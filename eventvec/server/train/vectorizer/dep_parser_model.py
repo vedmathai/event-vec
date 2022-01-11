@@ -2,40 +2,71 @@ import spacy
 import re
 from collections import defaultdict
 from collections import deque
-nlp = spacy.load("en_core_web_sm")
-doc = nlp("This is a sentence.")
+
+nlp = spacy.load("en_core_web_trf")
 
 
-def main():
-    while True:
-        sent = input('\n\n\nEnter sentence:\n\n')
-        sent.replace('\n', ' ')
-        sent = re.sub("\[[0-9]*\]", "", sent) 
-        doc = nlp(sent)
-        for sentence in doc.sents:
-            print()
-            print(sentence)
-            Node.clear()
-            root = sentence.root
-            traverse(root)
-            root = Node.root
-            for node in Node.nodes:
-                subj = follow_down_orth(node, ['nsubj', 'nsubjpass'])
-                obj = follow_down_orth(node, ['prep>pobj', 'dobj', 'pobj', 'pobj>compound', 'xcomp', 'acomp>prep>pobj'])
-                if has_item(subj) and has_item(obj):
-                    print(subj, node.orth, obj)
-            """
-                    if key in ['nsubj', 'nsubjpass']:
-                        obj = []
-                        subj = [k.orth for k in node.down[key]]
-                        for obj_key in ['pobj', 'dobj']:
-                            if obj_key in node.down:
-                                obj += [k.orth for k in node.down[obj_key]]
-                        print(subj, node.orth, obj)
-                #if row[0] in ['compound']:
-                #    print('-'*4, '>', row)
-            """
+class Node():
+    nodes_dict = {}
+    root = None
+    nodes = set()
 
+    def __init__(self, spacy_token, is_root=False):
+        self.up = defaultdict(lambda: [])
+        self.down = defaultdict(lambda: [])
+        self.spacy_token = spacy_token
+        self._is_root = is_root
+        if is_root is True:
+            Node.root = self
+        Node.nodes.add(self)
+
+    @staticmethod
+    def add_r(spacy_child_node, spacy_head_node):
+        dep = spacy_child_node.dep_
+        if spacy_head_node not in Node.nodes_dict:
+            is_root = False
+            if spacy_head_node.dep_ == 'ROOT':
+                is_root = True
+            Node.nodes_dict[spacy_head_node] = Node(spacy_head_node, is_root)
+        if spacy_child_node not in Node.nodes_dict:
+            Node.nodes_dict[spacy_child_node] = Node(spacy_child_node)
+        child = Node.nodes_dict[spacy_child_node]
+        parent = Node.nodes_dict[spacy_head_node]
+        parent.down[dep].append(child)
+        child.up[dep].append(parent)
+
+    def head(self):
+        return Node.nodes_dict[self.spacy_token.head]
+
+    def lemma(self):
+        return self.spacy_token.lemma_
+
+    def i(self):
+        return self.spacy_token.i
+
+    def orth(self):
+        return self.spacy_token.orth_
+
+    def is_root(self):
+        return self._is_root
+    @staticmethod
+    def clear():
+        Node.nodes_dict = {}
+        Node.root = None
+        Node.nodes = set()
+
+
+def get_spacy_doc(doc):
+    return nlp(doc)
+
+def parse_sentence(sentence):
+    root = sentence.root
+    traverse(root)
+    root = Node.root
+    psentence = []
+    for token in sentence:
+        psentence += [Node.nodes_dict[token]]
+    return root, psentence
 
 def has_item(item):
     if isinstance(item, list) and len(item) > 0:
@@ -79,7 +110,7 @@ def enumerate_paths_aux(node):
 def follow_down_orth(node, paths):
     fd = follow_down(node, paths)
     if fd is not None:
-        return [w.orth for w in fd]
+        return [w.orth() for w in fd]
 
 
 def follow_down(node, paths):
@@ -110,42 +141,56 @@ def traverse(root):
     return traversal
 
 
-class Node():
-    nodes_dict = {}
-    root = None
-    nodes = set()
+def get_path(sentence, i, j):
+    if i <= j:
+        left = i
+        right = j
+    if i > j:
+        left = j
+        right = i
+    if len(sentence) <= right:
+        return []
+    for token in sentence:
+        if token.i() == left:
+            left_token = token
+        if token.i() == right:
+            right_token = token
+    left_path_to_root = []
+    right_path_to_root = []
+    left_pointer = left_token
+    right_pointer = right_token
+    while True:
+        left_path_to_root += [left_pointer]
+        if left_pointer.is_root():
+            break
+        left_pointer = left_pointer.head()
+    while True:
+        right_path_to_root += [right_pointer]
+        if right_pointer.is_root():
+            break
+        right_pointer = right_pointer.head()
+    min_len = min(len(left_path_to_root), len(right_path_to_root))
+    left_path_to_root = left_path_to_root[::-1]
+    right_path_to_root = right_path_to_root[::-1]
+    non_breaker = 0
+    i = 0
+    while True:
+        if i < min_len:
+            if left_path_to_root[i] != right_path_to_root[i]:
+                non_breaker = i-1
+                break
+        elif i == min_len:
+            non_breaker = i-1
+            break
+        i += 1
+    left = left_path_to_root[non_breaker+1:]
+    mid = [left_path_to_root[non_breaker]]
+    right = right_path_to_root[non_breaker+1:]
+    seq = left[::-1] + mid + right
+    if i > j:
+        seq = seq[::-1]
+    return seq
 
-    def __init__(self, idx, orth, is_root=False):
-        self.up = defaultdict(lambda: [])
-        self.down = defaultdict(lambda: [])
-        self.idx = idx
-        self.orth = orth
-        self.is_root = is_root
-        if is_root is True:
-            Node.root = self
-        Node.nodes.add(self)
-
-    @staticmethod
-    def add_r(sp_child_node, sp_head_node):
-        dep = sp_child_node.dep_
-        if sp_head_node not in Node.nodes_dict:
-            is_root = False
-            if sp_head_node.dep_ == 'ROOT':
-                is_root = True
-            Node.nodes_dict[sp_head_node] = Node(sp_head_node.idx, sp_head_node.orth_, is_root)
-        if sp_child_node not in Node.nodes_dict:
-            Node.nodes_dict[sp_child_node] = Node(sp_child_node.idx, sp_child_node.orth_)
-        child = Node.nodes_dict[sp_child_node]
-        parent = Node.nodes_dict[sp_head_node]
-        parent.down[dep].append(child)
-        child.up[dep].append(parent)
-
-
-    @staticmethod
-    def clear():
-        Node.nodes_dict = {}
-        Node.root = None
-        Node.nodes = set()
-
-if __name__ == '__main__':
-    main()
+#Notes for later
+#subj = follow_down_orth(node, ['nsubj', 'nsubjpass'])
+#obj = follow_down_orth(node, ['prep>pobj', 'dobj', 'pobj', 'pobj>compound', 'xcomp', 'acomp>prep>pobj'])
