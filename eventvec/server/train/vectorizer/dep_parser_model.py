@@ -3,6 +3,9 @@ import re
 from collections import defaultdict
 from collections import deque
 
+
+from eventvec.utils.spacy_utils.utils import get_spacy_doc
+
 nlp = spacy.load("en_core_web_trf")
 
 
@@ -54,10 +57,6 @@ class Node():
         Node.nodes_dict = {}
         Node.root = None
         Node.nodes = set()
-
-
-def get_spacy_doc(doc):
-    return nlp(doc)
 
 def parse_sentence(sentence):
     root = sentence.root
@@ -118,6 +117,8 @@ def follow_down(node, paths):
     paths = [k.split('>') for k in paths]
     enumerated_paths = enumerate_paths(node)
     for path in paths:
+        if path == ['ROOT']:
+            words += [node]
         if path in enumerated_paths:
             curr_nodes = [node]
             for elementi, element in enumerate(path):
