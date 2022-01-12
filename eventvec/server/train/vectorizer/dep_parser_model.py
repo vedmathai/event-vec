@@ -50,8 +50,15 @@ class Node():
     def orth(self):
         return self.spacy_token.orth_
 
+    def dep(self):
+        return self.spacy_token.dep_
+
+    def pos(self):
+        return self.spacy_token.pos_
+
     def is_root(self):
         return self._is_root
+
     @staticmethod
     def clear():
         Node.nodes_dict = {}

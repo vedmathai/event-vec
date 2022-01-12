@@ -30,7 +30,8 @@ class TestEventExtractor(unittest.TestCase):
                     "had",
                     "been",
                     "drawing"
-                ]
+                ],
+                "root_node": "drawing"
             }
         )
 
