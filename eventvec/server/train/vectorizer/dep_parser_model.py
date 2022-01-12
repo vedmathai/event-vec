@@ -156,7 +156,7 @@ def get_path(sentence, i, j):
     if i > j:
         left = j
         right = i
-    if len(sentence) <= right:
+    if sentence[-1].i() < right:
         return []
     for token in sentence:
         if token.i() == left:

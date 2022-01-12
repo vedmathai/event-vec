@@ -16,6 +16,7 @@ class TestEventExtractor(unittest.TestCase):
             root, psentence = parse_sentence(sentence)
         verb_node = psentence[4]
         event = extractor.extract(verb_node, psentence)
+        self.maxDiff = None
         self.assertEqual(
             event.to_dict(),
             {

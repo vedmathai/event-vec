@@ -16,6 +16,9 @@ class EventRelationship:
     def __repr__(self) -> str:
         return str(self.to_dict())
 
+    def relationship(self):
+        return self._relationship
+
     @staticmethod
     def create(event_1, event_2, relationship, relationship_score):
         event_relationship = EventRelationship()
