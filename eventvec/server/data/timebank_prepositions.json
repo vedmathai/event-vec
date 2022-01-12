@@ -1,0 +1,518 @@
+{
+    "of": {
+        "CULMINATES": 3,
+        "INCLUDES": 17,
+        "IS_INCLUDED": 40,
+        "AFTER": 18,
+        "BEFORE": 22,
+        "IBEFORE": 2,
+        "TERMINATES": 8,
+        "ENDS": 10,
+        "SIMULTANEOUS": 17,
+        "IDENTITY": 4,
+        "DURING": 13,
+        "IAFTER": 2,
+        "BEGINS": 6
+    },
+    "in": {
+        "IS_INCLUDED": 290,
+        "INCLUDES": 63,
+        "SIMULTANEOUS": 22,
+        "ENDS": 18,
+        "BEFORE": 15,
+        "IDENTITY": 6,
+        "ENDED_BY": 17,
+        "INITIATES": 5,
+        "AFTER": 18,
+        "DURING": 69,
+        "BEGINS": 5
+    },
+    "before": {
+        "DURING": 4,
+        "ENDS": 2,
+        "BEFORE": 9
+    },
+    "to": {
+        "ENDED_BY": 43,
+        "IDENTITY": 2,
+        "BEFORE": 26,
+        "IS_INCLUDED": 18,
+        "AFTER": 16,
+        "IBEFORE": 2,
+        "SIMULTANEOUS": 4,
+        "TERMINATES": 3,
+        "INCLUDES": 4
+    },
+    "since": {
+        "BEGINS": 3,
+        "BEGUN_BY": 6,
+        "AFTER": 7
+    },
+    "at": {
+        "IS_INCLUDED": 29,
+        "SIMULTANEOUS": 29,
+        "ENDED_BY": 11,
+        "INCLUDES": 13,
+        "DURING": 7,
+        "AFTER": 3
+    },
+    "on": {
+        "IS_INCLUDED": 41,
+        "BEFORE": 7,
+        "INCLUDES": 9,
+        "SIMULTANEOUS": 5,
+        "DURING": 3,
+        "AFTER": 5,
+        "ENDED_BY": 4,
+        "TERMINATES": 2
+    },
+    "over": {
+        "IS_INCLUDED": 23,
+        "DURING": 23,
+        "INCLUDES": 12,
+        "AFTER": 2
+    },
+    "by|convene": {
+        "AFTER": 2
+    },
+    "for": {
+        "SIMULTANEOUS": 18,
+        "AFTER": 16,
+        "IS_INCLUDED": 71,
+        "DURING": 50,
+        "BEFORE": 16,
+        "INCLUDES": 2,
+        "ENDED_BY": 12,
+        "ENDS": 20,
+        "IDENTITY": 3,
+        "IAFTER": 8
+    },
+    "bid": {
+        "INCLUDES": 3
+    },
+    "until": {
+        "BEGINS": 3,
+        "ENDED_BY": 16,
+        "BEFORE": 5
+    },
+    "to|in": {
+        "INCLUDES": 7,
+        "IS_INCLUDED": 4
+    },
+    "under": {
+        "BEFORE": 2,
+        "IS_INCLUDED": 2,
+        "SIMULTANEOUS": 5,
+        "INCLUDES": 5
+    },
+    "after": {
+        "BEGINS": 2,
+        "ENDS": 4,
+        "AFTER": 28,
+        "IS_INCLUDED": 2,
+        "BEFORE": 2
+    },
+    "because": {
+        "BEFORE": 6,
+        "AFTER": 4
+    },
+    "at|in": {
+        "IS_INCLUDED": 5,
+        "INCLUDES": 4
+    },
+    "of|to": {
+        "ENDED_BY": 2,
+        "AFTER": 3,
+        "BEFORE": 3
+    },
+    "from": {
+        "IS_INCLUDED": 19,
+        "AFTER": 18,
+        "BEFORE": 17,
+        "BEGUN_BY": 23,
+        "SIMULTANEOUS": 3,
+        "INCLUDES": 2,
+        "ENDS": 9
+    },
+    "by": {
+        "BEFORE": 12,
+        "IS_INCLUDED": 7,
+        "ENDED_BY": 9,
+        "AFTER": 5
+    },
+    "with": {
+        "IS_INCLUDED": 8,
+        "SIMULTANEOUS": 5,
+        "BEFORE": 4,
+        "AFTER": 5,
+        "BEGUN_BY": 2
+    },
+    "after|report": {
+        "AFTER": 2
+    },
+    "amid": {
+        "SIMULTANEOUS": 2
+    },
+    "in|with": {
+        "BEFORE": 3,
+        "AFTER": 2
+    },
+    "than": {
+        "AFTER": 3
+    },
+    "against|at": {
+        "ENDED_BY": 2
+    },
+    "against|compare|with": {
+        "BEGINS": 2
+    },
+    "with|compare": {
+        "IS_INCLUDED": 6,
+        "BEGINS": 3
+    },
+    "without": {
+        "SIMULTANEOUS": 2
+    },
+    "after|because": {
+        "IS_INCLUDED": 2
+    },
+    "of|as": {
+        "IS_INCLUDED": 6,
+        "ENDED_BY": 2
+    },
+    "within": {
+        "IS_INCLUDED": 16
+    },
+    "despite": {
+        "IS_INCLUDED": 3,
+        "SIMULTANEOUS": 6
+    },
+    "engage|over": {
+        "IS_INCLUDED": 5
+    },
+    "through": {
+        "INCLUDES": 5,
+        "BEFORE": 2,
+        "AFTER": 2,
+        "IS_INCLUDED": 2,
+        "DURING": 13,
+        "ENDS": 5,
+        "ENDED_BY": 2
+    },
+    "at|of": {
+        "IS_INCLUDED": 2,
+        "ENDED_BY": 2
+    },
+    "during": {
+        "IS_INCLUDED": 23,
+        "DURING": 11,
+        "INCLUDES": 2
+    },
+    "for|by": {
+        "ENDED_BY": 2
+    },
+    "as": {
+        "BEFORE": 5,
+        "IS_INCLUDED": 3,
+        "SIMULTANEOUS": 4,
+        "DURING": 2,
+        "BEGUN_BY": 2,
+        "AFTER": 3,
+        "IDENTITY": 3,
+        "INCLUDES": 2
+    },
+    "around": {
+        "IS_INCLUDED": 6
+    },
+    "from|of": {
+        "INCLUDES": 2,
+        "AFTER": 6,
+        "BEFORE": 3
+    },
+    "of|from": {
+        "IS_INCLUDED": 3,
+        "BEFORE": 2
+    },
+    "in|in": {
+        "BEFORE": 3,
+        "DURING": 4,
+        "ENDS": 3,
+        "IS_INCLUDED": 2
+    },
+    "from|from": {
+        "BEFORE": 6,
+        "INCLUDES": 3
+    },
+    "of|at": {
+        "IS_INCLUDED": 3,
+        "SIMULTANEOUS": 2
+    },
+    "in|be": {
+        "IS_INCLUDED": 2
+    },
+    "about": {
+        "INCLUDES": 2,
+        "BEFORE": 2,
+        "IS_INCLUDED": 2
+    },
+    "of|in": {
+        "IS_INCLUDED": 7,
+        "DURING": 5
+    },
+    "follow": {
+        "AFTER": 4
+    },
+    "on|of": {
+        "AFTER": 2
+    },
+    "to|of": {
+        "BEFORE": 3
+    },
+    "of|within|on": {
+        "IS_INCLUDED": 3
+    },
+    "after|of": {
+        "AFTER": 3
+    },
+    "of|of": {
+        "ENDED_BY": 4
+    },
+    "into": {
+        "BEGINS": 2,
+        "IS_INCLUDED": 3,
+        "INCLUDES": 6,
+        "BEFORE": 3
+    },
+    "with|for": {
+        "IS_INCLUDED": 5
+    },
+    "by|of": {
+        "ENDS": 3,
+        "ENDED_BY": 3
+    },
+    "in|of": {
+        "BEFORE": 5,
+        "IS_INCLUDED": 17,
+        "AFTER": 7
+    },
+    "from|in": {
+        "IS_INCLUDED": 4,
+        "BEGUN_BY": 2,
+        "DURING": 3
+    },
+    "compare|with": {
+        "BEFORE": 3,
+        "ENDS": 2,
+        "SIMULTANEOUS": 2
+    },
+    "compare|with|of": {
+        "BEFORE": 4
+    },
+    "in|compare|with|of": {
+        "BEFORE": 2
+    },
+    "in|compare|with|in": {
+        "AFTER": 12
+    },
+    "of|for": {
+        "ENDED_BY": 2,
+        "DURING": 3,
+        "IS_INCLUDED": 8
+    },
+    "for|than": {
+        "DURING": 3
+    },
+    "at|for": {
+        "INCLUDES": 3
+    },
+    "to|from": {
+        "AFTER": 4
+    },
+    "in|to": {
+        "BEFORE": 2
+    },
+    "as|on": {
+        "IS_INCLUDED": 2
+    },
+    "in|of|of": {
+        "IS_INCLUDED": 4
+    },
+    "throughout": {
+        "DURING": 5,
+        "SIMULTANEOUS": 3
+    },
+    "through|of": {
+        "INCLUDES": 2,
+        "SIMULTANEOUS": 2
+    },
+    "in|on": {
+        "IS_INCLUDED": 4
+    },
+    "accord": {
+        "IS_INCLUDED": 2
+    },
+    "to|accord": {
+        "IS_INCLUDED": 2
+    },
+    "for|of": {
+        "ENDS": 2,
+        "AFTER": 3,
+        "IS_INCLUDED": 6
+    },
+    "to|of|by": {
+        "BEFORE": 2
+    },
+    "above": {
+        "AFTER": 8
+    },
+    "than|early": {
+        "AFTER": 2
+    },
+    "early|than": {
+        "AFTER": 2
+    },
+    "after|average|for": {
+        "IS_INCLUDED": 2
+    },
+    "after|average|for|of": {
+        "IS_INCLUDED": 2
+    },
+    "average|for": {
+        "SIMULTANEOUS": 2
+    },
+    "average|for|of": {
+        "SIMULTANEOUS": 2
+    },
+    "in|of|for": {
+        "IS_INCLUDED": 2
+    },
+    "report|for": {
+        "DURING": 3
+    },
+    "into|of": {
+        "INCLUDES": 2
+    },
+    "include": {
+        "INCLUDES": 2
+    },
+    "as|of": {
+        "BEFORE": 2
+    },
+    "ago|with": {
+        "AFTER": 3
+    },
+    "for|compare|with|of": {
+        "ENDS": 3
+    },
+    "to|for": {
+        "AFTER": 2
+    },
+    "to|to": {
+        "BEFORE": 2
+    },
+    "in|for": {
+        "IS_INCLUDED": 6,
+        "ENDS": 2
+    },
+    "for|to": {
+        "DURING": 4
+    },
+    "between": {
+        "BEGUN_BY": 2
+    },
+    "over|in": {
+        "IS_INCLUDED": 2
+    },
+    "against": {
+        "IS_INCLUDED": 2
+    },
+    "to|over": {
+        "INCLUDES": 4
+    },
+    "at|on": {
+        "IDENTITY": 3
+    },
+    "on|for": {
+        "AFTER": 3
+    },
+    "of|on": {
+        "SIMULTANEOUS": 3,
+        "INCLUDES": 4
+    },
+    "in|by": {
+        "IS_INCLUDED": 2
+    },
+    "of|in|with": {
+        "BEFORE": 3
+    },
+    "than|ago": {
+        "BEGINS": 3,
+        "ENDS": 3,
+        "IS_INCLUDED": 3
+    },
+    "from|early": {
+        "ENDS": 4
+    },
+    "of|over": {
+        "DURING": 2
+    },
+    "for|compare|with": {
+        "BEFORE": 3
+    },
+    "versus": {
+        "ENDS": 3
+    },
+    "by|strengthen": {
+        "IDENTITY": 2
+    },
+    "with|decline": {
+        "DURING": 2,
+        "IS_INCLUDED": 2
+    },
+    "in|through": {
+        "DURING": 3
+    },
+    "past": {
+        "AFTER": 2
+    },
+    "as|in": {
+        "IS_INCLUDED": 3
+    },
+    "on|buy": {
+        "IS_INCLUDED": 2
+    },
+    "under|since": {
+        "BEGUN_BY": 2
+    },
+    "of|to|for": {
+        "IS_INCLUDED": 3
+    },
+    "for|over": {
+        "DURING": 4
+    },
+    "of|in|of": {
+        "IS_INCLUDED": 4
+    },
+    "into|over": {
+        "IS_INCLUDED": 4
+    },
+    "for|from": {
+        "BEGUN_BY": 8,
+        "BEFORE": 16
+    },
+    "in|resume|in": {
+        "INCLUDES": 2
+    },
+    "as|of|in": {
+        "IS_INCLUDED": 3
+    },
+    "from|ago": {
+        "BEGUN_BY": 3
+    },
+    "ago|than": {
+        "IS_INCLUDED": 3
+    },
+    "include|at|as": {
+        "BEFORE": 2
+    }
+}

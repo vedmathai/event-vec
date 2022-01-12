@@ -12,5 +12,6 @@ class EventExtractor():
             subject_nodes=subject_nodes,
             object_nodes=object_nodes,
             verb_nodes=verb_nodes,
+            root_node=verb_node,
         )
         return event
