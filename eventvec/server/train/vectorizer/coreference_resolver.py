@@ -1,12 +1,15 @@
 
-from eventvec.utils.spacy_utils.utils import get_spacy_doc
+from eventvec.utils.spacy_utils.utils import SpacyUtils
+
 
 
 class CoreferenceResolver:
+    def __init__(self):
+        self._spacy_utils = SpacyUtils()
     
     def resolve(self, document):
         text = document.text()
-        text = get_spacy_doc(text)
+        text = self._spacy_utils.get_spacy_doc(text)
         token2reference = {}
         for chain in text._.coref_chains:
             for token in chain:

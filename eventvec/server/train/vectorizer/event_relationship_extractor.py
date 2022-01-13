@@ -17,8 +17,11 @@ class EventRelationshipExtractor:
                     dep_tup += [i.lemma()]
             dep_tup = '|'.join(dep_tup)
             if len(dep_tup) > 0 and len(dep) > 0:
-                for rel in prep_to_relationships[dep_tup]:
-                    rel_score = prep_to_relationships[dep_tup][rel]
-                    relationship = EventRelationship.create(event_1, event_2, rel, rel_score)
-                    relationships.append(relationship)
+                if dep_tup in prep_to_relationships:
+                    for rel in prep_to_relationships[dep_tup]:
+                        rel_score = prep_to_relationships[dep_tup][rel]
+                        relationship = EventRelationship.create(event_1, event_2, rel, rel_score)
+                        relationships.append(relationship)
+                #else:
+                #    print('missing', dep_tup)
         return relationships

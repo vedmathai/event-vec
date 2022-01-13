@@ -4,8 +4,6 @@ from collections import defaultdict
 from collections import deque
 
 
-from eventvec.utils.spacy_utils.utils import get_spacy_doc
-
 nlp = spacy.load("en_core_web_trf")
 
 
@@ -66,6 +64,7 @@ class Node():
         Node.nodes = set()
 
 def parse_sentence(sentence):
+    Node.clear()
     root = sentence.root
     traverse(root)
     root = Node.root
