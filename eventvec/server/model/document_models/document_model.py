@@ -1,6 +1,7 @@
 class Document:
     def __init__(self):
         self._text = None
+        self._resolved_text = None
         self._sentences = []
         self._events = []
         self._relationships = []
@@ -13,6 +14,15 @@ class Document:
 
     def add_sentences(self, sentence):
         self._sentences.append(sentence)    
+
+    def set_resolved_text(self, resolved_text):
+        self._resolved_text = resolved_text
+
+    def text(self):
+        return self._text
+
+    def resolved_text(self):
+        return self._resolved_text
 
     def events(self):
         return self._events
