@@ -3,7 +3,7 @@ import unittest
 from eventvec.server.train.vectorizer.event_extractor import EventExtractor
 from eventvec.server.train.vectorizer.event_relationship_extractor import EventRelationshipExtractor
 from eventvec.server.train.vectorizer.dep_parser_model import parse_sentence
-from eventvec.utils.spacy_utils.utils import get_spacy_doc
+from eventvec.utils.spacy_utils.utils import SpacyUtils
 
 
 class TestEventRelationshipExtractor(unittest.TestCase):
@@ -11,7 +11,8 @@ class TestEventRelationshipExtractor(unittest.TestCase):
     def test_event_relationship_extraction(self):
         event_extractor = EventExtractor()
         relationship_extractor = EventRelationshipExtractor()
-        spacy_doc = get_spacy_doc('the boy drew a bird after learning how to.')
+        spacy_utils = SpacyUtils()
+        spacy_doc = spacy_utils.get_spacy_doc('the boy drew a bird after learning how to.')
         for sentence in spacy_doc.sents:
             root, psentence = parse_sentence(sentence)
         verb_node_1 = psentence[2]
