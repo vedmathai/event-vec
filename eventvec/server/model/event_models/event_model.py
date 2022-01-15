@@ -4,6 +4,9 @@ class Event:
         self._object_nodes = None
         self._verb_nodes = None
         self._root_node = None
+        self._verb_tensor = None
+        self._object_tensor = None
+        self._subject_tensor = None
 
     def to_dict(self):
         return {
@@ -18,6 +21,30 @@ class Event:
 
     def root_node(self):
         return self._root_node
+
+    def verb_nodes(self):
+        return self._verb_nodes
+
+    def object_nodes(self):
+        return self._object_nodes
+
+    def subject_nodes(self):
+        return self._subject_nodes
+
+    def set_object_tensor(self, object_tensor):
+        self._object_tensor = object_tensor
+
+    def set_verb_tensor(self, verb_tensor):
+        self._verb_tensor = verb_tensor
+
+    def set_subject_tensor(self, subject_tensor):
+        self._subject_tensor = subject_tensor
+
+    def subject_tensor(self):
+        return self._subject_tensor
+
+    def verb_tensor(self):
+        return self._verb_tensor
 
     @staticmethod
     def create_from_paths(subject_nodes, object_nodes, verb_nodes, root_node):
