@@ -1,6 +1,9 @@
-class RNN(nn.Module):
+import torch.nn as nn 
+
+class EventPartsRNN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size):
         super(RNN, self).__init__()
+        self.embedding = nn.Embedding(input_size, hidden_size)
         self.hidden_size = hidden_size
         self.i2h = nn.Linear(n_categories + input_size + hidden_size, hidden_size)
         self.i2o = nn.Linear(n_categories + input_size + hidden_size, output_size)

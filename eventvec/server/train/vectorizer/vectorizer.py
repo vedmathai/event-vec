@@ -1,6 +1,5 @@
 import gc
 
-from eventvec.server.train.vectorizer.coreference_resolver import CoreferenceResolver
 from eventvec.utils.data_readers.fervous_wikipedia_reader import FerverousDataset
 from eventvec.server.train.vectorizer.document_parser import DocumentParser
 
