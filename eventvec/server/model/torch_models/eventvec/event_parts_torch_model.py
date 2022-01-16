@@ -1,18 +1,21 @@
-import torch.nn as nn 
+import torch.nn as nn
+import torch
 
 class EventPartsRNN(nn.Module):
-    def __init__(self, input_size, hidden_size, output_size):
-        super(RNN, self).__init__()
-        self.embedding = nn.Embedding(input_size, hidden_size)
+    def __init__(self, input_size, hidden_size, output_size, device):
+        super(EventPartsRNN, self).__init__()
+        self.device = device
+        self.embedding = nn.Embedding(input_size, hidden_size, device=device)
         self.hidden_size = hidden_size
-        self.i2h = nn.Linear(n_categories + input_size + hidden_size, hidden_size)
-        self.i2o = nn.Linear(n_categories + input_size + hidden_size, output_size)
-        self.o2o = nn.Linear(hidden_size + output_size, output_size)
+        self.i2h = nn.Linear(hidden_size + hidden_size, hidden_size, device=device)
+        self.i2o = nn.Linear(hidden_size + hidden_size, output_size, device=device)
+        self.o2o = nn.Linear(hidden_size + output_size, output_size, device=device)
         self.dropout = nn.Dropout(0.1)
         self.softmax = nn.LogSoftmax(dim=1)
 
-    def forward(self, category, input, hidden):
-        input_combined = torch.cat((category, input, hidden), 1)
+    def forward(self, input, hidden):
+        input = self.embedding(input)
+        input_combined = torch.cat((input, hidden), 1)
         hidden = self.i2h(input_combined)
         output = self.i2o(input_combined)
         output_combined = torch.cat((hidden, output), 1)
@@ -22,4 +25,7 @@ class EventPartsRNN(nn.Module):
         return output, hidden
 
     def initHidden(self):
-        return torch.zeros(1, self.hidden_size)
+        return torch.zeros(1, self.hidden_size, device=self.device)
+
+    def initOutput(self):
+        return torch.zeros(1, self.hidden_size, device=self.device)

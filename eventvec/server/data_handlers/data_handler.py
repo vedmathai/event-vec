@@ -85,3 +85,9 @@ class DataHandler():
         subject_segment = [i.orth() for i in sorted(event._subject_nodes, key=key_fn)]
         subject_tensor = self.inputTensor(subject_segment)
         event.set_subject_tensor(subject_tensor)
+
+    def n_words(self):
+        return len(self._word2index.keys())
+
+    def n_categories(self):
+        return len(self._categories)

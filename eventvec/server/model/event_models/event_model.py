@@ -45,6 +45,9 @@ class Event:
 
     def verb_tensor(self):
         return self._verb_tensor
+    
+    def object_tensor(self):
+        return self._object_tensor
 
     @staticmethod
     def create_from_paths(subject_nodes, object_nodes, verb_nodes, root_node):
