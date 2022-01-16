@@ -11,7 +11,9 @@ from eventvec.server.model.torch_models.eventvec.event_torch_model import EventM
 LEARNING_RATE = 1e-4
 HIDDEN_LAYER_SIZE = 50
 OUTPUT_LAYER_SIZE = 50
+CHECKPOINT_PATH = 'local/checkpoints/checkpoint.tar'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+SAVE_EVERY = 10000
 
 class Trainer:
 
@@ -21,6 +23,7 @@ class Trainer:
         self._all_losses = []
         self._criterion = nn.CrossEntropyLoss()
         self._data_handler = DataHandler()
+        self._iteration = 0
 
     def load(self):
         self._data_handler.load()
@@ -84,12 +87,48 @@ class Trainer:
         return relationship_target, target_score
 
     def train_document(self, document):
+        if self._iteration == 0:
+            self.load_checkpoint()
         start = time.time()
         for relationship in document.relationships():
             loss = self.train_step(relationship)
             self._relationship_counter += 1
             self._all_losses += [loss.item()]
-            print(np.mean(self._all_losses))
+            self._iteration += 1
+            print(np.mean(self._all_losses), self._iteration)
+        if self._iteration % SAVE_EVERY == 0:
+            self.create_checkpoint()
+        
+
+    def create_checkpoint(self):
+        torch.save({
+            'iteration': self._iteration,
+            'event_parts_model_state_dict': self._event_parts_model.state_dict(),
+            'event_model_state_dict': self._event_model.state_dict(),
+            'event_relationship_model_state_dict': self._event_relationship_model.state_dict(),
+            'event_model_optimizer_state_dict': self._event_model_optimizer.state_dict(),
+            'event_parts_optimizer_dict': self._event_parts_optimizer.state_dict(),
+            'event_relationship_optimizer_dict': self._event_relationship_optimizer.state_dict(),
+            'all_losses': self._all_losses,
+            }, CHECKPOINT_PATH)
+        print('Checkpoint created.')
+
+    def load_checkpoint(self):
+        checkpoint = torch.load(CHECKPOINT_PATH)
+        self._event_parts_model.load_state_dict(checkpoint['event_parts_model_state_dict'])
+        self._event_model.load_state_dict(checkpoint['event_model_state_dict'])
+        self._event_relationship_model.load_state_dict(checkpoint['event_relationship_model_state_dict'])
+
+        self._event_model_optimizer.load_state_dict(checkpoint['event_model_optimizer_state_dict'])
+        self._event_parts_optimizer.load_state_dict(checkpoint['event_parts_optimizer_dict'])
+        self._event_relationship_optimizer.load_state_dict(checkpoint['event_relationship_optimizer_dict'])
+
+        self._iteration = checkpoint['iteration']
+        self._all_losses = checkpoint['all_losses']
+        self._event_parts_model.train()
+        self._event_model.train()
+        self._event_relationship_model.train()
+
 
 """
             if iter % print_every == 0:
