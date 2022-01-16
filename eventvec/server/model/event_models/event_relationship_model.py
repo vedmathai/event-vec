@@ -19,6 +19,15 @@ class EventRelationship:
     def relationship(self):
         return self._relationship
 
+    def relationship_score(self):
+        return self._relationship_score
+
+    def event_1(self):
+        return self._event_1
+        
+    def event_2(self):
+        return self._event_2
+
     @staticmethod
     def create(event_1, event_2, relationship, relationship_score):
         event_relationship = EventRelationship()
