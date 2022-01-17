@@ -21,7 +21,7 @@ class TestEventRelationshipExtractor(unittest.TestCase):
         event_2 = event_extractor.extract(verb_node_2, psentence)
         relationships = relationship_extractor.extract(psentence, event_1, event_2)
         self.assertEqual(
-            sorted([i.to_dict() for i in relationships], key=lambda x: x['relationship']),
+            [i.to_dict() for i in relationships],
             [
                 {
                     "event_1": {
@@ -45,111 +45,22 @@ class TestEventRelationshipExtractor(unittest.TestCase):
                         ],
                         "root_node": "learning"
                     },
-                    "relationship": "AFTER",
-                    "relationship_score": 28
-                },
-                {
-                    "event_1": {
-                        "subject_nodes": [
-                            "boy"
-                        ],
-                        "object_nodes": [
-                            "a",
-                            "bird"
-                        ],
-                        "verb_nodes": [
-                            "drew"
-                        ],
-                        "root_node": "drew"
+                    "relationship_distribution": {
+                        "BEGINS": 0.05263157894736842,
+                        "ENDS": 0.10526315789473684,
+                        "AFTER": 0.7368421052631579,
+                        "IS_INCLUDED": 0.05263157894736842,
+                        "BEFORE": 0.05263157894736842
                     },
-                    "event_2": {
-                        "subject_nodes": [],
-                        "object_nodes": [],
-                        "verb_nodes": [
-                            "learning"
-                        ],
-                        "root_node": "learning"
-                    },
-                    "relationship": "BEFORE",
-                    "relationship_score": 2
-                },
-                {
-                    "event_1": {
-                        "subject_nodes": [
-                            "boy"
-                        ],
-                        "object_nodes": [
-                            "a",
-                            "bird"
-                        ],
-                        "verb_nodes": [
-                            "drew"
-                        ],
-                        "root_node": "drew"
-                    },
-                    "event_2": {
-                        "subject_nodes": [],
-                        "object_nodes": [],
-                        "verb_nodes": [
-                            "learning"
-                        ],
-                        "root_node": "learning"
-                    },
-                    "relationship": "BEGINS",
-                    "relationship_score": 2
-                },
-                {
-                    "event_1": {
-                        "subject_nodes": [
-                            "boy"
-                        ],
-                        "object_nodes": [
-                            "a",
-                            "bird"
-                        ],
-                        "verb_nodes": [
-                            "drew"
-                        ],
-                        "root_node": "drew"
-                    },
-                    "event_2": {
-                        "subject_nodes": [],
-                        "object_nodes": [],
-                        "verb_nodes": [
-                            "learning"
-                        ],
-                        "root_node": "learning"
-                    },
-                    "relationship": "ENDS",
-                    "relationship_score": 4
-                },
-                {
-                    "event_1": {
-                        "subject_nodes": [
-                            "boy"
-                        ],
-                        "object_nodes": [
-                            "a",
-                            "bird"
-                        ],
-                        "verb_nodes": [
-                            "drew"
-                        ],
-                        "root_node": "drew"
-                    },
-                    "event_2": {
-                        "subject_nodes": [],
-                        "object_nodes": [],
-                        "verb_nodes": [
-                            "learning"
-                        ],
-                        "root_node": "learning"
-                    },
-                    "relationship": "IS_INCLUDED",
-                    "relationship_score": 2
+                    "relationships": {
+                        "BEGINS": 2,
+                        "ENDS": 4,
+                        "AFTER": 28,
+                        "IS_INCLUDED": 2,
+                        "BEFORE": 2
+                    }
                 }
             ]
-
         )
 
 
