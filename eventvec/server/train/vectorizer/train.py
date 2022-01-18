@@ -23,7 +23,7 @@ class Trainer:
         self._total_loss = 0
         self._all_losses = []
         self._criterion = nn.MSELoss()
-        self._data_handler = DataHandler()
+        self._data_handler = DataHandler(device)
         self._iteration = 0
         self._last_iteration = 0
 
@@ -51,8 +51,6 @@ class Trainer:
         event_predicted_vector = self.event_relationship_vectorizer(relationship)
         relationship_target = self.get_target(relationship)
         event_prediction_loss = self._criterion(event_predicted_vector, relationship_target)
-        #print('p', event_predicted_vector)
-        #print('t', relationship_target)
         loss = event_prediction_loss
         loss.backward()
         self.optimizer_step()
@@ -60,10 +58,10 @@ class Trainer:
 
     def event_phrase_vectorizer(self, phrase_tensor):
         encoder_output= self._event_parts_model.initOutput()
-        hidden = self._event_parts_model.initHidden()
+        encoder_hidden = self._event_parts_model.initHidden()
         for ei in range(len(phrase_tensor)):
             encoder_output, encoder_hidden = self._event_parts_model(
-                phrase_tensor[ei], hidden)
+                phrase_tensor[ei], encoder_hidden)
         return encoder_output
 
     def event_vectorizer(self, event):
