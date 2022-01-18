@@ -8,14 +8,14 @@ from eventvec.server.model.event_models.event_model import key_fn
 
 PREPOSITIONS_FILE = 'eventvec/server/data/timebank_prepositions.json'
 WORDS_FILE = 'local/data/word2index.txt'
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
 class DataHandler():
-    def __init__(self):
+    def __init__(self, device):
         self._word2index = {}
         self._index2word = {}
         self._categories = []
+        self._device = device
 
     def load(self):
         self.load_categories()
@@ -50,7 +50,7 @@ class DataHandler():
         return (event_1_idx, event_2_idx)
 
     def categoryTensor(self, category_distribution):
-        tensor = torch.zeros(1, len(self._categories), device=device)
+        tensor = torch.zeros(1, len(self._categories), device=self._device)
         for category, category_prob in category_distribution.items():
             li = self._categories.index(category)
             tensor[0][li] = category_prob
@@ -62,14 +62,14 @@ class DataHandler():
 
     def tensorFromPhrase(self, phrase):
         indexes = self.indexesFromPhrase(phrase)
-        return torch.tensor(indexes, dtype=torch.long, device=device).view(-1, 1)
+        return torch.tensor(indexes, dtype=torch.long, device=self._device).view(-1, 1)
 
     def inputTensor(self, phrase):
         tensor = self.tensorFromPhrase(phrase)
         return tensor
 
     def scoreTensor(self, score):
-        return torch.tensor([[score]], device=device)
+        return torch.tensor([[score]], device=self._device)
 
     def targetTensor(self, category_distribution):
         category_tensor = self.categoryTensor(category_distribution)
@@ -91,3 +91,6 @@ class DataHandler():
 
     def n_categories(self):
         return len(self._categories)
+
+    def categories(self):
+        return self._categories
