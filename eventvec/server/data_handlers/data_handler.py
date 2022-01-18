@@ -49,10 +49,11 @@ class DataHandler():
         event_2_idx = event_1_idx + 1
         return (event_1_idx, event_2_idx)
 
-    def categoryTensor(self, category):
-        li = self._categories.index(category)
+    def categoryTensor(self, category_distribution):
         tensor = torch.zeros(1, len(self._categories), device=device)
-        tensor[0][li] = 1
+        for category, category_prob in category_distribution.items():
+            li = self._categories.index(category)
+            tensor[0][li] = category_prob
         return tensor
 
     def indexesFromPhrase(self, phrase):
@@ -70,10 +71,9 @@ class DataHandler():
     def scoreTensor(self, score):
         return torch.tensor([[score]], device=device)
 
-    def targetTensor(self, category, score):
-        category_tensor = self.categoryTensor(category)
-        score_tensor = self.scoreTensor(score)
-        return category_tensor, score_tensor
+    def targetTensor(self, category_distribution):
+        category_tensor = self.categoryTensor(category_distribution)
+        return category_tensor
 
     def set_event_input_tensors(self, event):
         verb_segment = [i.orth() for i in sorted(event._verb_nodes, key=key_fn)]

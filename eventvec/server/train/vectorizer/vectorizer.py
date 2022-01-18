@@ -16,8 +16,9 @@ class Vectorizer:
         text_i = 0
         while True:
             text = dataset.get_next_article()
-            document = self.document_parser.parse(text)
-            self.trainer.train_document(document)
+            if text is not None:
+                document = self.document_parser.parse(text)
+                self.trainer.train_document(document)
 
 
 if __name__ == '__main__':

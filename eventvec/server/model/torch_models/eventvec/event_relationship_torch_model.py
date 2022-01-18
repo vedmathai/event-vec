@@ -8,7 +8,7 @@ class EventRelationshipModel(nn.Module):
         self.hidden_size = hidden_size
         self.i2h = nn.Linear(input_size * 2, output_size, device=device)
         self.dropout = nn.Dropout(0.1)
-        self.softmax = nn.LogSoftmax(dim=1)
+        self.softmax = nn.Softmax(dim=1)
 
     def forward(self, input_1, input_2):
         input_combined = torch.cat((input_1, input_2), 1)

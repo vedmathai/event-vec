@@ -1,6 +1,7 @@
 import os
 import json
 import re
+from xml.etree.ElementTree import TreeBuilder
 
 
 class FerverousDataset:
@@ -9,6 +10,7 @@ class FerverousDataset:
         self._files = []
         self._current_file_index = 0
         self._current_index = 0
+        self._debug = False
 
     def load(self):
         self._files = os.listdir(self._folder)
@@ -16,14 +18,21 @@ class FerverousDataset:
         self._contents = self.read_file(file_name)
 
     def get_next_article(self):
-        if self._current_index+1 >= len(self._contents) and self._current_file_index < len(self._files) - 1:
+        while self._current_index + 1 >= len(self._contents) and self._current_file_index < len(self._files) - 1:
             self._contents = self.read_file(self._files[self._current_file_index+1])
-            self._current_index = 0
+            self._current_index = -1
             self._current_file_index += 1
-        elif self._current_index+1 >= len(self._contents) and self._current_file_index >= len(self._files) - 1: 
+        if self._current_index+1 >= len(self._contents) and self._current_file_index >= len(self._files) - 1: 
             return None
         self._current_index += 1
+        if self._debug is True:
+            self.print_file_indexes()
         return self._contents[self._current_index]
+
+    def print_file_indexes(self):
+        file_len = len(self._files)
+        contents_len = len(self._contents)
+        print(f'_current_index:{self._current_index}, _current_file_index{self._current_file_index}, file_len:{file_len}, contents_len:{contents_len}')
 
     def read_file(self, file_name):
         contents = []
@@ -37,9 +46,9 @@ class FerverousDataset:
                         if key[0:8] == 'sentence':
                             sentence_content += [self.fix_sentence(content[key])]
                     sentence_content = ' '.join(sentence_content)
-                    contents += [sentence_content]
-                    #if 'cicero' in sentence_content.lower():
-                    #    print(content['title'])
+                    #contents += [sentence_content]
+                    if 'formula one' in sentence_content.lower():
+                        contents += [sentence_content]
             except UnicodeDecodeError:
                 print('unicode_error:', file_name)
                 return []
