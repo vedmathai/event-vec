@@ -2,25 +2,32 @@ class EventRelationship:
     def __init__(self):
         self._event_1 = None
         self._event_2 = None
-        self._relationship = None
-        self._relationship_score = 0
+        self._relationship_distribution = {}
+        self._relationships = {}
 
     def to_dict(self):
         return {
             "event_1": self._event_1.to_dict(),
             "event_2": self._event_2.to_dict(),
-            "relationship": self._relationship,
-            "relationship_score": self._relationship_score
+            "relationship_distribution": self._relationship_distribution,
+            "relationships": self._relationships,
         }
 
     def __repr__(self) -> str:
         return str(self.to_dict())
 
-    def relationship(self):
-        return self._relationship
+    def normalize_distribution(self):
+        total = float(sum(self._relationships.values()))
+        self._relationship_distribution = {k: v/total for k, v in self._relationships.items()}
 
-    def relationship_score(self):
-        return self._relationship_score
+    def relationship_distribution(self):
+        return self._relationship_distribution
+
+    def relationships(self):
+        return self._relationships
+
+    def add_relationship_type(self, relationship_type, relationship_score):
+        self._relationships[relationship_type] = relationship_score
 
     def event_1(self):
         return self._event_1
@@ -29,10 +36,8 @@ class EventRelationship:
         return self._event_2
 
     @staticmethod
-    def create(event_1, event_2, relationship, relationship_score):
+    def create(event_1, event_2):
         event_relationship = EventRelationship()
         event_relationship._event_1 = event_1
         event_relationship._event_2 = event_2
-        event_relationship._relationship = relationship
-        event_relationship._relationship_score = relationship_score
         return event_relationship

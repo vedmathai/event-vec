@@ -18,10 +18,12 @@ class EventRelationshipExtractor:
             dep_tup = '|'.join(dep_tup)
             if len(dep_tup) > 0 and len(dep) > 0:
                 if dep_tup in prep_to_relationships:
+                    relationship = EventRelationship.create(event_1, event_2)
                     for rel in prep_to_relationships[dep_tup]:
                         rel_score = prep_to_relationships[dep_tup][rel]
-                        relationship = EventRelationship.create(event_1, event_2, rel, rel_score)
-                        relationships.append(relationship)
+                        relationship.add_relationship_type(rel, rel_score)
+                    relationship.normalize_distribution()
+                    relationships.append(relationship)
                 #else:
                 #    print('missing', dep_tup)
         return relationships
