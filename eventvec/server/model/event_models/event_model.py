@@ -3,10 +3,12 @@ class Event:
         self._subject_nodes = None
         self._object_nodes = None
         self._verb_nodes = None
+        self._date_nodes = None
         self._root_node = None
         self._verb_tensor = None
         self._object_tensor = None
         self._subject_tensor = None
+        self._date_tensor = None
 
     def to_dict(self):
         return {
@@ -14,6 +16,7 @@ class Event:
             "object_nodes": [i.orth() for i in sorted(self._object_nodes, key=key_fn)],
             "verb_nodes": [i.orth() for i in sorted(self._verb_nodes, key=key_fn)],
             "root_node": self._root_node.orth(),
+            "date_nodes": [i.orth() for i in sorted(self._date_nodes, key=key_fn)],
         }
 
     def __repr__(self) -> str:
@@ -31,6 +34,9 @@ class Event:
     def subject_nodes(self):
         return self._subject_nodes
 
+    def date_nodes(self):
+        return self._date_nodes
+
     def set_object_tensor(self, object_tensor):
         self._object_tensor = object_tensor
 
@@ -39,6 +45,9 @@ class Event:
 
     def set_subject_tensor(self, subject_tensor):
         self._subject_tensor = subject_tensor
+
+    def set_date_tensor(self, date_tensor):
+        self._date_tensor = date_tensor
 
     def subject_tensor(self):
         return self._subject_tensor
@@ -49,12 +58,16 @@ class Event:
     def object_tensor(self):
         return self._object_tensor
 
+    def date_tensor(self):
+        return self._date_tensor
+
     @staticmethod
-    def create_from_paths(subject_nodes, object_nodes, verb_nodes, root_node):
+    def create_from_paths(subject_nodes, object_nodes, verb_nodes, date_nodes, root_node):
         event = Event()
         event._subject_nodes = subject_nodes
         event._object_nodes = object_nodes
         event._verb_nodes = verb_nodes
+        event._date_nodes = date_nodes
         event._root_node = root_node
         return event
 

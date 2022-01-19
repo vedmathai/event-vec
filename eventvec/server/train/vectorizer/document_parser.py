@@ -24,10 +24,14 @@ class DocumentParser:
         spacy_doc = self._spacy_utils.get_spacy_doc(document.resolved_text())
         for sentence in spacy_doc.sents:
             root, psentence = parse_sentence(sentence)
-            events = self._event_detector.detect(psentence)
+            detected_events = self._event_detector.detect(psentence)
             extracted_events = []
-            for event in events:
-                extracted_event = self._event_extractor.extract(event, psentence)
+            for event in detected_events['verb_roots']:
+                extracted_event = self._event_extractor.extract_verb_events(event, psentence)
+                extracted_events.append(extracted_event)
+                document.add_events(extracted_event)
+            for event in detected_events['date_roots']:
+                extracted_event = self._event_extractor.extract_date_events(event, psentence)
                 extracted_events.append(extracted_event)
                 document.add_events(extracted_event)
             for event_1i, event_1 in enumerate(extracted_events):

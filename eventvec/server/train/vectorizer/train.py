@@ -9,12 +9,12 @@ from eventvec.server.model.torch_models.eventvec.event_parts_torch_model import 
 from eventvec.server.model.torch_models.eventvec.event_relationship_torch_model import EventRelationshipModel
 from eventvec.server.model.torch_models.eventvec.event_torch_model import EventModel
 
-LEARNING_RATE = 1e-4
+LEARNING_RATE = 1e-2
 HIDDEN_LAYER_SIZE = 50
 OUTPUT_LAYER_SIZE = 50
 CHECKPOINT_PATH = 'local/checkpoints/checkpoint.tar'
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-SAVE_EVERY = 10000
+SAVE_EVERY = 2000
 
 class Trainer:
 
@@ -69,8 +69,9 @@ class Trainer:
         event_verb_vector = self.event_phrase_vectorizer(event.verb_tensor())
         event_subject_vector = self.event_phrase_vectorizer(event.subject_tensor())
         event_object_vector = self.event_phrase_vectorizer(event.object_tensor())
+        event_date_vector = self.event_phrase_vectorizer(event.date_tensor())
         event_vector = self._event_model(
-            event_verb_vector, event_subject_vector, event_object_vector)
+            event_verb_vector, event_subject_vector, event_object_vector, event_date_vector)
         return event_vector
 
     def event_relationship_vectorizer(self, relationship):
