@@ -9,7 +9,7 @@ class EventsReport:
         return {
             'event_1': self._event_1.to_dict(),
             'event_2': self._event_2.to_dict(),
-            'relationship_distribution': self._relationship_distribution,
+            'relationship_distribution': sorted(self._relationship_distribution.items(), key=lambda x: x[1]),
             'similarity': self._similarity,
         }
 

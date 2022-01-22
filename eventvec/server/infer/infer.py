@@ -125,7 +125,7 @@ def sample(category, start_letter='A'):
 if __name__ == '__main__':
     infer = Infer()
     infer.load()
-    infer.infer('Rosberg competed in race. Rosberg won the race.')
+    #infer.infer('Rosberg moved to williams. Rosberg retires.')
 
     infer.infer('Corporation televises formula one. Thompson succeeded Michael Jackson. BBC appoints Thompson as its Director-General in 2010. ')
     #infer.infer("Rosberg first drove in F1 with Williams from 2006 to 2009 and achieved two podium finishes for the team in 2008. For 2010, he moved to Mercedes, partnering fellow German and seven-time world champion Michael Schumacher. Rosberg took his first career win at the 2012 Chinese Grand Prix. He was the teammate of former karting friend and eventual seven-time World Drivers' Champion, Lewis Hamilton, from 2013 to 2016, twice finishing runner-up to his teammate before a title win in 2016.")

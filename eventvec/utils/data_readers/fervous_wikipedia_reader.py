@@ -20,6 +20,8 @@ class FerverousDataset:
 
     def get_next_article(self):
         while self._current_index + 1 >= len(self._contents) and self._current_file_index < len(self._files) - 1:
+            number_of_files = len(self._files)
+            print(f'{self._current_file_index}/{number_of_files}')
             self._contents = self.read_file(self._files[self._current_file_index+1])
             self._current_index = -1
             self._current_file_index += 1
@@ -49,7 +51,7 @@ class FerverousDataset:
                             sentence_content += [self.fix_sentence(content[key])]
                     sentence_content = ' '.join(sentence_content)
                     #contents += [sentence_content]
-                    if sentence_content.lower().count('formula one') > 10:
+                    if sentence_content.lower().count('formula one') > 7:
                         print(content['title'])
                         contents += [sentence_content]
             except UnicodeDecodeError:

@@ -8,7 +8,8 @@ from eventvec.server.model.event_models.event_model import key_fn
 
 PREPOSITIONS_FILE = 'eventvec/server/data/timebank_prepositions.json'
 WORDS_FILE = 'local/data/word2index.txt'
-PREP_LIST = ['AFTER', 'BEFORE', 'DURING']
+PREP_LIST = ['AFTER', 'BEFORE', 'IS_INCLUDED'][0:3]
+SMALL_E = 1e-4
 
 
 class DataHandler():
@@ -30,7 +31,7 @@ class DataHandler():
                 for key in item.keys():
                     relationships.add(key)
             self._categories = sorted(list(relationships))
-        self._categories = sorted(PREP_LIST)
+        #self._categories = sorted(PREP_LIST)
 
     def generate_word2index(self):
         with open(WORDS_FILE) as f:
@@ -52,7 +53,7 @@ class DataHandler():
         return (event_1_idx, event_2_idx)
 
     def categoryTensor(self, category_distribution):
-        tensor = torch.zeros(1, len(self._categories), device=self._device)
+        tensor = torch.ones(1, len(self._categories), device=self._device) * SMALL_E
         for category, category_prob in category_distribution.items():
             li = self._categories.index(category)
             tensor[0][li] = category_prob
