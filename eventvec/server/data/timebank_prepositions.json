@@ -1,4 +1,16 @@
 {
+    "after": {
+        "BEGINS": 2,
+        "ENDS": 4,
+        "AFTER": 28,
+        "IS_INCLUDED": 2,
+        "BEFORE": 2
+    },
+    "before": {
+        "DURING": 4,
+        "ENDS": 2,
+        "BEFORE": 9
+    },
     "of": {
         "CULMINATES": 3,
         "INCLUDES": 17,
@@ -26,11 +38,6 @@
         "AFTER": 18,
         "DURING": 69,
         "BEGINS": 5
-    },
-    "before": {
-        "DURING": 4,
-        "ENDS": 2,
-        "BEFORE": 9
     },
     "to": {
         "ENDED_BY": 43,
@@ -104,13 +111,6 @@
         "IS_INCLUDED": 2,
         "SIMULTANEOUS": 5,
         "INCLUDES": 5
-    },
-    "after": {
-        "BEGINS": 2,
-        "ENDS": 4,
-        "AFTER": 28,
-        "IS_INCLUDED": 2,
-        "BEFORE": 2
     },
     "because": {
         "BEFORE": 6,

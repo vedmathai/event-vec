@@ -37,6 +37,7 @@ class Infer:
         self._event_parts_model = EventPartsRNN(self._data_handler.n_words(), HIDDEN_LAYER_SIZE, OUTPUT_LAYER_SIZE, device=device)
         self._event_model = EventModel(HIDDEN_LAYER_SIZE, HIDDEN_LAYER_SIZE, HIDDEN_LAYER_SIZE, device=device)
         self._event_relationship_model = EventRelationshipModel(HIDDEN_LAYER_SIZE, HIDDEN_LAYER_SIZE, self._data_handler.n_categories(), device=device)
+        self.load_checkpoint()
 
     def event_phrase_vectorizer(self, phrase_tensor):
         encoder_output= self._event_parts_model.initOutput()
@@ -51,8 +52,9 @@ class Infer:
         event_verb_vector = self.event_phrase_vectorizer(event.verb_tensor())
         event_subject_vector = self.event_phrase_vectorizer(event.subject_tensor())
         event_object_vector = self.event_phrase_vectorizer(event.object_tensor())
+        event_date_vector = self.event_phrase_vectorizer(event.date_tensor())
         event_vector = self._event_model(
-            event_verb_vector, event_subject_vector, event_object_vector)
+            event_verb_vector, event_subject_vector, event_object_vector, event_date_vector)
         return event_vector
 
     def event_relationship_vectorizer(self, event_1, event_2):
@@ -123,5 +125,7 @@ def sample(category, start_letter='A'):
 if __name__ == '__main__':
     infer = Infer()
     infer.load()
-    infer.infer('Rosberg drove. Rosbery won.')
+    #infer.infer('Rosberg moved to williams. Rosberg retires.')
+
+    infer.infer('Corporation televises formula one. Thompson succeeded Michael Jackson. BBC appoints Thompson as its Director-General in 2010. ')
     #infer.infer("Rosberg first drove in F1 with Williams from 2006 to 2009 and achieved two podium finishes for the team in 2008. For 2010, he moved to Mercedes, partnering fellow German and seven-time world champion Michael Schumacher. Rosberg took his first career win at the 2012 Chinese Grand Prix. He was the teammate of former karting friend and eventual seven-time World Drivers' Champion, Lewis Hamilton, from 2013 to 2016, twice finishing runner-up to his teammate before a title win in 2016.")

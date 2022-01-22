@@ -48,6 +48,9 @@ class Node():
     def orth(self):
         return self.spacy_token.orth_
 
+    def ent_type(self):
+        return self.spacy_token.ent_type_
+
     def dep(self):
         return self.spacy_token.dep_
 

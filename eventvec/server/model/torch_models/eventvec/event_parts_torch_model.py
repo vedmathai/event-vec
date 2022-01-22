@@ -8,20 +8,22 @@ class EventPartsRNN(nn.Module):
         self.embedding = nn.Embedding(input_size, hidden_size, device=device)
         self.hidden_size = hidden_size
         self.i2h = nn.Linear(hidden_size + hidden_size, hidden_size, device=device)
+        self.relu = nn.ReLU()
         self.i2o = nn.Linear(hidden_size + hidden_size, output_size, device=device)
         self.o2o = nn.Linear(hidden_size + output_size, output_size, device=device)
         self.dropout = nn.Dropout(0.1)
-        self.softmax = nn.LogSoftmax(dim=1)
 
     def forward(self, input, hidden):
         input = self.embedding(input)
         input_combined = torch.cat((input, hidden), 1)
         hidden = self.i2h(input_combined)
+        hidden = self.relu(hidden)
         output = self.i2o(input_combined)
-        output_combined = torch.cat((hidden, output), 1)
-        output = self.o2o(output_combined)
+        output = self.relu(output)
+        #output_combined = torch.cat((hidden, output), 1)
+        #output = self.o2o(output_combined)
+        #output = self.relu(output)
         output = self.dropout(output)
-        output = self.softmax(output)
         return output, hidden
 
     def initHidden(self):
