@@ -31,12 +31,15 @@ class TimebankSlink:
         self._subordinated_event_instance = subordinated_event_instance
 
     @staticmethod
-    def from_bs_obj(slink):
+    def from_bs_obj(slink, timebank_document):
         timebank_slink = TimebankSlink()
         timebank_slink.set_lid(slink.attrs.get('lid'))
         timebank_slink.set_rel_type(slink.attrs.get('rel_type'))
         timebank_slink.set_event_instance_id(slink.attrs.get('event_instance_id'))  # noqa
         timebank_slink.set_subordinated_event_instance(slink.attrs.get('subordinated_event_instance'))  # noqa
+        timebank_document.add_event_instance_id2slink(
+            timebank_slink.event_instance_id(), timebank_slink
+        )
         return timebank_slink
 
     def to_dict(self):

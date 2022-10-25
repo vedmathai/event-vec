@@ -32,12 +32,15 @@ class TimebankAlink:
         self._related_to_event_instance = related_to_event_instance
 
     @staticmethod
-    def from_bs_obj(alink):
+    def from_bs_obj(alink, timebank_document):
         timebank_alink = TimebankAlink()
         timebank_alink.set_lid(alink.attrs.get('lid'))
         timebank_alink.set_rel_type(alink.attrs.get('rel_type'))
         timebank_alink.set_event_instance_id(alink.attrs.get('event_instance_id'))  # noqa
         timebank_alink.set_related_to_event_instance(alink.attrs.get('related_to_event_instance'))  # noqa
+        timebank_document.add_event_instance_id2alink(
+            timebank_alink.event_instance_id(), alink
+        )
         return timebank_alink
 
     def to_dict(self):

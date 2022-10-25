@@ -16,6 +16,15 @@ class TimebankDocument:
         self._timebank_sentences = []
         self._make_instances = []
         self._eid2event = {}
+        self._eid2sentence = {}
+        self._event_id2make_instance = {}
+        self._event_instance_id2make_instance = {}
+        self._event_id2tlink = {}
+        self._time_id2tlink = {}
+        self._event_id2slink = {}
+        self._time_id2slink = {}
+        self._event_id2alink = {}
+        self._time_id2alink = {}
 
     def slinks(self):
         return self._slinks
@@ -65,14 +74,65 @@ class TimebankDocument:
     def add_eid2event(self, eid, event):
         self._eid2event[eid] = event
 
+    def add_eid2sentence(self, eid, sentence):
+        self._eid2sentence[eid] = sentence
+
+    def add_event_id2make_instance(self, event_id, make_instance):
+        self._event_id2make_instance[event_id] = make_instance
+
+    def add_event_instance_id2make_instance(self, event_instance_id, make_instance):  # noqa
+        self._event_instance_id2make_instance[event_instance_id] = make_instance  # noqa
+
+    def add_event_instance_id2tlink(self, event_instance_id, tlink):
+        self._event_id2tlink[event_instance_id] = tlink
+
+    def add_time_id2tlink(self, time_id, tlink):
+        self._time_id2tlink[time_id] = tlink
+
+    def add_event_instance_id2slink(self, event_instance_id, slink):
+        self._event_id2slink[event_instance_id] = slink
+
+    def add_time_id2slink(self, time_id, slink):
+        self._time_id2slink[time_id] = slink
+
+    def add_event_instance_id2alink(self, event_instance_id, alink):
+        self._event_id2alink[event_instance_id] = alink
+
+    def add_time_id2alink(self, time_id, alink):
+        self._time_id2alink[time_id] = alink
+
     def eid2event(self, eid):
         return self._eid2event[eid]
 
     def eids(self):
         return list(self._eid2event)
 
-    def eid2sentence(self):
-        pass
+    def eid2sentence(self, eid):
+        return self._eid2sentence[eid]
+
+    def event_id2make_instance(self, event_id):
+        return self._event_id2make_instance[event_id]
+
+    def event_instance_id2make_instance(self, event_instance_id):
+        return self._event_instance_id2make_instance[event_instance_id]
+
+    def event_instance_id2tlink(self, event_instance_id):
+        return self._event_id2tlink[event_instance_id]
+
+    def time_id2tlink(self, time_id):
+        return self._event_id2tlink[time_id]
+
+    def event_instance_id2slink(self, event_instance_id):
+        return self._event_id2slink[event_instance_id]
+
+    def time_id2slink(self, time_id):
+        return self._time2slink[time_id]
+
+    def event_instance_id2alink(self, event_instance_id):
+        return self._event_id2alink[event_instance_id]
+
+    def time_id2alink(self, time_id):
+        return self._time_id2alink[time_id]
 
     @staticmethod
     def from_xml(document):
@@ -88,22 +148,30 @@ class TimebankDocument:
 
         tlinks = list(soup.find_all('tlink'))
         for tlink in tlinks:
-            timebank_tlink = TimebankTlink.from_bs_obj(tlink)
+            timebank_tlink = TimebankTlink.from_bs_obj(
+                tlink, timebank_document
+            )
             timebank_document.add_tlink(timebank_tlink)
 
         slinks = list(soup.find_all('slink'))
         for slink in slinks:
-            timebank_slink = TimebankSlink.from_bs_obj(slink)
+            timebank_slink = TimebankSlink.from_bs_obj(
+                slink, timebank_document
+            )
             timebank_document.add_slink(timebank_slink)
 
         alinks = list(soup.find_all('alink'))
         for alink in alinks:
-            timebank_alink = TimebankAlink.from_bs_obj(alink)
+            timebank_alink = TimebankAlink.from_bs_obj(
+                alink, timebank_document
+            )
             timebank_document.add_alink(timebank_alink)
 
         makeinstances = list(soup.find_all('makeinstance'))
         for makeinstance in makeinstances:
-            timebank_makeinstance = MakeInstance.from_bs_obj(makeinstance)
+            timebank_makeinstance = MakeInstance.from_bs_obj(
+                makeinstance, timebank_document
+            )
             timebank_document.add_make_instance(timebank_makeinstance)
 
         return timebank_document

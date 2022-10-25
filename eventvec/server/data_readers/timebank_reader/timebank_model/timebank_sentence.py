@@ -14,6 +14,12 @@ class TimebankSentence:
     def sequence(self):
         return self._sequence
 
+    def text(self):
+        for i in self._sequence:
+            if i.text() is None:
+                print(i)
+        return ' '.join([i.text() for i in self._sequence])
+
     def append(self, item):
         self._sequence.append(item)
 
@@ -35,6 +41,9 @@ class TimebankSentence:
             timebank_sentence.append(obj)
             if c.name == 'event':
                 timebank_document.add_eid2event(obj.eid(), obj)
+                timebank_document.add_eid2sentence(
+                    obj.eid(), timebank_sentence
+                )
         return timebank_sentence
 
     def to_dict(self):
