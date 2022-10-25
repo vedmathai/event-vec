@@ -2,6 +2,7 @@ import os
 
 from eventvec.server.data_readers.abstract import AbstractDataReader
 from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_document import TimebankDocument  # noqa
+from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_event import TimebankEvent  # noqa
 
 
 class TimeMLDataReader(AbstractDataReader):
@@ -32,7 +33,11 @@ class TimeMLDataReader(AbstractDataReader):
 if __name__ == '__main__':
     tmdr = TimeMLDataReader()
     files = tmdr.list_extra()
-    first_file = files[1]
-    content = tmdr.read_file(first_file)
-    timebank_document = tmdr.xml2timebank_document(content)
-    print(timebank_document.eids())
+    relations = 0
+    for file in files:
+        content = tmdr.read_file(file)
+        timebank_document = tmdr.xml2timebank_document(content)
+        relations += len(timebank_document.alinks())
+        relations += len(timebank_document.slinks())
+        relations += len(timebank_document.tlinks())
+    print(relations)

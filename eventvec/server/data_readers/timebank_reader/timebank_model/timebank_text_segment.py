@@ -7,7 +7,7 @@ class TimebankTextSegment:
         return self._text
 
     def set_text(self, text):
-        self._event = text
+        self._text = text
 
     @staticmethod
     def from_bs_obj(text):

@@ -59,7 +59,7 @@ class TimebankTimex:
         timebank_timex.set_temporal_function(timex.attrs.get('temporal_function'))  # noqa
         timebank_timex.set_function_in_document(timex.attrs.get('function_id_document'))  # noqa
         timebank_timex.set_anchor_time_id(timex.attrs.get('anchor_time_id'))
-        timebank_timex.set_text(timex.attrs.get('text'))
+        timebank_timex.set_text(timex.text)
         return timebank_timex
 
     def to_dict(self):

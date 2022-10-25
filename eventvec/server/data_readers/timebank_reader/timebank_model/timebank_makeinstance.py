@@ -51,7 +51,7 @@ class MakeInstance:
         self._modality = modality
 
     @staticmethod
-    def from_bs_obj(bs_obj):
+    def from_bs_obj(bs_obj, timebank_document):
         timebank_makeinstance = MakeInstance()
         timebank_makeinstance.set_event_id(bs_obj.attrs.get('eventid'))
         timebank_makeinstance.set_eiid(bs_obj.attrs.get('eiid'))
@@ -60,6 +60,13 @@ class MakeInstance:
         timebank_makeinstance.set_polarity(bs_obj.attrs.get('polarity'))
         timebank_makeinstance.set_pos(bs_obj.attrs.get('pos'))
         timebank_makeinstance.set_modality(bs_obj.attrs.get('modality'))
+        timebank_document.add_event_id2make_instance(
+            timebank_makeinstance.event_id(), timebank_makeinstance
+        )
+        timebank_document.add_event_instance_id2make_instance(
+            timebank_makeinstance.eiid(), timebank_makeinstance
+        )
+
         return timebank_makeinstance
 
     def to_dict(self):
