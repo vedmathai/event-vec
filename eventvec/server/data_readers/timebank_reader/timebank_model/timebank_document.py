@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from typing import List
 
 
 from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_sentence import TimebankSentence  # noqa
@@ -10,6 +11,7 @@ from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_makein
 
 class TimebankDocument:
     def __init__(self):
+        self._file_name = None
         self._tlinks = []
         self._slinks = []
         self._alinks = []
@@ -17,6 +19,8 @@ class TimebankDocument:
         self._make_instances = []
         self._eid2event = {}
         self._eid2sentence = {}
+        self._time_id2timex3 = {}
+        self._time_id2sentence = {}
         self._event_id2make_instance = {}
         self._event_instance_id2make_instance = {}
         self._event_id2tlink = {}
@@ -26,11 +30,17 @@ class TimebankDocument:
         self._event_id2alink = {}
         self._time_id2alink = {}
 
+    def file_name(self):
+        return self._file_name
+
+    def set_file_name(self, file_name):
+        self._file_name = file_name
+
     def slinks(self):
         return self._slinks
 
     def add_slink(self, slink):
-        self._tlinks.append(slink)
+        self._slinks.append(slink)
 
     def set_slinks(self, slinks):
         self._slinks = slinks
@@ -44,7 +54,7 @@ class TimebankDocument:
     def set_alinks(self, alinks):
         self._alinks = alinks
 
-    def tlinks(self):
+    def tlinks(self) -> List[TimebankTlink]:
         return self._tlinks
 
     def add_tlink(self, tlink):
@@ -77,6 +87,12 @@ class TimebankDocument:
     def add_eid2sentence(self, eid, sentence):
         self._eid2sentence[eid] = sentence
 
+    def add_time_id2timex3(self, time_id, event):
+        self._time_id2timex3[time_id] = event
+
+    def add_time_id2sentence(self, time_id, sentence):
+        self._time_id2sentence[time_id] = sentence
+
     def add_event_id2make_instance(self, event_id, make_instance):
         self._event_id2make_instance[event_id] = make_instance
 
@@ -105,10 +121,13 @@ class TimebankDocument:
         return self._eid2event[eid]
 
     def eids(self):
-        return list(self._eid2event)
+        return list(self._eid2event.keys())
+
+    def is_eid(self, eid):
+        return eid in self._eid2event
 
     def eid2sentence(self, eid):
-        return self._eid2sentence[eid]
+        return self._eid2sentence.get(eid)
 
     def event_id2make_instance(self, event_id):
         return self._event_id2make_instance[event_id]
@@ -118,6 +137,15 @@ class TimebankDocument:
 
     def event_instance_id2tlink(self, event_instance_id):
         return self._event_id2tlink[event_instance_id]
+
+    def is_time_id(self, time_id):
+        return time_id in self._time_id2timex3
+
+    def time_id2sentence(self, time_id):
+        return self._time_id2sentence.get(time_id)
+
+    def time_id2timex3(self, time_id):
+        return self._time_id2timex3[time_id]
 
     def time_id2tlink(self, time_id):
         return self._event_id2tlink[time_id]
@@ -139,11 +167,14 @@ class TimebankDocument:
         timebank_document = TimebankDocument()
         soup = BeautifulSoup(document, 'lxml')
 
+        docno = soup.find('docno')
+        timebank_document.set_file_name(docno.text)
+
         sentences = list(soup.find_all('s'))
         for s in sentences:
             timebank_sentence = TimebankSentence.from_bs_obj(
                 s, timebank_document
-            )  
+            )
             timebank_document.add_timebank_sentence(timebank_sentence)
 
         tlinks = list(soup.find_all('tlink'))
