@@ -44,6 +44,11 @@ class TimebankSentence:
                 timebank_document.add_eid2sentence(
                     obj.eid(), timebank_sentence
                 )
+            if c.name == 'timex3':
+                timebank_document.add_time_id2timex3(obj.tid(), obj)
+                timebank_document.add_time_id2sentence(
+                    obj.tid(), timebank_sentence
+                )
         return timebank_sentence
 
     def to_dict(self):

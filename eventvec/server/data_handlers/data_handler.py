@@ -60,7 +60,7 @@ class DataHandler():
         return tensor
 
     def indexesFromPhrase(self, phrase):
-        unknown_index =self._word2index['<UNKNOWN>']
+        unknown_index = self._word2index['<UNKNOWN>']
         return [self._word2index.get(word, unknown_index) for word in phrase]
 
     def tensorFromPhrase(self, phrase):
