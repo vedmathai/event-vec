@@ -2,6 +2,7 @@ import numpy as np
 import torch
 from transformers import BertTokenizer
 import random
+from collections import defaultdict
 
 
 from eventvec.server.data_handlers.timebank_data_handler import TimeBankBertDataHandler  # noqa
@@ -37,6 +38,7 @@ class BertDataHandler():
         self._tokenizer = BertTokenizer.from_pretrained('bert-base-cased')
         self._data = []
         self._labels = []
+        self._label_counts = defaultdict(int)
 
     def load(self):
         data_handler = TimeBankBertDataHandler()
@@ -58,9 +60,21 @@ class BertDataHandler():
         label = labels_simpler[datum['relationship']]
         self._data.append((encoding, label))
         self._labels.append(label)
+        self._label_counts[label] += 1
 
     def classes(self):
         return set(self._labels)
+
+    def label_counts(self):
+        return dict(self._label_counts)
+
+    def label_weights(self):
+        weights = [0 for i in range(len(self.classes()))]
+        total = sum(self._label_counts.values())
+        for label in self.classes():
+            weight = float(total - self._label_counts[label]) / total
+            weights[label] = weight
+        return weights
 
     def data(self):
         return self._data

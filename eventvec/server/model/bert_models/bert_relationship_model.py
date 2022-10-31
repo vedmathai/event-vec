@@ -23,6 +23,6 @@ class BertRelationshipClassifier(nn.Module):
         )
         dropout_output = self.dropout(pooled_output)
         linear_output1 = self.linear1(dropout_output)
-        relu_output = self.relu(linear_output1)
-        linear_output2 = self.linear2(relu_output)
+        #relu_output = self.relu(linear_output1)
+        linear_output2 = self.linear2(linear_output1)
         return linear_output2

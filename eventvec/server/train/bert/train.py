@@ -52,7 +52,6 @@ class Trainer:
         self._relationship_counter = 0
         self._total_loss = 0
         self._all_losses = []
-        self._criterion = nn.CrossEntropyLoss()
         self._data_handler = BertDataHandler()
         self._iteration = 0
         self._last_iteration = 0
@@ -68,6 +67,9 @@ class Trainer:
         self._model_optimizer = Adam(
             self._model.parameters(), lr=LEARNING_RATE
         )
+        weights = self._data_handler.label_weights()
+        weights = torch.from_numpy(np.array(weights)).to(device)
+        self._criterion = nn.CrossEntropyLoss(weight=weights)
 
     def zero_grad(self):
         self._model.zero_grad()
@@ -107,17 +109,17 @@ class Trainer:
             self.load_checkpoint()
         self.zero_grad()
         for datum in tqdm(self._train_dataset):
-            self.zero_grad
             loss = self.train_step(datum)
             self._all_losses += [loss.item()]
             self._iteration += 1
             if (self._iteration - self._last_iteration) % SAVE_EVERY == 0:
                 self.create_checkpoint()
                 self._last_iteration = self._iteration
-            if self._loss is not None:
+            if self._loss is not None and self._iteration % 10 == 0:
                 self._loss.backward()
                 self.optimizer_step()
-            self._loss = None
+                self.zero_grad()
+                self._loss = None
         print('train_loss: ', sum(self._all_losses) / self._iteration)
         self.train_evaluate()
 
@@ -148,6 +150,8 @@ class Trainer:
                     relationship_target
                 )
                 total_loss_val += batch_loss.item()
+                if datumi < 5:
+                    print(event_predicted_vector)
                 if event_predicted_vector.argmax(dim=1).item() == target:
                     total_acc_val += 1
         val_data_size = len(self._val_dataset)
