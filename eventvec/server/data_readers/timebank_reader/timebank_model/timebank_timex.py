@@ -1,5 +1,10 @@
-class TimebankTimex:
+from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_abstract_sp import AbstractSentencePart  # noqa
+
+
+class TimebankTimex(AbstractSentencePart):
     def __init__(self):
+        super().__init__()
+        self._sentence_token_i = None
         self._tid = None
         self._type = None
         self._value = None
@@ -51,8 +56,12 @@ class TimebankTimex:
         self._text = text
 
     @staticmethod
-    def from_bs_obj(timex):
+    def from_bs_obj(timex, token_i, last_token):
         timebank_timex = TimebankTimex()
+        timebank_timex.set_start_token_i(last_token + 1)
+        end_token = last_token + len(timex.text.split())
+        timebank_timex.set_end_token_i(end_token)
+        timebank_timex.set_sentence_token_i(token_i)
         timebank_timex.set_tid(timex.attrs.get('tid'))
         timebank_timex.set_type(timex.attrs.get('type'))
         timebank_timex.set_value(timex.attrs.get('value'))
@@ -60,7 +69,7 @@ class TimebankTimex:
         timebank_timex.set_function_in_document(timex.attrs.get('function_id_document'))  # noqa
         timebank_timex.set_anchor_time_id(timex.attrs.get('anchor_time_id'))
         timebank_timex.set_text(timex.text)
-        return timebank_timex
+        return timebank_timex, end_token
 
     def to_dict(self):
         return {

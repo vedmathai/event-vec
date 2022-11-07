@@ -39,7 +39,6 @@ class Trainer:
         self._event_parts_optimizer = optim.Adam(self._event_parts_model.parameters(), lr=LEARNING_RATE, weight_decay=1e-5)
         self._event_relationship_optimizer = optim.Adam(self._event_relationship_model.parameters(), lr=LEARNING_RATE, weight_decay=1e-5)
 
-
     def zero_grad(self):
         self._event_model.zero_grad()
         self._event_parts_model.zero_grad()

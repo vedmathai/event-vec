@@ -4,6 +4,8 @@ from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_timex 
 from eventvec.server.data_readers.timebank_reader.timebank_reader import TimeMLDataReader  # noqa
 from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_event import TimebankEvent  # noqa
 
+from collections import defaultdict
+
 rel2rel = {
     'IS_INCLUDED': 'is_included',
     'SIMULTANEOUS': 'simultaneous',
@@ -39,59 +41,58 @@ rel2rel_simpler = {
 }
 
 
-class TimeBankBertDataHandler:
+class TimeBankStatistics:
 
-    def get_data(self):
+    def print_counts(self):
         tmdr = TimeMLDataReader()
         timebank_documents = tmdr.timebank_documents()
         data = []
+        counter_pos = defaultdict(int)
+        counter_same_pos = defaultdict(int)
+        rel_counter = defaultdict(int)
+        rel_counter_simpler = defaultdict(int)
+
         for document in timebank_documents:
             for tlink in document.tlinks():
+                pos = ''
                 if 't' in tlink.tlink_type():
                     continue
                 tlink_type = tlink.tlink_type()
                 if tlink_type[0] == 'e':
                     from_event = tlink.event_instance_id()
                     make_instance = document.event_instance_id2make_instance(from_event)
-                    if make_instance.pos() != 'VERB':
-                        pass #continue
+                    pos += make_instance.pos()
                     from_sentence, from_sentence_i, from_token_i, from_start_token_i, from_end_token_i = self.event_instance_id2sentence(
                         document, from_event, 'from',
                     )
                 if tlink_type[1:] == '2e':
                     to_event = tlink.related_to_event_instance()
                     make_instance = document.event_instance_id2make_instance(to_event)
-                    if make_instance.pos() != 'VERB':
-                        pass #continue
-
+                    pos += '|' + make_instance.pos()
                     to_sentence, to_sentence_i, to_token_i, to_start_token_i, to_end_token_i = self.event_instance_id2sentence(
                         document, to_event, 'to',
                     )
-                if tlink_type[0] == 't':
-                    from_time = tlink.time_id()
-                    from_sentence = self.time_id2sentence(document, from_time)
-                if tlink_type[1:] == '2t':
-                    to_time = tlink.related_to_time()
-                    to_sentence = self.time_id2sentence(document, to_time)
+                
+
 
                 if len(to_sentence) == 0 or len(from_sentence) == 0:
                     continue
 
-                token_order = self.token_order(
-                    from_sentence_i, from_token_i, to_sentence_i,
-                    from_sentence_i
-                )
-                if to_sentence_i != from_sentence_i:
-                    pass #continue
-                data.append({
-                    'from_sentence': from_sentence,
-                    'to_sentence': to_sentence,
-                    'from_token_i': (from_start_token_i, from_end_token_i),
-                    'to_token_i': (to_start_token_i, to_end_token_i),
-                    'relationship': rel2rel_simpler[tlink.rel_type()],
-                    'token_order': token_order,
-                })
-        return data
+                counter_pos[pos] += 1
+
+                if to_sentence_i == from_sentence_i:
+                    counter_same_pos[pos] += 1
+
+                rel_counter[rel2rel_simpler[tlink.rel_type()]] += 1
+                
+        for k, i in sorted(counter_pos.items(), key=lambda x: x[1], reverse=True):
+            print(k, i)
+        print('\n')
+        for i in counter_same_pos:
+            print(i, counter_same_pos[i])
+        print('\n')
+        for rel_type in rel_counter:
+            print(rel_type, rel_counter[rel_type])
 
     def event_instance_id2sentence(self, document, eiid, event_point):
         make_instance = document.event_instance_id2make_instance(eiid)
@@ -102,9 +103,9 @@ class TimeBankBertDataHandler:
         start_token_i = None
         end_token_i = None
         if event_point == 'from':
-            tags = ('ENTITY1', 'ENTITY1')
+            tags = ('[ENTITY_1]', '[/ENTITY_1]')
         elif event_point == 'to':
-            tags = ('ENTITY2', 'ENTITY2')
+            tags = ('[ENTITY_2]', '[/ENTITY_2]')
         if document.is_eid(eid) is True:
             from_sentence = document.eid2sentence(eid)
             sentence_i = from_sentence.sentence_i()
@@ -121,31 +122,6 @@ class TimeBankBertDataHandler:
                     sseq.append(s.text())
         return sseq, sentence_i, token_i, start_token_i, end_token_i
 
-    def time_id2sentence(self, document: TimebankDocument, time_id):
-        sseq = []
-        if document.is_time_id(time_id) is True:
-            from_sentence = document.time_id2sentence(time_id)
-            for s in from_sentence.sequence():
-                if isinstance(s, TimebankTimex):
-                    if s.tid() == time_id:
-                        sseq.extend(['[ENTITY_2]', s.text(), '[/ENTITY_2]'])
-                else:
-                    sseq.append(s.text())
-        return sseq
-
-    def token_order(self, from_sentence_i, from_token_i, to_sentence_i,
-                    to_token_i):
-        if from_sentence_i < to_sentence_i:
-            return 0
-        elif from_sentence_i > to_sentence_i:
-            return 1
-        else:
-            if from_token_i < to_token_i:
-                return 0
-            else:
-                return 1
-
-
 if __name__ == '__main__':
-    bdh = TimeBankBertDataHandler()
-    bdh.get_data()
+    tbs = TimeBankStatistics()
+    tbs.print_counts()

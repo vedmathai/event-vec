@@ -171,9 +171,9 @@ class TimebankDocument:
         timebank_document.set_file_name(docno.text)
 
         sentences = list(soup.find_all('s'))
-        for s in sentences:
+        for s_i, s in enumerate(sentences):
             timebank_sentence = TimebankSentence.from_bs_obj(
-                s, timebank_document
+                s, s_i, timebank_document
             )
             timebank_document.add_timebank_sentence(timebank_sentence)
 
