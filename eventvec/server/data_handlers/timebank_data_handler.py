@@ -45,6 +45,7 @@ class TimeBankBertDataHandler:
         tmdr = TimeMLDataReader()
         timebank_documents = tmdr.timebank_documents()
         data = []
+        tenses = set()
         for document in timebank_documents:
             for tlink in document.tlinks():
                 if 't' in tlink.tlink_type():
@@ -54,19 +55,22 @@ class TimeBankBertDataHandler:
                     from_event = tlink.event_instance_id()
                     make_instance = document.event_instance_id2make_instance(from_event)
                     if make_instance.pos() != 'VERB':
-                        pass #continue
+                        continue
                     from_sentence, from_sentence_i, from_token_i, from_start_token_i, from_end_token_i = self.event_instance_id2sentence(
                         document, from_event, 'from',
                     )
+                    from_tense = make_instance.tense()
+                    tenses.add(from_tense)
                 if tlink_type[1:] == '2e':
                     to_event = tlink.related_to_event_instance()
                     make_instance = document.event_instance_id2make_instance(to_event)
                     if make_instance.pos() != 'VERB':
-                        pass #continue
+                        continue
 
                     to_sentence, to_sentence_i, to_token_i, to_start_token_i, to_end_token_i = self.event_instance_id2sentence(
                         document, to_event, 'to',
                     )
+                    to_tense = make_instance.tense()
                 if tlink_type[0] == 't':
                     from_time = tlink.time_id()
                     from_sentence = self.time_id2sentence(document, from_time)
@@ -90,7 +94,10 @@ class TimeBankBertDataHandler:
                     'to_token_i': (to_start_token_i, to_end_token_i),
                     'relationship': rel2rel_simpler[tlink.rel_type()],
                     'token_order': token_order,
+                    'from_tense': from_tense,
+                    'to_tense': to_tense,
                 })
+        print(tenses)
         return data
 
     def event_instance_id2sentence(self, document, eiid, event_point):
