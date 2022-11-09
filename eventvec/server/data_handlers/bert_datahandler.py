@@ -39,6 +39,20 @@ labels_simpler_reverse = {
     'before': 2,
 }
 
+tenses = {
+    'PRESPART': 0,
+    'PASTPART': 1,
+    'PRESENT': 2,
+    'FUTURE': 3,
+    'NONE': 4,
+    'INFINITIVE': 5,
+    'PAST': 6
+}
+
+tenses_hot_encoding = {i: [0]*7 for i in tenses}
+for i in tenses_hot_encoding:
+    tenses_hot_encoding[i][tenses[i]] = 1
+
 
 class BertDataHandler():
 
@@ -100,7 +114,9 @@ class BertDataHandler():
         to_from_to_token_i = decoded_sentence[0].split().index('entity2') + 1
         if any(i >= 200 for i in [from_to_from_token_i, from_to_to_token_i, to_from_from_token_i, to_from_to_token_i]):
             return 
-        feature_encoding = [datum['token_order']]
+        from_tense_encoding = tenses_hot_encoding[datum['from_tense']]
+        to_tense_encoding = tenses_hot_encoding[datum['to_tense']]
+        feature_encoding = [[datum['token_order']] + from_tense_encoding + to_tense_encoding]
         feature_encoding_reverse = [1 - datum['token_order']]
         label = labels_simpler[datum['relationship']]
         label_reverse = labels_simpler_reverse[datum['relationship']]
