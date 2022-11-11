@@ -1,8 +1,13 @@
+import numpy as np
+from random import shuffle
+
 from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_document import TimebankDocument  # noqa
 from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_timex import TimebankTimex  # noqa
-
 from eventvec.server.data_readers.timebank_reader.timebank_reader import TimeMLDataReader  # noqa
 from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_event import TimebankEvent  # noqa
+from eventvec.server.data_handlers.model_input.model_input_data import ModelInputData  # noqa
+from eventvec.server.data_handlers.model_input.model_input_datum import ModelInputDatum  # noqa
+
 
 rel2rel = {
     'IS_INCLUDED': 'is_included',
@@ -25,7 +30,7 @@ rel2rel_simpler = {
     'IS_INCLUDED': 'during',
     'SIMULTANEOUS': 'during',
     'BEFORE': 'before',
-    'IDENTITY': 'during',
+    'IDENTITY': 'identity',
     'DURING': 'during',
     'ENDED_BY': 'during',
     'BEGUN_BY': 'during',
@@ -41,11 +46,19 @@ rel2rel_simpler = {
 
 class TimeBankBertDataHandler:
 
-    def get_data(self):
+    def __init__(self):
+        self._model_input_data = ModelInputData()
+        self._data = []
+        self._train_data = []
+        self._test_data = []
+
+    def load(self):
+        self.load_data()
+        self.allocate_train_test_data()
+
+    def load_data(self):
         tmdr = TimeMLDataReader()
         timebank_documents = tmdr.timebank_documents()
-        data = []
-        tenses = set()
         for document in timebank_documents:
             for tlink in document.tlinks():
                 if 't' in tlink.tlink_type():
@@ -60,7 +73,6 @@ class TimeBankBertDataHandler:
                         document, from_event, 'from',
                     )
                     from_tense = make_instance.tense()
-                    tenses.add(from_tense)
                 if tlink_type[1:] == '2e':
                     to_event = tlink.related_to_event_instance()
                     make_instance = document.event_instance_id2make_instance(to_event)
@@ -86,19 +98,28 @@ class TimeBankBertDataHandler:
                     from_sentence_i
                 )
                 if to_sentence_i != from_sentence_i:
-                    pass #continue
-                data.append({
-                    'from_sentence': from_sentence,
-                    'to_sentence': to_sentence,
-                    'from_token_i': (from_start_token_i, from_end_token_i),
-                    'to_token_i': (to_start_token_i, to_end_token_i),
-                    'relationship': rel2rel_simpler[tlink.rel_type()],
-                    'token_order': token_order,
-                    'from_tense': from_tense,
-                    'to_tense': to_tense,
-                })
-        print(tenses)
-        return data
+                    pass  # continue
+                model_input_datum = ModelInputDatum()
+                model_input_datum.set_from_sentence(from_sentence)
+                model_input_datum.set_to_sentence(to_sentence)
+                relationship = rel2rel_simpler[tlink.rel_type()]
+                model_input_datum.set_relationship(relationship)
+                model_input_datum.set_from_entity_start_token_i(
+                    from_start_token_i
+                )
+                model_input_datum.set_from_entity_end_token_i(
+                    from_end_token_i
+                )
+                model_input_datum.set_to_entity_start_token_i(
+                    to_start_token_i
+                )
+                model_input_datum.set_to_entity_end_token_i(
+                    to_end_token_i
+                )
+                model_input_datum.set_token_order(token_order)
+                model_input_datum.set_from_tense(from_tense)
+                model_input_datum.set_to_tense(to_tense)
+                self._data.append(model_input_datum)
 
     def event_instance_id2sentence(self, document, eiid, event_point):
         make_instance = document.event_instance_id2make_instance(eiid)
@@ -151,6 +172,18 @@ class TimeBankBertDataHandler:
                 return 0
             else:
                 return 1
+
+    def allocate_train_test_data(self):
+        split_point_1 = int(.9*len(self._data))
+        shuffle(self._data)
+        split_data = np.split(self._data, [split_point_1])
+        train_data, test_data = split_data
+        self._model_input_data.set_train_data(train_data)
+        self._model_input_data.set_test_data(test_data)
+        return train_data, test_data
+
+    def model_input_data(self):
+        return self._model_input_data
 
 
 if __name__ == '__main__':
