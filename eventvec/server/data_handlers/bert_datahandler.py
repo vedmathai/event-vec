@@ -1,12 +1,12 @@
 import numpy as np
-import torch
-import random
 import re
 from collections import defaultdict
-from random import choices, shuffle
 from transformers import BertTokenizer
 
 
+
+from eventvec.server.data_handlers.model_input.model_input_data import ModelInputData  # noqa
+from eventvec.server.data_handlers.model_input.model_input_datum import ModelInputDatum  # noqa
 from eventvec.server.data_handlers.timebank_data_handler import TimeBankBertDataHandler  # noqa
 
 
@@ -31,6 +31,7 @@ labels_simpler = {
     'before': 0,
     'during': 1,
     'after': 2,
+    'identity': 3,
 }
 
 labels_simpler_reverse = {
@@ -58,20 +59,31 @@ class BertDataHandler():
 
     def __init__(self):
         self._tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
-        self._data = []
-        self._labels = []
+        self._labels = set()
         self._label_counts = defaultdict(int)
+        self._data_handler = TimeBankBertDataHandler()
 
     def load(self):
-        data_handler = TimeBankBertDataHandler()
-        timebank_data = data_handler.get_data()
-        for datum in timebank_data:
-            self.process_timebank_data(datum)
-        self.shuffle_data()
+        self._model_input_data = self._data_handler.model_input_data()
+        self._data_handler.load()
+        self.load_train_data()
+        self.load_test_data()
 
-    def process_timebank_data(self, datum):
-        from_sentence = ' '.join(datum['from_sentence'])
-        to_sentence = ' '.join(datum['to_sentence'])
+    def load_train_data(self):
+        timebank_train_data = self._model_input_data.train_data()
+        for datumi, datum in enumerate(timebank_train_data):
+            if datumi < 100:
+                self.process_timebank_data(datum)
+
+    def load_test_data(self):
+        timebank_test_data = self._model_input_data.test_data()
+        for datumi, datum in enumerate(timebank_test_data):
+            if datumi < 100:
+                self.process_timebank_data(datum)
+
+    def process_timebank_data(self, model_input_datum):
+        from_sentence = ' '.join(model_input_datum.from_sentence())
+        to_sentence = ' '.join(model_input_datum.to_sentence())
         bert_encoding_from_sentence = self._tokenizer(
             [from_sentence],
             padding='max_length',
@@ -94,7 +106,7 @@ class BertDataHandler():
             return_tensors='pt',
         )
         switched_from_sentence = re.sub('ENTITY1',  'ENTITY2', from_sentence)
-        switched_to_sentence = re.sub('ENTITY2',  'ENTITY1', to_sentence)  
+        switched_to_sentence = re.sub('ENTITY2',  'ENTITY1', to_sentence)
         whole_sentence_to_from = self._tokenizer(
             [switched_to_sentence], [switched_from_sentence],
             padding='max_length',
@@ -113,60 +125,36 @@ class BertDataHandler():
         to_from_from_token_i = decoded_sentence[0].split().index('entity1') + 1
         to_from_to_token_i = decoded_sentence[0].split().index('entity2') + 1
         if any(i >= 200 for i in [from_to_from_token_i, from_to_to_token_i, to_from_from_token_i, to_from_to_token_i]):
-            return 
-        from_tense_encoding = tenses_hot_encoding[datum['from_tense']]
-        to_tense_encoding = tenses_hot_encoding[datum['to_tense']]
-        feature_encoding = [[datum['token_order']] + from_tense_encoding + to_tense_encoding]
-        feature_encoding_reverse = [1 - datum['token_order']]
-        label = labels_simpler[datum['relationship']]
-        label_reverse = labels_simpler_reverse[datum['relationship']]
-        from_token_i = datum['from_token_i']
-        to_token_i = datum['to_token_i']
-        self._data.append((bert_encoding_from_sentence, bert_encoding_to_sentence, from_to_from_token_i, from_to_to_token_i, feature_encoding, from_sentence, to_sentence, whole_sentence_from_to, label))  # noqa
-        #self._data.append((bert_encoding_to_sentence, bert_encoding_from_sentence, to_from_from_token_i, to_from_to_token_i, feature_encoding_reverse, switched_to_sentence , switched_from_sentence, whole_sentence_to_from, label_reverse))  # noqa
-        self._labels.append(label)
+            return
+        from_tense_encoding = tenses_hot_encoding[model_input_datum.from_tense()]
+        to_tense_encoding = tenses_hot_encoding[model_input_datum.to_tense()]
+        feature_encoding = [[model_input_datum.token_order()] + from_tense_encoding + to_tense_encoding]
+        label = labels_simpler[model_input_datum.relationship()]
+        model_input_datum.set_is_trainable()
+        model_input_datum.set_from_entity_token_i(from_to_from_token_i)
+        model_input_datum.set_to_entity_token_i(from_to_to_token_i)
+        model_input_datum.set_from_sentence_encoded(bert_encoding_from_sentence)  # noqa
+        model_input_datum.set_to_sentence_encoded(bert_encoding_to_sentence)
+        model_input_datum.set_feature_encoding(feature_encoding)
+        model_input_datum.set_sentence_pair_encoded(whole_sentence_from_to)
+        model_input_datum.set_target(label)
+        self._model_input_data.add_class(label)
+        self._labels.add(label)
         self._label_counts[label] += 1
 
-    def classes(self):
-        return set(self._labels)
+    def model_input_data(self):
+        return self._model_input_data
+
+    def labels(self):
+        return self._labels
 
     def label_counts(self):
         return dict(self._label_counts)
 
     def label_weights(self):
-        weights = [0 for i in range(len(self.classes()))]
+        weights = [0 for i in range(len(self.labels()))]
         total = sum(self._label_counts.values())
-        for label in self.classes():
+        for label in self.labels():
             weight = total / (float(self._label_counts[label]))
             weights[label] = weight
         return weights
-
-    def data(self):
-        return self._data
-
-    def shuffle_data(self):
-        random.shuffle(self._data)
-
-    def sample_data(self, original_data):
-        print(len(original_data))
-        data = defaultdict(list)
-        for datum in original_data:
-            data[datum[-1]].append(datum)
-        for datum in data:
-            data[datum] = choices(data[datum], k=1000)
-        data = sum([list(i) for i in data.values()], [])
-        shuffle(data)
-        return data
-
-    def split_data(self):
-        split_point_1 = int(.9*len(self._data))
-        split_point_2 = int(1*len(self._data))
-        split_data = np.split(self._data, [split_point_1, split_point_2])
-        train_data, eval_data, test_data = split_data
-        train_data = self.sample_data(train_data)
-        return train_data, eval_data, test_data
-
-
-if __name__ == '__main__':
-    bh = BertDataHandler()
-    bh.setup()
