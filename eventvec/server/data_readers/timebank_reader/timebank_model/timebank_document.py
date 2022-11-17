@@ -167,7 +167,7 @@ class TimebankDocument:
         timebank_document = TimebankDocument()
         soup = BeautifulSoup(document, 'lxml')
 
-        docno = soup.find('docno')
+        docno = soup.find('docid')
         timebank_document.set_file_name(docno.text)
 
         sentences = list(soup.find_all('s'))
@@ -204,7 +204,6 @@ class TimebankDocument:
                 makeinstance, timebank_document
             )
             timebank_document.add_make_instance(timebank_makeinstance)
-
         return timebank_document
 
     def to_dict(self):

@@ -42,6 +42,8 @@ class RunStatistics:
     def precision(self, label):
         numerator = float(self.true_positives(label))
         denominator = self.true_positives(label) + self.false_positives(label)
+        if denominator == 0:
+            return 0
         return numerator/denominator
 
     def precisions(self):
@@ -53,6 +55,8 @@ class RunStatistics:
     def recall(self, label):
         numerator = float(self.true_positives(label))
         denominator = self.true_positives(label) + self.false_negatives(label)
+        if denominator == 0:
+            return 0
         return numerator/denominator
 
     def recalls(self):

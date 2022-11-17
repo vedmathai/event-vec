@@ -1,12 +1,15 @@
 import numpy as np
-from random import shuffle
+from collections import defaultdict
 
 from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_document import TimebankDocument  # noqa
 from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_timex import TimebankTimex  # noqa
 from eventvec.server.data_readers.timebank_reader.timebank_reader import TimeMLDataReader  # noqa
+from eventvec.server.data_readers.timebank_reader.timebank_dense_reader import TimeBankDenseDataReader  # noqa
 from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_event import TimebankEvent  # noqa
 from eventvec.server.data_handlers.model_input.model_input_data import ModelInputData  # noqa
 from eventvec.server.data_handlers.model_input.model_input_datum import ModelInputDatum  # noqa
+
+DATANAME = "timebank_dense"
 
 
 rel2rel = {
@@ -41,6 +44,12 @@ rel2rel_simpler = {
     'INCLUDES': 'during',
     'DURING_INV': 'during',
     'BEGINS': 'during',
+    'NONE': 'none',
+}
+
+datareaders = {
+    'timebank': TimeMLDataReader,
+    'timebank_dense': TimeBankDenseDataReader,
 }
 
 
@@ -53,13 +62,13 @@ class TimeBankBertDataHandler:
         self._test_data = []
 
     def load(self):
-        self.load_data()
         self.allocate_train_test_data()
 
-    def load_data(self):
-        tmdr = TimeMLDataReader()
-        timebank_documents = tmdr.timebank_documents()
-        for document in timebank_documents:
+    def load_data(self, documents):
+        data = []
+        count = 20
+        data_counter = defaultdict(lambda: defaultdict(int))
+        for document in documents:
             for tlink in document.tlinks():
                 if 't' in tlink.tlink_type():
                     continue
@@ -67,22 +76,22 @@ class TimeBankBertDataHandler:
                 if tlink_type[0] == 'e':
                     from_event = tlink.event_instance_id()
                     make_instance = document.event_instance_id2make_instance(from_event)
-                    if make_instance.pos() != 'VERB':
+                    first_pos = make_instance.pos()
+                    if make_instance.pos() not in ['NOUN']:
                         continue
-                    from_sentence, from_sentence_i, from_token_i, from_start_token_i, from_end_token_i = self.event_instance_id2sentence(
+
+                    from_original_sentence, from_sentence, from_sentence_i, from_token_i, from_start_token_i, from_end_token_i = self.event_instance_id2sentence(
                         document, from_event, 'from',
                     )
-                    from_tense = make_instance.tense()
                 if tlink_type[1:] == '2e':
                     to_event = tlink.related_to_event_instance()
                     make_instance = document.event_instance_id2make_instance(to_event)
-                    if make_instance.pos() != 'VERB':
+                    second_pos = make_instance.pos()
+                    if make_instance.pos() not in ['NOUN']:
                         continue
-
-                    to_sentence, to_sentence_i, to_token_i, to_start_token_i, to_end_token_i = self.event_instance_id2sentence(
+                    to_original_sentence, to_sentence, to_sentence_i, to_token_i, to_start_token_i, to_end_token_i = self.event_instance_id2sentence(
                         document, to_event, 'to',
                     )
-                    to_tense = make_instance.tense()
                 if tlink_type[0] == 't':
                     from_time = tlink.time_id()
                     from_sentence = self.time_id2sentence(document, from_time)
@@ -98,11 +107,22 @@ class TimeBankBertDataHandler:
                     from_sentence_i
                 )
                 if to_sentence_i != from_sentence_i:
-                    pass  # continue
+                    pass
                 model_input_datum = ModelInputDatum()
+                model_input_datum.set_from_original_sentence(from_original_sentence.text())
+                model_input_datum.set_to_original_sentence(to_original_sentence.text())
                 model_input_datum.set_from_sentence(from_sentence)
                 model_input_datum.set_to_sentence(to_sentence)
                 relationship = rel2rel_simpler[tlink.rel_type()]
+                if relationship == 'none':
+                    continue
+                sent1 = ' '.join(from_sentence)
+                sent2 = ' '.join(to_sentence)
+                if count > 0:
+                    print(f'{sent1} & {sent2} & {tlink.rel_type()} \\\\ \n \\hline ')
+                    count -= 1
+                if tlink_type == 'e2e':
+                    data_counter[first_pos][second_pos] += 1
                 model_input_datum.set_relationship(relationship)
                 model_input_datum.set_from_entity_start_token_i(
                     from_start_token_i
@@ -117,9 +137,10 @@ class TimeBankBertDataHandler:
                     to_end_token_i
                 )
                 model_input_datum.set_token_order(token_order)
-                model_input_datum.set_from_tense(from_tense)
-                model_input_datum.set_to_tense(to_tense)
-                self._data.append(model_input_datum)
+                data.append(model_input_datum)
+        print(len(data))
+        print(data_counter)
+        return data
 
     def event_instance_id2sentence(self, document, eiid, event_point):
         make_instance = document.event_instance_id2make_instance(eiid)
@@ -129,6 +150,7 @@ class TimeBankBertDataHandler:
         token_i = None
         start_token_i = None
         end_token_i = None
+        from_sentence = None
         if event_point == 'from':
             tags = ('ENTITY1', 'ENTITY1')
         elif event_point == 'to':
@@ -147,7 +169,7 @@ class TimeBankBertDataHandler:
                         sseq.append(s.text())
                 else:
                     sseq.append(s.text())
-        return sseq, sentence_i, token_i, start_token_i, end_token_i
+        return from_sentence, sseq, sentence_i, token_i, start_token_i, end_token_i
 
     def time_id2sentence(self, document: TimebankDocument, time_id):
         sseq = []
@@ -174,18 +196,14 @@ class TimeBankBertDataHandler:
                 return 1
 
     def allocate_train_test_data(self):
-        split_point_1 = int(.9*len(self._data))
-        shuffle(self._data)
-        split_data = np.split(self._data, [split_point_1])
-        train_data, test_data = split_data
+        dr = datareaders.get(DATANAME)
+        dr = dr()
+        train_documents = dr.train_documents()
+        test_documents = dr.test_documents()
+        train_data = self.load_data(train_documents)
         self._model_input_data.set_train_data(train_data)
+        test_data = self.load_data(test_documents)
         self._model_input_data.set_test_data(test_data)
-        return train_data, test_data
 
     def model_input_data(self):
         return self._model_input_data
-
-
-if __name__ == '__main__':
-    bdh = TimeBankBertDataHandler()
-    bdh.get_data()

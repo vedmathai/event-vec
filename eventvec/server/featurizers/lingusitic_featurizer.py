@@ -16,17 +16,7 @@ class LinguisticFeaturizer():
 
     def featurize_sentence(self, sentence):
         spacy_doc = nlp(sentence)
-        featurized_sentence = FeaturizedSentence.from_spacy(spacy_doc.sents[0])
+        featurized_sentence = FeaturizedSentence.from_spacy(
+            list(spacy_doc.sents)[0]
+        )
         return featurized_sentence
-
-
-if __name__ == '__main__':
-    text = ("When Sebastian Thrun started working on self-driving cars at "
-            "Google in 2007, few people outside of the company took him "
-            "seriously.")
-    lf = LinguisticFeaturizer()
-    fd = lf.featurize_document(text)
-    sentences = fd.sentences()
-    for sent in sentences:
-        for token in sent.tokens():
-            print(token.text())

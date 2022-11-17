@@ -26,9 +26,16 @@ class Config:
     def set_timebank_data_location(self, timebank_data_location):
         self._timebank_data_location = timebank_data_location
 
+    def timebank_dense_data_location(self):
+        return self._timebank_dense_data_location
+
+    def set_timebank_dense_data_location(self, timebank_dense_data_location):
+        self._timebank_dense_data_location = timebank_dense_data_location
+
     @staticmethod
     def from_dict(val):
         config = Config()
         config.set_matres_data_location(val.get('matres_data_location'))
         config.set_timebank_data_location(val.get('timebank_data_location'))
+        config.set_timebank_dense_data_location(val.get('timebank_dense_data_location'))
         return config

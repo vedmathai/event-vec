@@ -1,5 +1,5 @@
 from collections import defaultdict
-from random import choices, shuffle
+import random
 
 
 class ModelInputData:
@@ -61,6 +61,7 @@ class ModelInputData:
         return self._sample_data(self._test_data, sample_number, True)
 
     def _sample_data(self, original_data, sample_number, check_trainable):
+        random.seed(0)
         data = defaultdict(list)
         for datum in original_data:
             if check_trainable is True and datum.is_trainable() is True:
@@ -68,7 +69,7 @@ class ModelInputData:
             if check_trainable is False:
                 data[datum.target()].append(datum)
         for target in data:
-            data[target] = choices(data[target], k=sample_number)
+            data[target] = random.choices(data[target], k=sample_number)
         data = sum([list(i) for i in data.values()], [])
-        shuffle(data)
+        random.shuffle(data)
         return data
