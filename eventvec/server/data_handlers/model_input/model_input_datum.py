@@ -11,8 +11,12 @@ class ModelInputDatum:
         self._to_sentence_encoded = None
         self._from_entity_token_i = None
         self._to_entity_token_i = None
+        self._from_original_sentence = None
+        self._to_original_sentence = None
         self._from_sentence = None
         self._to_sentence = None
+        self._from_decoded_sentence = None
+        self._to_decoded_sentence = None
         self._feature_encoding = None
         self._sentence_pair_encoded = None
         self._target = None
@@ -25,6 +29,10 @@ class ModelInputDatum:
         self._token_order = None
         self._from_tense = None
         self._to_tense = None
+        self._from_aspect = None
+        self._to_aspect = None
+        self._from_pos = None
+        self._to_pos = None
         self._is_trainable = False
 
     def from_sentence_encoded(self):
@@ -42,8 +50,26 @@ class ModelInputDatum:
     def from_sentence(self):
         return self._from_sentence
 
+    def from_original_sentence(self):
+        return self._from_original_sentence
+
+    def from_sentence_string(self):
+        return ' '.join(self._from_sentence)
+
+    def to_sentence_string(self):
+        return ' '.join(self._to_sentence)
+
+    def from_decoded_sentence(self):
+        return self._from_decoded_sentence
+
+    def to_decoded_sentence(self):
+        return self._to_decoded_sentence
+
     def to_sentence(self):
         return self._to_sentence
+
+    def to_original_sentence(self):
+        return self._to_original_sentence
 
     def feature_encoding(self):
         return self._feature_encoding
@@ -57,7 +83,7 @@ class ModelInputDatum:
     def from_entity_start_token_i(self):
         return self._from_entity_start_token_i
 
-    def from_entity_end_token_i(self):    
+    def from_entity_end_token_i(self):
         return self._from_entity_end_token_i
 
     def to_entity_start_token_i(self):
@@ -77,6 +103,18 @@ class ModelInputDatum:
 
     def to_tense(self):
         return self._to_tense
+
+    def from_aspect(self):
+        return self._from_aspect
+
+    def to_aspect(self):
+        return self._to_aspect
+
+    def from_pos(self):
+        return self._from_pos
+
+    def to_pos(self):
+        return self._to_pos
 
     def is_trainable(self):
         return self._is_trainable
@@ -98,6 +136,18 @@ class ModelInputDatum:
 
     def set_to_sentence(self, to_sentence):
         self._to_sentence = to_sentence
+
+    def set_from_original_sentence(self, from_original_sentence):
+        self._from_original_sentence = from_original_sentence
+
+    def set_to_original_sentence(self, to_original_sentence):
+        self._to_original_sentence = to_original_sentence
+
+    def set_from_decoded_sentence(self, from_decoded_sentence):
+        self._from_decoded_sentence = from_decoded_sentence
+
+    def set_to_decoded_sentence(self, to_decoded_sentence):
+        self._to_decoded_sentence = to_decoded_sentence
 
     def set_feature_encoding(self, feature_encoding):
         self._feature_encoding = feature_encoding
@@ -131,6 +181,18 @@ class ModelInputDatum:
 
     def set_to_tense(self, to_tense):
         self._to_tense = to_tense
+
+    def set_from_aspect(self, from_aspect):
+        self._from_aspect = from_aspect
+
+    def set_to_aspect(self, to_aspect):
+        self._to_aspect = to_aspect
+
+    def set_from_pos(self, from_pos):
+        self._from_pos = from_pos
+
+    def set_to_pos(self, to_pos):
+        self._to_pos = to_pos
 
     def set_is_trainable(self):
         self._is_trainable = True

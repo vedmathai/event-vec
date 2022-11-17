@@ -11,9 +11,9 @@ from eventvec.server.data_handlers.bert_datahandler import BertDataHandler
 from eventvec.server.reporter.report_model.report_model import ReportModel
 
 
-TRAIN_SAMPLE_SIZE = 400
-TEST_SAMPLE_SIZE = 100
-EPOCHS = 5
+TRAIN_SAMPLE_SIZE = 1000
+TEST_SAMPLE_SIZE = 400
+EPOCHS = 15
 LEARNING_RATE = 1e-2
 MOMENTUM = 0.9
 WEIGHT_DECAY = 1e-5
@@ -41,8 +41,6 @@ class Trainer:
             self._model.parameters(),
             lr=LEARNING_RATE,
         )
-        weights = self._data_handler.label_weights()
-        weights = torch.from_numpy(np.array(weights)).to(device)
         self._criterion = nn.CrossEntropyLoss()
         self._report.set_labels(self._data_handler.labels())
 
@@ -94,7 +92,7 @@ class Trainer:
             if (self._iteration - self._last_iteration) % SAVE_EVERY == 0:
                 self.create_checkpoint()
                 self._last_iteration = self._iteration
-            if self._loss is not None and self._iteration % 50 == 0:
+            if self._loss is not None and self._iteration % 10 == 0:
                 self._loss.backward()
                 self.optimizer_step()
                 self.zero_grad()
