@@ -16,7 +16,7 @@ class BertRelationshipClassifier(nn.Module):
         for param in self.bert.parameters():
             param.requires_grad = False
         self.dropout = nn.Dropout(dropout)
-        self.linear1 = nn.Linear((768 + 768) * 1+ (1 + 7 + 7 + 4 + 4 + 9 + 9)*1, 352)
+        self.linear1 = nn.Linear((768 + 768) * 0+ (1 + 7 + 7 + 4 + 4 + 9 + 9)*1, 352)
         self.relu = nn.ReLU()
         self.linear2 = nn.Linear(352, 3)
         self.softmax = nn.Softmax()
@@ -35,10 +35,10 @@ class BertRelationshipClassifier(nn.Module):
         # token1_dropout = self.dropout(token_1)
         # token2_dropout = self.dropout(token_2)
         feature_encoding = bi.feature_encoding()
-        catted_features = cat([token_1, token_2, feature_encoding], dim=1)
+        #catted_features = cat([token_1, token_2, feature_encoding], dim=1)
         #catted_features = cat([token_1, token_2], dim=1)
-        #linear_output1 = self.linear1(feature_encoding.float())
-        linear_output1 = self.linear1(catted_features)
+        linear_output1 = self.linear1(feature_encoding.float())
+        #linear_output1 = self.linear1(catted_features)
         relu_output = self.relu(linear_output1)
         # dropout_output2 = self.dropout(relu_output)
         linear_output2 = self.linear2(relu_output)
