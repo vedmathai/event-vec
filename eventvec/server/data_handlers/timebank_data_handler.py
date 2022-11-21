@@ -66,7 +66,6 @@ class TimeBankBertDataHandler:
 
     def load_data(self, documents):
         data = []
-        count = 20
         data_counter = defaultdict(lambda: defaultdict(int))
         for document in documents:
             for tlink in document.tlinks():
@@ -78,7 +77,7 @@ class TimeBankBertDataHandler:
                     make_instance = document.event_instance_id2make_instance(from_event)
                     first_pos = make_instance.pos()
                     if make_instance.pos() not in ['NOUN']:
-                        continue
+                        pass
 
                     from_original_sentence, from_sentence, from_sentence_i, from_token_i, from_start_token_i, from_end_token_i = self.event_instance_id2sentence(
                         document, from_event, 'from',
@@ -87,8 +86,8 @@ class TimeBankBertDataHandler:
                     to_event = tlink.related_to_event_instance()
                     make_instance = document.event_instance_id2make_instance(to_event)
                     second_pos = make_instance.pos()
-                    if make_instance.pos() not in ['NOUN']:
-                        continue
+                    if make_instance.pos() not in ['VERB']:
+                        pass
                     to_original_sentence, to_sentence, to_sentence_i, to_token_i, to_start_token_i, to_end_token_i = self.event_instance_id2sentence(
                         document, to_event, 'to',
                     )
@@ -116,11 +115,6 @@ class TimeBankBertDataHandler:
                 relationship = rel2rel_simpler[tlink.rel_type()]
                 if relationship == 'none':
                     continue
-                sent1 = ' '.join(from_sentence)
-                sent2 = ' '.join(to_sentence)
-                if count > 0:
-                    print(f'{sent1} & {sent2} & {tlink.rel_type()} \\\\ \n \\hline ')
-                    count -= 1
                 if tlink_type == 'e2e':
                     data_counter[first_pos][second_pos] += 1
                 model_input_datum.set_relationship(relationship)
@@ -138,8 +132,6 @@ class TimeBankBertDataHandler:
                 )
                 model_input_datum.set_token_order(token_order)
                 data.append(model_input_datum)
-        print(len(data))
-        print(data_counter)
         return data
 
     def event_instance_id2sentence(self, document, eiid, event_point):

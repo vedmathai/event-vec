@@ -61,7 +61,7 @@ class ModelInputData:
         return self._sample_data(self._test_data, sample_number, True)
 
     def _sample_data(self, original_data, sample_number, check_trainable):
-        random.seed(0)
+        random.seed(10)
         data = defaultdict(list)
         for datum in original_data:
             if check_trainable is True and datum.is_trainable() is True:
