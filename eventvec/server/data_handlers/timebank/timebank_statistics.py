@@ -102,7 +102,7 @@ class TimeBankStatistics:
                     counter_same_pos[pos] += 1
 
                 rel_counter[rel2rel_simpler[tlink.rel_type()]] += 1
-                
+
         for k, i in sorted(counter_pos.items(), key=lambda x: x[1], reverse=True):
             print(k, i)
         print('\n')
