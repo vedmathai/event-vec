@@ -131,3 +131,4 @@ dmypy.json
 local/
 
 config.json
+eventvec/server/graph_parser/heatmaps

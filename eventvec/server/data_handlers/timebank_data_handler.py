@@ -1,5 +1,6 @@
 import numpy as np
 from collections import defaultdict
+import pprint
 
 from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_document import TimebankDocument  # noqa
 from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_timex import TimebankTimex  # noqa
@@ -27,6 +28,16 @@ rel2rel = {
     'INCLUDES': 'includes',
     'DURING_INV': 'during_inv',
     'BEGINS': 'begins',
+    'NONE': 'none',
+}
+
+rel2rel_opposite = {
+    'IS_INCLUDED': 'includes',
+    'SIMULTANEOUS': 'simultaneous',
+    'BEFORE': 'after',
+    'AFTER': 'before',
+    'INCLUDES': 'is_included',
+    'NONE': 'none',
 }
 
 rel2rel_simpler = {
@@ -66,7 +77,8 @@ class TimeBankBertDataHandler:
 
     def load_data(self, documents):
         data = []
-        data_counter = defaultdict(lambda: defaultdict(int))
+        rels = set()
+        pos2rel = defaultdict(lambda: defaultdict(int))
         for document in documents:
             for tlink in document.tlinks():
                 if 't' in tlink.tlink_type():
@@ -76,10 +88,10 @@ class TimeBankBertDataHandler:
                     from_event = tlink.event_instance_id()
                     make_instance = document.event_instance_id2make_instance(from_event)
                     first_pos = make_instance.pos()
-                    if make_instance.pos() not in ['NOUN']:
-                        pass
+                    if make_instance.pos() not in ['VERB']:
+                        continue
 
-                    from_original_sentence, from_sentence, from_sentence_i, from_token_i, from_start_token_i, from_end_token_i = self.event_instance_id2sentence(
+                    from_original_sentence, from_sentence, from_sentence_i, from_token_i, from_start_token_i, from_end_token_i, from_token = self.event_instance_id2sentence(
                         document, from_event, 'from',
                     )
                 if tlink_type[1:] == '2e':
@@ -87,8 +99,8 @@ class TimeBankBertDataHandler:
                     make_instance = document.event_instance_id2make_instance(to_event)
                     second_pos = make_instance.pos()
                     if make_instance.pos() not in ['VERB']:
-                        pass
-                    to_original_sentence, to_sentence, to_sentence_i, to_token_i, to_start_token_i, to_end_token_i = self.event_instance_id2sentence(
+                        continue
+                    to_original_sentence, to_sentence, to_sentence_i, to_token_i, to_start_token_i, to_end_token_i, to_token = self.event_instance_id2sentence(
                         document, to_event, 'to',
                     )
                 if tlink_type[0] == 't':
@@ -97,7 +109,7 @@ class TimeBankBertDataHandler:
                 if tlink_type[1:] == '2t':
                     to_time = tlink.related_to_time()
                     to_sentence = self.time_id2sentence(document, to_time)
-
+                rels.add(tlink.rel_type())
                 if len(to_sentence) == 0 or len(from_sentence) == 0:
                     continue
 
@@ -107,16 +119,33 @@ class TimeBankBertDataHandler:
                 )
                 if to_sentence_i != from_sentence_i:
                     pass
+                relationship = rel2rel[tlink.rel_type()]
+                if relationship == 'none':
+                    continue
+                
+                if token_order == 1:
+                    from_original_sentence, to_original_sentence = to_original_sentence, from_original_sentence
+                    from_sentence, to_sentence = to_sentence, from_sentence
+                    relationship = rel2rel_opposite[tlink.rel_type()]
+                    from_start_token_i, to_start_token_i = to_start_token_i, from_start_token_i
+                    from_end_token_i, to_end_token_i = to_end_token_i, from_end_token_i
+                    token_order = 0
+                    if (second_pos, first_pos) in [('VERB', 'NOUN')]:
+                        pos2rel[(second_pos, first_pos)][from_token] += 1
+                    if (second_pos, first_pos) in [('NOUN', 'VERB')]:
+                        pos2rel[(second_pos, first_pos)][to_token] += 1
+                else:
+                    if (first_pos, second_pos) in [('VERB', 'NOUN')]:
+                        pos2rel[(first_pos, second_pos)][to_token] += 1
+                    if (first_pos, second_pos) in [('NOUN', 'VERB')]:
+                        pos2rel[(first_pos, second_pos)][from_token] += 1
+
                 model_input_datum = ModelInputDatum()
                 model_input_datum.set_from_original_sentence(from_original_sentence.text())
                 model_input_datum.set_to_original_sentence(to_original_sentence.text())
                 model_input_datum.set_from_sentence(from_sentence)
                 model_input_datum.set_to_sentence(to_sentence)
-                relationship = rel2rel_simpler[tlink.rel_type()]
-                if relationship == 'none':
-                    continue
-                if tlink_type == 'e2e':
-                    data_counter[first_pos][second_pos] += 1
+
                 model_input_datum.set_relationship(relationship)
                 model_input_datum.set_from_entity_start_token_i(
                     from_start_token_i
@@ -132,6 +161,11 @@ class TimeBankBertDataHandler:
                 )
                 model_input_datum.set_token_order(token_order)
                 data.append(model_input_datum)
+        print(' ' * 4)
+        for pos in pos2rel:
+            print('-' * 32)
+            for itemi, item in enumerate(sorted(pos2rel[pos].items(), key=lambda x: x[1])):
+                print(pos, itemi, item)
         return data
 
     def event_instance_id2sentence(self, document, eiid, event_point):
@@ -143,10 +177,11 @@ class TimeBankBertDataHandler:
         start_token_i = None
         end_token_i = None
         from_sentence = None
+        token = None
         if event_point == 'from':
-            tags = ('ENTITY1', 'ENTITY1')
+            tags = ('entity1', 'entity1')
         elif event_point == 'to':
-            tags = ('ENTITY2', 'ENTITY2')
+            tags = ('entity2', 'entity2')
         if document.is_eid(eid) is True:
             from_sentence = document.eid2sentence(eid)
             sentence_i = from_sentence.sentence_i()
@@ -157,11 +192,12 @@ class TimeBankBertDataHandler:
                         token_i = s.sentence_token_i()
                         start_token_i = s.start_token_i()
                         end_token_i = s.end_token_i()
+                        token = s.text()
                     else:
                         sseq.append(s.text())
                 else:
                     sseq.append(s.text())
-        return from_sentence, sseq, sentence_i, token_i, start_token_i, end_token_i
+        return from_sentence, sseq, sentence_i, token_i, start_token_i, end_token_i, token
 
     def time_id2sentence(self, document: TimebankDocument, time_id):
         sseq = []

@@ -39,7 +39,7 @@ class WordGraphCreator():
         verbs = verbs - stopwords
         together = nouns | verbs
         documents_list = os.listdir(documents_location)
-        for document in tqdm(documents_list[0:1000]):
+        for document in tqdm(documents_list[0:10]):
             document_location = os.path.join(documents_location, document)
             with open(document_location) as f:
                 text = f.read()

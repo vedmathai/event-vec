@@ -13,6 +13,9 @@ class FeaturizedToken:
         self._i = None
         self._deps = defaultdict(list)
         self._dep = None
+        self._verb_form = None
+        self._tag = None
+        self._vector = None
 
     def text(self):
         return self._text
@@ -26,8 +29,14 @@ class FeaturizedToken:
     def tense(self):
         return self._tense
 
+    def verb_form(self):
+        return self._verb_form
+
     def pos(self):
         return self._pos
+
+    def vector(self):
+        return self._vector
 
     def children(self):
         return self._deps
@@ -85,6 +94,12 @@ class FeaturizedToken:
     def set_dep(self, dep):
         self._dep = dep
 
+    def set_verb_form(self, verb_form):
+        self._verb_form = verb_form
+
+    def set_vector(self, vector):
+        self._vector = vector
+
     def set_children(self, children):
         self._children = children
 
@@ -109,6 +124,8 @@ class FeaturizedToken:
         morph_dict = token.morph.to_dict()
         ftoken._tense = morph_dict.get('Tense')
         ftoken._aspect = morph_dict.get('Aspect')
+        ftoken._verb_form = token.tag_
         ftoken._pos = token.pos_
         ftoken._dep = token.dep_
+        ftoken._vector = token.vector
         return ftoken

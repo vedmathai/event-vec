@@ -5,7 +5,7 @@ from eventvec.server.model.featurized_document_model.featurized_document import 
 from eventvec.server.model.featurized_document_model.featurized_sentence import FeaturizedSentence  # noqa
 
 
-nlp = spacy.load('en_core_web_sm')
+nlp = spacy.load('en_core_web_lg')
 
 
 class LinguisticFeaturizer():
