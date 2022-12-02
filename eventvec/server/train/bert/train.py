@@ -9,11 +9,12 @@ from torch.optim import Adam
 from eventvec.server.model.bert_models.bert_relationship_model import BertRelationshipClassifier  # noqa
 from eventvec.server.data_handlers.bert_datahandler import BertDataHandler
 from eventvec.server.reporter.report_model.report_model import ReportModel
+from eventvec.server.train.train_config_loader.train_config_loader import TrainConfigsLoader
 
 
-TRAIN_SAMPLE_SIZE = 1000
+TRAIN_SAMPLE_SIZE = int(3000 / 3)
 TEST_SAMPLE_SIZE = 400
-EPOCHS = 15
+EPOCHS = 10
 LEARNING_RATE = 1e-2
 MOMENTUM = 0.9
 WEIGHT_DECAY = 1e-5
@@ -29,14 +30,18 @@ class Trainer:
         self._all_losses = []
         self._report = ReportModel()
         self._data_handler = BertDataHandler()
+        self._train_configs_loader = TrainConfigsLoader()
         self._iteration = 0
         self._last_iteration = 0
         self._loss = None
+        self._train_configs = None
 
     def load(self):
+        self._train_configs_loader.load()
+        self._train_configs = self._train_configs_loader.train_configs()
         self._data_handler.load()
         self._input_data = self._data_handler.model_input_data()
-        self._model = BertRelationshipClassifier()
+        self._model = BertRelationshipClassifier(self._train_configs.train_configs()[0])
         self._model_optimizer = Adam(
             self._model.parameters(),
             lr=LEARNING_RATE,

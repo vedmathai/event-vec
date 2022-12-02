@@ -1,0 +1,8 @@
+{
+    "train_configs": [
+        {
+            "llm": "timebert",
+            "model_type": "features_only"
+        }
+    ]
+}

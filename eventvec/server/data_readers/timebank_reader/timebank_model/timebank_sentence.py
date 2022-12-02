@@ -11,6 +11,8 @@ class TimebankSentence:
     def __init__(self):
         self._sentence_i = None
         self._sequence = []
+        self._sentence_start_token_global_i = None
+        self._sentence_end_token_global_i = None
 
     def sequence(self):
         return self._sequence
@@ -18,18 +20,33 @@ class TimebankSentence:
     def sentence_i(self):
         return self._sentence_i
 
+    def sentence_start_token_global_i(self):
+        return self._sentence_start_token_global_i
+
+    def sentence_end_token_global_i(self):
+        return self._sentence_end_token_global_i
+
     def set_sentence_i(self, sentence_i):
         self._sentence_i = sentence_i
 
     def text(self):
         return ' '.join([i.text() for i in self._sequence])
 
+    def set_sentence_start_token_global_i(self, sentence_start_token_global_i):
+        self._sentence_start_token_global_i = sentence_start_token_global_i
+
+    def set_sentence_end_token_global_i(self, sentence_end_token_global_i):
+        self._sentence_end_token_global_i = sentence_end_token_global_i
+
     def append(self, item):
         self._sequence.append(item)
 
     @staticmethod
-    def from_bs_obj(sentence, sentence_i, timebank_document):
+    def from_bs_obj(sentence, sentence_i, sentence_start_token_global_i,
+                    timebank_document):
         timebank_sentence = TimebankSentence()
+        timebank_sentence.set_sentence_start_token_global_i(sentence_start_token_global_i)
+        timebank_sentence.set_sentence_end_token_global_i(sentence_start_token_global_i)
         children = list(sentence.children)
         creators = {
             'event': TimebankEvent,
@@ -55,6 +72,8 @@ class TimebankSentence:
                 timebank_document.add_time_id2sentence(
                     obj.tid(), timebank_sentence
                 )
+            end_token_global_i = obj.end_token_i() + sentence_start_token_global_i
+            timebank_sentence.set_sentence_end_token_global_i(end_token_global_i)
         return timebank_sentence
 
     def to_dict(self):

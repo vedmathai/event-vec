@@ -23,6 +23,9 @@ class Config:
     def timebank_data_location(self):
         return self._timebank_data_location
 
+    def train_configs_file(self):
+        return self._train_configs_file
+
     def set_timebank_data_location(self, timebank_data_location):
         self._timebank_data_location = timebank_data_location
 
@@ -32,10 +35,14 @@ class Config:
     def set_timebank_dense_data_location(self, timebank_dense_data_location):
         self._timebank_dense_data_location = timebank_dense_data_location
 
+    def set_train_configs_file(self, train_configs_file):
+        self._train_configs_file = train_configs_file
+
     @staticmethod
     def from_dict(val):
         config = Config()
         config.set_matres_data_location(val.get('matres_data_location'))
         config.set_timebank_data_location(val.get('timebank_data_location'))
         config.set_timebank_dense_data_location(val.get('timebank_dense_data_location'))
+        config.set_train_configs_file(val.get('train_configs_file'))
         return config

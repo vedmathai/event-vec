@@ -171,11 +171,13 @@ class TimebankDocument:
         timebank_document.set_file_name(docno.text)
 
         sentences = list(soup.find_all('s'))
+        start_token_global_i = 0
         for s_i, s in enumerate(sentences):
             timebank_sentence = TimebankSentence.from_bs_obj(
-                s, s_i, timebank_document
+                s, s_i, start_token_global_i, timebank_document
             )
             timebank_document.add_timebank_sentence(timebank_sentence)
+            start_token_global_i = timebank_sentence.sentence_end_token_global_i() + 1
 
         tlinks = list(soup.find_all('tlink'))
         for tlink in tlinks:

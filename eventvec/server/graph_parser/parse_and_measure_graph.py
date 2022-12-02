@@ -25,8 +25,8 @@ def parse_and_measure_graph():
     event_graph = egc.create_graph(train_documents)
     all_nouns, all_verbs = create_interested_words(event_graph)
     gch = GraphClusterHeatmap()
-    gch.create_heatmap(event_graph, 'NOUN', 'event_graph')
-    gch.create_heatmap(event_graph, 'VERB', 'event_graph')
+    gch.create_heatmap(event_graph, ('NOUN', 'NOUN'), 'event_graph')
+    gch.create_heatmap(event_graph, ('VERB', 'VERB'), 'event_graph')
     cluster_measures = ClusterMeasures()
     cluster_measures.measure(event_graph)
     print('Word Cluster')
@@ -34,8 +34,8 @@ def parse_and_measure_graph():
     word_graph = wgc.create_graph(documents_folder)
     cluster_measures = ClusterMeasures()
     cluster_measures.measure(word_graph)
-    gch.create_heatmap(word_graph, 'VERB', 'word_graph')
-    gch.create_heatmap(word_graph, 'NOUN', 'word_graph')
+    gch.create_heatmap(word_graph, ('NOUN', 'VERB'), 'word_graph')
+    gch.create_heatmap(word_graph, ('VERB', 'NOUN'), 'word_graph')
 
     # create the heatmap
     # create the connectedness measure

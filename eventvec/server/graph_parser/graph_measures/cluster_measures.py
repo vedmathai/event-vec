@@ -9,7 +9,7 @@ class ClusterMeasures:
         self._connected_sub_graphs = ConnectedSubGraphs()
 
     def measure(self, graph):
-        for pos in ['NOUN', 'VERB']:
+        for pos in [('NOUN', 'NOUN'), ('VERB', 'VERB')]:
             print(' ' * 4, pos)
             connected_sub_graphs = self.create_sub_graphs(graph, pos)
             sub_graph_ratio, weighted_sub_graph_ratio = self.measure_sub_graphs(connected_sub_graphs)
@@ -42,7 +42,7 @@ class ClusterMeasures:
         for node in graph.nodes():
             connected_sub_graph = ConnectedSubGraph()
             source_documents = set()
-            if node.visited() is True or node.pos() != pos:
+            if node.visited() is True or node.pos() != pos[0]:
                 continue
             to_visit = [node]
             connected_sub_graph.add_node(node)
@@ -56,7 +56,7 @@ class ClusterMeasures:
                     relationship = curr.relationship(relationship_id)
                     relationship_type = relationship.relationship_type()
                     other_node = relationship.other_node(curr)
-                    if other_node is not None and relationship_type != 'NONE' and other_node.pos() == pos:
+                    if other_node is not None and relationship_type != 'NONE' and other_node.pos() == pos[1]:
                         connected_sub_graph.add_node(other_node)
                         to_visit.append(other_node)
             connected_sub_graphs.add_connected_sub_graph(connected_sub_graph)
@@ -78,7 +78,7 @@ class ClusterMeasures:
             if relationship.relationship_type() != 'NONE':
                 node1 = relationship.node1()
                 node2 = relationship.node2()
-                if node1.pos() == pos and node2.pos() == pos:
+                if node1.pos() == pos[0] and node2.pos() == pos[1]:
                     interested_relationships_weighted += relationship.count()
                     interested_relationships += 1
         relationship_ratio = float(interested_relationships) / total_relationships

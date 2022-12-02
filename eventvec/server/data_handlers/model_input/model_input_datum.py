@@ -31,6 +31,8 @@ class ModelInputDatum:
         self._to_tense = None
         self._from_aspect = None
         self._to_aspect = None
+        self._from_verb_form = None
+        self._to_verb_form = None
         self._from_pos = None
         self._to_pos = None
         self._is_trainable = False
@@ -110,6 +112,12 @@ class ModelInputDatum:
     def to_aspect(self):
         return self._to_aspect
 
+    def from_verb_form(self):
+        return self._from_verb_form
+
+    def to_verb_form(self):
+        return self._to_verb_form
+
     def from_pos(self):
         return self._from_pos
 
@@ -187,6 +195,12 @@ class ModelInputDatum:
 
     def set_to_aspect(self, to_aspect):
         self._to_aspect = to_aspect
+
+    def set_from_verb_form(self, from_verb_form):
+        self._from_verb_form = from_verb_form
+
+    def set_to_verb_form(self, to_verb_form):
+        self._to_verb_form = to_verb_form
 
     def set_from_pos(self, from_pos):
         self._from_pos = from_pos

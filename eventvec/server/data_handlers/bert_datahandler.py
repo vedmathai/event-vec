@@ -1,7 +1,8 @@
 import numpy as np
+import pprint
 import re
 from collections import defaultdict
-from transformers import BertTokenizer
+from transformers import BertTokenizer, RobertaTokenizer
 
 
 from eventvec.server.data_handlers.timebank_data_handler import TimeBankBertDataHandler  # noqa
@@ -27,9 +28,11 @@ labels = {
 
 labels_simpler = {
     'before': 0,
-    'during': 1,
+    'includes': 1,
+    'is_included': 1,
+    'simultaneous': 1,
     'after': 2,
-    'none': 3,
+    'none': 5,
 }
 
 labels_simpler_reverse = {
@@ -67,28 +70,58 @@ pos = {
     'ADV': 6,
     None: 7,
     'PROPN': 8,
+    'CCONJ': 9,
+    'PRON': 10,
+    'NUM': 11,
+    'PUNCT': 12,
+    'PART': 13,
+    'SCONJ': 14,
+    'DET': 15,
+    'INTJ': 16,
 }
 
-tenses_hot_encoding = {i: [0]*7 for i in tenses}
+verb_form = {
+    'VBD': 0,
+    'VBN': 2,
+    'VBP': 3,
+    'PRP': 4,
+    'VB': 5,
+    'VBG': 6,
+    'VBZ': 7,
+    'JJ': 8,
+    'NN': 9,
+    'IN': 10,
+    'NNS': 11,
+    'NNP': 12,
+    'DT': 13,
+    None: 14,
+}
+
+tenses_hot_encoding = {i: [0] * 7 for i in tenses}
 for i in tenses_hot_encoding:
     tenses_hot_encoding[i][tenses[i]] = 1
 
-aspect_hot_encoding = {i: [0]*4 for i in aspect}
+aspect_hot_encoding = {i: [0] * 4 for i in aspect}
 for i in aspect_hot_encoding:
     aspect_hot_encoding[i][aspect[i]] = 1
 
-pos_hot_encoding = {i: [0]*9 for i in pos}
+pos_hot_encoding = {i: [0] * 17 for i in pos}
 for i in pos_hot_encoding:
     pos_hot_encoding[i][pos[i]] = 1
+
+verb_form_hot_encoding = {i: [0] * 15 for i in verb_form}
+for i in verb_form_hot_encoding:
+    verb_form_hot_encoding[i][verb_form[i]] = 1
 
 
 class BertDataHandler():
     def __init__(self):
-        self._tokenizer = BertTokenizer.from_pretrained('bert-base-uncased')
+        self._tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
         self._labels = set()
         self._label_counts = defaultdict(int)
         self._data_handler = TimeBankBertDataHandler()
         self._featurizer = BERTLinguisticFeaturizer()
+        self._aspect_counter = defaultdict(int)
 
     def load(self):
         self._model_input_data = self._data_handler.model_input_data()
@@ -100,6 +133,7 @@ class BertDataHandler():
         timebank_train_data = self._model_input_data.train_data()
         for datumi, datum in enumerate(timebank_train_data):
             self.process_timebank_data(datum)
+        pprint.pprint(self._aspect_counter)
 
     def load_test_data(self):
         timebank_test_data = self._model_input_data.test_data()
@@ -115,6 +149,7 @@ class BertDataHandler():
             max_length=200,
             truncation=True,
             return_tensors='pt',
+            return_token_type_ids=True
         )
         bert_encoding_to_sentence = self._tokenizer(
             [to_sentence],
@@ -122,6 +157,7 @@ class BertDataHandler():
             max_length=200,
             truncation=True,
             return_tensors='pt',
+            return_token_type_ids=True
         )
         whole_sentence_from_to = self._tokenizer(
             [from_sentence], [to_sentence],
@@ -129,6 +165,7 @@ class BertDataHandler():
             max_length=200,
             truncation=True,
             return_tensors='pt',
+            return_token_type_ids=True
         )
         switched_from_sentence = re.sub('ENTITY1',  'ENTITY2', from_sentence)
         switched_to_sentence = re.sub('ENTITY2',  'ENTITY1', to_sentence)
@@ -138,6 +175,7 @@ class BertDataHandler():
             max_length=200,
             truncation=True,
             return_tensors='pt',
+            return_token_type_ids=True
         )
         decoded_sentence = self._tokenizer.batch_decode(whole_sentence_from_to['input_ids'])
         if 'entity1' not in decoded_sentence[0].split() or 'entity2' not in decoded_sentence[0].split():
@@ -166,9 +204,14 @@ class BertDataHandler():
         to_tense_encoding = tenses_hot_encoding[model_input_datum.to_tense()]
         from_aspect_encoding = aspect_hot_encoding[model_input_datum.from_aspect()]
         to_aspect_encoding = aspect_hot_encoding[model_input_datum.to_aspect()]
+        from_verb_form = verb_form_hot_encoding[model_input_datum.from_verb_form()]
+        to_verb_form = verb_form_hot_encoding[model_input_datum.to_verb_form()]
         from_pos_encoding = pos_hot_encoding[model_input_datum.from_pos()]
         to_pos_encoding = pos_hot_encoding[model_input_datum.to_pos()]
-        feature_encoding = [[model_input_datum.token_order()] + from_tense_encoding + to_tense_encoding + from_aspect_encoding + to_aspect_encoding + from_pos_encoding + to_pos_encoding]
+        tense = (model_input_datum.from_verb_form(), model_input_datum.to_verb_form())
+        self._aspect_counter[model_input_datum.token_order()] += 1 
+        feature_encoding = [[model_input_datum.token_order()] + from_verb_form + to_verb_form + from_tense_encoding + to_tense_encoding + from_aspect_encoding + to_aspect_encoding + from_pos_encoding + to_pos_encoding]
+        feature_encoding = [from_verb_form + to_verb_form + from_tense_encoding + to_tense_encoding + from_aspect_encoding + to_aspect_encoding + from_pos_encoding + to_pos_encoding]
         model_input_datum.set_feature_encoding(feature_encoding)
         self._model_input_data.add_class(label)
         self._labels.add(label)
