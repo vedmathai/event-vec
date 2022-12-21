@@ -15,6 +15,8 @@ class ModelInputDatum:
         self._to_original_sentence = None
         self._from_sentence = None
         self._to_sentence = None
+        self._marked_up_parent_to_sentence = None
+        self._marked_up_parent_from_sentence = None
         self._from_decoded_sentence = None
         self._to_decoded_sentence = None
         self._feature_encoding = None
@@ -31,10 +33,18 @@ class ModelInputDatum:
         self._to_tense = None
         self._from_aspect = None
         self._to_aspect = None
-        self._from_verb_form = None
-        self._to_verb_form = None
+        self._from_tag = None
+        self._to_tag = None
         self._from_pos = None
         self._to_pos = None
+        self._parent_from_tense = None
+        self._parent_to_tense = None
+        self._parent_from_aspect = None
+        self._parent_to_aspect = None
+        self._parent_from_tag = None
+        self._parent_to_tag = None
+        self._parent_from_pos = None
+        self._parent_to_pos = None
         self._is_trainable = False
 
     def from_sentence_encoded(self):
@@ -51,6 +61,9 @@ class ModelInputDatum:
 
     def from_sentence(self):
         return self._from_sentence
+
+    def marked_up_parent_from_sentence(self):
+        return self._marked_up_parent_from_sentence
 
     def from_original_sentence(self):
         return self._from_original_sentence
@@ -69,6 +82,9 @@ class ModelInputDatum:
 
     def to_sentence(self):
         return self._to_sentence
+
+    def marked_up_parent_to_sentence(self):
+        return self._marked_up_parent_to_sentence
 
     def to_original_sentence(self):
         return self._to_original_sentence
@@ -112,11 +128,35 @@ class ModelInputDatum:
     def to_aspect(self):
         return self._to_aspect
 
-    def from_verb_form(self):
-        return self._from_verb_form
+    def parent_from_tag(self):
+        return self._parent_from_tag
 
-    def to_verb_form(self):
-        return self._to_verb_form
+    def parent_to_tag(self):
+        return self._parent_to_tag
+
+    def parent_from_pos(self):
+        return self._parent_from_pos
+
+    def parent_to_pos(self):
+        return self._parent_to_pos
+
+    def parent_from_tense(self):
+        return self._parent_from_tense
+
+    def parent_to_tense(self):
+        return self._parent_to_tense
+
+    def parent_from_aspect(self):
+        return self._parent_from_aspect
+
+    def parent_to_aspect(self):
+        return self._parent_to_aspect
+
+    def from_tag(self):
+        return self._from_tag
+
+    def to_tag(self):
+        return self._to_tag
 
     def from_pos(self):
         return self._from_pos
@@ -144,6 +184,12 @@ class ModelInputDatum:
 
     def set_to_sentence(self, to_sentence):
         self._to_sentence = to_sentence
+
+    def set_marked_up_parent_from_sentence(self, marked_up_parent_from_sentence):
+        self._marked_up_parent_from_sentence = marked_up_parent_from_sentence
+
+    def set_marked_up_parent_to_sentence(self, marked_up_parent_to_sentence):
+        self._marked_up_parent_to_sentence = marked_up_parent_to_sentence
 
     def set_from_original_sentence(self, from_original_sentence):
         self._from_original_sentence = from_original_sentence
@@ -196,11 +242,11 @@ class ModelInputDatum:
     def set_to_aspect(self, to_aspect):
         self._to_aspect = to_aspect
 
-    def set_from_verb_form(self, from_verb_form):
-        self._from_verb_form = from_verb_form
+    def set_from_tag(self, from_tag):
+        self._from_tag = from_tag
 
-    def set_to_verb_form(self, to_verb_form):
-        self._to_verb_form = to_verb_form
+    def set_to_tag(self, to_tag):
+        self._to_tag = to_tag
 
     def set_from_pos(self, from_pos):
         self._from_pos = from_pos
@@ -208,5 +254,29 @@ class ModelInputDatum:
     def set_to_pos(self, to_pos):
         self._to_pos = to_pos
 
-    def set_is_trainable(self):
-        self._is_trainable = True
+    def set_parent_from_tense(self, parent_from_tense):
+        self._parent_from_tense = parent_from_tense
+
+    def set_parent_to_tense(self, parent_to_tense):
+        self._parent_to_tense = parent_to_tense
+
+    def set_parent_from_aspect(self, parent_from_aspect):
+        self._parent_from_aspect = parent_from_aspect
+
+    def set_parent_to_aspect(self, parent_to_aspect):
+        self._parent_to_aspect = parent_to_aspect
+
+    def set_parent_from_tag(self, parent_from_tag):
+        self._parent_from_tag = parent_from_tag
+
+    def set_parent_to_tag(self, parent_to_tag):
+        self._parent_to_tag = parent_to_tag
+
+    def set_parent_from_pos(self, parent_from_pos):
+        self._parent_from_pos = parent_from_pos
+
+    def set_parent_to_pos(self, parent_to_pos):
+        self._parent_to_pos = parent_to_pos
+
+    def set_is_trainable(self, is_trainable):
+        self._is_trainable = is_trainable

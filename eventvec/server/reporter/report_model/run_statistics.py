@@ -2,13 +2,20 @@ from collections import defaultdict
 import numpy as np
 
 
+from eventvec.server.reporter.heatmaps.heatmap_report import HeatmapReport
+
+
 class RunStatistics:
-    def __init__(self):
+    def __init__(self, run_name):
+        self._run_name = run_name
         self._iterations = 0
         self._total_loss = 0
         self._true_positives = defaultdict(int)
         self._false_positives = defaultdict(int)
         self._false_negatives = defaultdict(int)
+        self._confusion_matrix = defaultdict(lambda: defaultdict(int))
+        self._counts = defaultdict(int)
+        self._heatmap_report = HeatmapReport()
         self._labels = []
 
     def set_labels(self, labels):
@@ -19,12 +26,14 @@ class RunStatistics:
 
     def record_iteration(self, predicted, expected, loss):
         self._iterations += 1
+        self._counts[expected] += 1
         if predicted == expected:
             self._true_positives[predicted] += 1
         else:
             if predicted != expected:
                 self._false_positives[predicted] += 1
                 self._false_negatives[expected] += 1
+        self._confusion_matrix[predicted][expected] += 1
         self._total_loss += loss
 
     def iterations(self):
@@ -86,6 +95,14 @@ class RunStatistics:
             f1s.append(self.f1(label))
         return np.mean(f1s)
 
+    def weighted_macro_f1(self):
+        f1s = []
+        total_counts = sum(self._counts.values())
+        for label in self.labels():
+            weight = self._counts[label] / total_counts
+            f1s.append(self.f1(label) * weight)
+        return np.mean(f1s)
+
     def mean_loss(self):
         return self._total_loss / self._iterations
 
@@ -94,12 +111,18 @@ class RunStatistics:
         denominator = float(self._iterations)
         return numerator / denominator
 
+    def generate_confusion_heatmaps(self):
+        self._heatmap_report.generate_heatmap(
+            self._confusion_matrix, self.labels(), self._run_name
+        )
+
     def to_dict(self):
         return {
             'precision': self.precisions(),
             'recall': self.recalls(),
             'f1': self.f1s(),
-            'macro_f1': self.macro_f1(),
             'mean_loss': self.mean_loss(),
             'accuracy': self.accuracy(),
+            'macro_f1': self.macro_f1(),
+            'weighted_macro_f1': self.weighted_macro_f1(),
         }
