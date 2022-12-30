@@ -75,9 +75,10 @@ class TimeBankBertDataHandler:
     def load(self):
         self.allocate_train_test_data()
 
-    def load_data(self, documents):
+    def load_data(self, documents, train_test):
         data = []
         rels = set()
+        nouns = set()
         pos2rel = defaultdict(lambda: defaultdict(int))
         for document in documents:
             for tlink in document.tlinks():
@@ -88,8 +89,8 @@ class TimeBankBertDataHandler:
                     from_event = tlink.event_instance_id()
                     make_instance = document.event_instance_id2make_instance(from_event)
                     first_pos = make_instance.pos()
-                    if make_instance.pos() not in ['VERB']:
-                        continue
+                    if (train_test == 'train' and make_instance.pos() not in ['NOUN']) or train_test == 'test' and make_instance.pos() not in ['NOUN']:
+                        pass
 
                     from_original_sentence, from_sentence, from_sentence_i, from_token_i, from_start_token_i, from_end_token_i, from_token = self.event_instance_id2sentence(
                         document, from_event, 'from',
@@ -98,8 +99,8 @@ class TimeBankBertDataHandler:
                     to_event = tlink.related_to_event_instance()
                     make_instance = document.event_instance_id2make_instance(to_event)
                     second_pos = make_instance.pos()
-                    if make_instance.pos() not in ['VERB']:
-                        continue
+                    if (train_test == 'train' and make_instance.pos() not in ['VERB']) or train_test == 'test' and make_instance.pos() not in ['VERB']:
+                        pass
                     to_original_sentence, to_sentence, to_sentence_i, to_token_i, to_start_token_i, to_end_token_i, to_token = self.event_instance_id2sentence(
                         document, to_event, 'to',
                     )
@@ -122,7 +123,8 @@ class TimeBankBertDataHandler:
                 relationship = rel2rel[tlink.rel_type()]
                 if relationship == 'none':
                     continue
-                
+
+
                 if token_order == 1:
                     from_original_sentence, to_original_sentence = to_original_sentence, from_original_sentence
                     from_sentence, to_sentence = to_sentence, from_sentence
@@ -130,15 +132,10 @@ class TimeBankBertDataHandler:
                     from_start_token_i, to_start_token_i = to_start_token_i, from_start_token_i
                     from_end_token_i, to_end_token_i = to_end_token_i, from_end_token_i
                     token_order = 0
-                    if (second_pos, first_pos) in [('VERB', 'NOUN')]:
-                        pos2rel[(second_pos, first_pos)][from_token] += 1
-                    if (second_pos, first_pos) in [('NOUN', 'VERB')]:
-                        pos2rel[(second_pos, first_pos)][to_token] += 1
+                    pos2rel[(second_pos, first_pos)][relationship] += 1
                 else:
-                    if (first_pos, second_pos) in [('VERB', 'NOUN')]:
-                        pos2rel[(first_pos, second_pos)][to_token] += 1
-                    if (first_pos, second_pos) in [('NOUN', 'VERB')]:
-                        pos2rel[(first_pos, second_pos)][from_token] += 1
+                    pos2rel[(first_pos, second_pos)][relationship] += 1
+
 
                 model_input_datum = ModelInputDatum()
                 model_input_datum.set_from_original_sentence(from_original_sentence.text())
@@ -163,10 +160,11 @@ class TimeBankBertDataHandler:
                 data.append(model_input_datum)
         print(' ' * 4)
         for pos in pos2rel:
+            print(pos, pos2rel[pos])
             print('-' * 32)
             for itemi, item in enumerate(sorted(pos2rel[pos].items(), key=lambda x: x[1])):
                 print(pos, itemi, item)
-        return data
+        return data, nouns
 
     def event_instance_id2sentence(self, document, eiid, event_point):
         make_instance = document.event_instance_id2make_instance(eiid)
@@ -228,9 +226,9 @@ class TimeBankBertDataHandler:
         dr = dr()
         train_documents = dr.train_documents()
         test_documents = dr.test_documents()
-        train_data = self.load_data(train_documents)
+        train_data, train_nouns = self.load_data(train_documents, 'train')
         self._model_input_data.set_train_data(train_data)
-        test_data = self.load_data(test_documents)
+        test_data, test_nouns = self.load_data(test_documents, 'test')
         self._model_input_data.set_test_data(test_data)
 
     def model_input_data(self):

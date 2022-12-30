@@ -5,8 +5,8 @@ class EpochStatistics:
     def __init__(self):
         self._epoch_number = 0
         self._labels = []
-        self._train_statistics = RunStatistics()
-        self._test_statistics = RunStatistics()
+        self._train_statistics = RunStatistics('train')
+        self._test_statistics = RunStatistics('test')
 
     def epoch_number(self):
         return self._epoch_number
@@ -35,6 +35,10 @@ class EpochStatistics:
 
     def record_test_iteration(self, predicted, expected, loss):
         self._test_statistics.record_iteration(predicted, expected, loss)
+
+    def generate_confusion_heatmaps(self):
+        self._train_statistics.generate_confusion_heatmaps()
+        self._test_statistics.generate_confusion_heatmaps()
 
     def to_dict(self):
         return {

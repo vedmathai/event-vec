@@ -19,4 +19,4 @@ class ReportModel:
         return self._epochs
 
     def set_labels(self, labels):
-        self._labels = labels
+        self._labels = list(labels)

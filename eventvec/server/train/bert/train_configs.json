@@ -1,7 +1,7 @@
 {
     "train_configs": [
         {
-            "llm": "timebert",
+            "llm": "roberta",
             "model_type": "features_only"
         }
     ]

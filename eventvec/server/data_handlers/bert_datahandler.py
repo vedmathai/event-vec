@@ -3,6 +3,7 @@ import pprint
 import re
 from collections import defaultdict
 from transformers import BertTokenizer, RobertaTokenizer
+import pprint
 
 
 from eventvec.server.data_handlers.timebank_data_handler import TimeBankBertDataHandler  # noqa
@@ -29,9 +30,9 @@ labels = {
 labels_simpler = {
     'before': 0,
     'includes': 1,
-    'is_included': 1,
-    'simultaneous': 1,
-    'after': 2,
+    'is_included': 2,
+    'simultaneous': 3,
+    'after': 4,
     'none': 5,
 }
 
@@ -80,7 +81,7 @@ pos = {
     'INTJ': 16,
 }
 
-verb_form = {
+tag = {
     'VBD': 0,
     'VBN': 2,
     'VBP': 3,
@@ -94,7 +95,8 @@ verb_form = {
     'NNS': 11,
     'NNP': 12,
     'DT': 13,
-    None: 14,
+    'RB': 14,
+    None: 15,
 }
 
 tenses_hot_encoding = {i: [0] * 7 for i in tenses}
@@ -109,9 +111,12 @@ pos_hot_encoding = {i: [0] * 17 for i in pos}
 for i in pos_hot_encoding:
     pos_hot_encoding[i][pos[i]] = 1
 
-verb_form_hot_encoding = {i: [0] * 15 for i in verb_form}
-for i in verb_form_hot_encoding:
-    verb_form_hot_encoding[i][verb_form[i]] = 1
+tag_hot_encoding = {i: [0] * 16 for i in tag}
+for i in tag_hot_encoding:
+    tag_hot_encoding[i][tag[i]] = 1
+
+noun_pos = ['NOUN', 'PROPN', 'PRON']
+verb_pos = ['VERB', 'AUX']
 
 
 class BertDataHandler():
@@ -122,6 +127,7 @@ class BertDataHandler():
         self._data_handler = TimeBankBertDataHandler()
         self._featurizer = BERTLinguisticFeaturizer()
         self._aspect_counter = defaultdict(int)
+        self._nouns = defaultdict(lambda: defaultdict(int))
 
     def load(self):
         self._model_input_data = self._data_handler.model_input_data()
@@ -132,15 +138,25 @@ class BertDataHandler():
     def load_train_data(self):
         timebank_train_data = self._model_input_data.train_data()
         for datumi, datum in enumerate(timebank_train_data):
-            self.process_timebank_data(datum)
-        pprint.pprint(self._aspect_counter)
+            self.process_timebank_data(datum, 'train')
 
     def load_test_data(self):
         timebank_test_data = self._model_input_data.test_data()
         for datumi, datum in enumerate(timebank_test_data):
-            self.process_timebank_data(datum)
+            self.process_timebank_data(datum, 'test')
+        pprint.pprint(self._nouns)
+        train_set = set(self._nouns['train'].keys())
+        test_set = set(self._nouns['test'].keys())
+        num = 0
+        den = 0
+        for i in train_set & test_set:
+            num += self._nouns['test'][i]
+        for i in test_set:
+            den += self._nouns['test'][i]
+        #print(num/den)
+        print(self._label_counts)
 
-    def process_timebank_data(self, model_input_datum):
+    def process_timebank_data(self, model_input_datum, is_train_or_test):
         from_sentence = ' '.join(model_input_datum.from_sentence())
         to_sentence = ' '.join(model_input_datum.to_sentence())
         bert_encoding_from_sentence = self._tokenizer(
@@ -183,7 +199,7 @@ class BertDataHandler():
         from_to_from_token_i = decoded_sentence[0].split().index('entity1') + 1
         from_to_to_token_i = decoded_sentence[0].split().index('entity2') + 1
         model_input_datum.set_from_decoded_sentence(decoded_sentence)
-        decoded_sentence = self._tokenizer.batch_decode(whole_sentence_to_from['input_ids'])
+        #decoded_sentence = self._tokenizer.batch_decode(whole_sentence_to_from['input_ids'])
         if 'entity1' not in decoded_sentence[0].split() or 'entity2' not in decoded_sentence[0].split():
             return
         to_from_from_token_i = decoded_sentence[0].split().index('entity1') + 1
@@ -192,7 +208,7 @@ class BertDataHandler():
         if any(i >= 200 for i in [from_to_from_token_i, from_to_to_token_i, to_from_from_token_i, to_from_to_token_i]):
             return
         label = labels_simpler[model_input_datum.relationship()]
-        model_input_datum.set_is_trainable()
+        model_input_datum.set_is_trainable(False)
         model_input_datum.set_from_entity_token_i(from_to_from_token_i)
         model_input_datum.set_to_entity_token_i(from_to_to_token_i)
         model_input_datum.set_from_sentence_encoded(bert_encoding_from_sentence)  # noqa
@@ -204,18 +220,41 @@ class BertDataHandler():
         to_tense_encoding = tenses_hot_encoding[model_input_datum.to_tense()]
         from_aspect_encoding = aspect_hot_encoding[model_input_datum.from_aspect()]
         to_aspect_encoding = aspect_hot_encoding[model_input_datum.to_aspect()]
-        from_verb_form = verb_form_hot_encoding[model_input_datum.from_verb_form()]
-        to_verb_form = verb_form_hot_encoding[model_input_datum.to_verb_form()]
+        from_tag_encoding = tag_hot_encoding[model_input_datum.from_tag()]
+        to_tag_encoding = tag_hot_encoding[model_input_datum.to_tag()]
         from_pos_encoding = pos_hot_encoding[model_input_datum.from_pos()]
         to_pos_encoding = pos_hot_encoding[model_input_datum.to_pos()]
-        tense = (model_input_datum.from_verb_form(), model_input_datum.to_verb_form())
-        self._aspect_counter[model_input_datum.token_order()] += 1 
-        feature_encoding = [[model_input_datum.token_order()] + from_verb_form + to_verb_form + from_tense_encoding + to_tense_encoding + from_aspect_encoding + to_aspect_encoding + from_pos_encoding + to_pos_encoding]
-        feature_encoding = [from_verb_form + to_verb_form + from_tense_encoding + to_tense_encoding + from_aspect_encoding + to_aspect_encoding + from_pos_encoding + to_pos_encoding]
-        model_input_datum.set_feature_encoding(feature_encoding)
-        self._model_input_data.add_class(label)
-        self._labels.add(label)
-        self._label_counts[label] += 1
+        if model_input_datum.marked_up_parent_from_sentence() is not None and model_input_datum.marked_up_parent_to_sentence() is not None:
+            from_sentence = ' '.join(model_input_datum.marked_up_parent_from_sentence())
+            to_sentence = ' '.join(model_input_datum.marked_up_parent_to_sentence())
+            whole_sentence_from_to = self._tokenizer(
+                [from_sentence], [to_sentence],
+                padding='max_length',
+                max_length=200,
+                truncation=True,
+                return_tensors='pt',
+                return_token_type_ids=True
+            )
+            decoded_sentence = self._tokenizer.batch_decode(whole_sentence_from_to['input_ids'])
+            if 'entity1' not in decoded_sentence[0].split() or 'entity2' not in decoded_sentence[0].split():
+                return
+            from_to_from_token_i = decoded_sentence[0].split().index('entity1') + 1
+            from_to_to_token_i = decoded_sentence[0].split().index('entity2') + 1
+            model_input_datum.set_from_entity_token_i(from_to_from_token_i)
+            model_input_datum.set_to_entity_token_i(from_to_to_token_i)
+            model_input_datum.set_sentence_pair_encoded(whole_sentence_from_to)
+            feature_encoding = [from_tag_encoding + to_tag_encoding + from_tense_encoding + to_tense_encoding + from_aspect_encoding + to_aspect_encoding + from_pos_encoding + to_pos_encoding]
+            model_input_datum.set_feature_encoding(feature_encoding)
+            from_token = decoded_sentence[0].split()[from_to_from_token_i]
+            to_token = decoded_sentence[0].split()[from_to_to_token_i]
+            from_to_tokens = '{}|{}'.format(from_token, to_token) + str(label)
+            if is_train_or_test == 'train' and (model_input_datum.from_pos() in verb_pos) and (model_input_datum.to_pos() in verb_pos):
+                model_input_datum.set_is_trainable(True)
+            if is_train_or_test == 'test' and (model_input_datum.from_pos() in verb_pos and model_input_datum.to_pos() in verb_pos):
+                model_input_datum.set_is_trainable(True)
+            self._model_input_data.add_class(label)
+            self._labels.add(label)
+
 
     def model_input_data(self):
         return self._model_input_data

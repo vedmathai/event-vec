@@ -13,9 +13,9 @@ class FeaturizedToken:
         self._i = None
         self._deps = defaultdict(list)
         self._dep = None
-        self._verb_form = None
         self._tag = None
         self._vector = None
+        self._i_in_sentence = None
 
     def text(self):
         return self._text
@@ -29,14 +29,17 @@ class FeaturizedToken:
     def tense(self):
         return self._tense
 
-    def verb_form(self):
-        return self._verb_form
+    def tag(self):
+        return self._tag
 
     def pos(self):
         return self._pos
 
     def vector(self):
         return self._vector
+    
+    def i_in_sentence(self):
+        return self._i_in_sentence
 
     def children(self):
         return self._deps
@@ -94,8 +97,8 @@ class FeaturizedToken:
     def set_dep(self, dep):
         self._dep = dep
 
-    def set_verb_form(self, verb_form):
-        self._verb_form = verb_form
+    def set_tag(self, tag):
+        self._tag = tag
 
     def set_vector(self, vector):
         self._vector = vector
@@ -109,6 +112,9 @@ class FeaturizedToken:
     def set_i(self, i):
         self._i = i
 
+    def set_i_in_sentence(self, i_in_sentence):
+        self._i_in_sentence = i_in_sentence
+
     def add_child(self, child):
         self._deps[child.dep()].append(child)
 
@@ -116,15 +122,16 @@ class FeaturizedToken:
         self._parent = parent
 
     @staticmethod
-    def from_spacy(token):
+    def from_spacy(token, sentence):
         ftoken = FeaturizedToken()
         ftoken._text = token.text
         ftoken._i = token.i
+        ftoken._i_in_sentence = token.i - sentence.start
         ftoken._lemma = token.lemma_
         morph_dict = token.morph.to_dict()
         ftoken._tense = morph_dict.get('Tense')
         ftoken._aspect = morph_dict.get('Aspect')
-        ftoken._verb_form = token.tag_
+        ftoken._tag = token.tag_
         ftoken._pos = token.pos_
         ftoken._dep = token.dep_
         ftoken._vector = token.vector

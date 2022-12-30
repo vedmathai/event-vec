@@ -7,15 +7,17 @@ from torch.optim import Adam
 
 
 from eventvec.server.model.bert_models.bert_relationship_model import BertRelationshipClassifier  # noqa
-from eventvec.server.data_handlers.bert_datahandler import BertDataHandler
+from eventvec.server.model.llm_tense_pretraining_model.llm_tense_pretrain_model import LLMTensePretrainer  # noqa
 from eventvec.server.reporter.report_model.report_model import ReportModel
 from eventvec.server.train.train_config_loader.train_config_loader import TrainConfigsLoader
+from eventvec.server.train.data_handler_registry import DataHandlerRegistry
 
 
-TRAIN_SAMPLE_SIZE = int(3000 / 3)
-TEST_SAMPLE_SIZE = 400
-EPOCHS = 10
-LEARNING_RATE = 1e-2
+
+TRAIN_SAMPLE_SIZE = int(3000 / 5)
+TEST_SAMPLE_SIZE = 100
+EPOCHS = 40
+LEARNING_RATE = 1e-3  # 1e-2
 MOMENTUM = 0.9
 WEIGHT_DECAY = 1e-5
 CHECKPOINT_PATH = 'local/checkpoints/checkpoint.tar'
@@ -25,11 +27,10 @@ SAVE_EVERY = 10000000
 
 class Trainer:
     def __init__(self):
-        self._relationship_counter = 0
         self._total_loss = 0
         self._all_losses = []
         self._report = ReportModel()
-        self._data_handler = BertDataHandler()
+        self._data_handler_registry = DataHandlerRegistry()
         self._train_configs_loader = TrainConfigsLoader()
         self._iteration = 0
         self._last_iteration = 0
@@ -39,21 +40,29 @@ class Trainer:
     def load(self):
         self._train_configs_loader.load()
         self._train_configs = self._train_configs_loader.train_configs()
+        data_handler = 'bert_data_handler'
+        self._data_handler = self._data_handler_registry.get_data_handler(data_handler)
         self._data_handler.load()
         self._input_data = self._data_handler.model_input_data()
         self._model = BertRelationshipClassifier(self._train_configs.train_configs()[0])
+        self.load_model()
         self._model_optimizer = Adam(
             self._model.parameters(),
             lr=LEARNING_RATE,
         )
         self._criterion = nn.CrossEntropyLoss()
-        self._report.set_labels(self._data_handler.labels())
+        self._report.set_labels(self._input_data.classes())
 
     def zero_grad(self):
         self._model.zero_grad()
 
     def optimizer_step(self):
         self._model_optimizer.step()
+
+    def change_learning_rate(self, lr):
+        for g in self._model_optimizer.param_groups:
+            print('changing learning rate')
+            g['lr'] = lr
 
     def train_step(self, datum):
         event_predicted_vector = self.classify(datum)
@@ -103,6 +112,8 @@ class Trainer:
                 self.zero_grad()
                 self._loss = None
         self.train_evaluate()
+        self.save_model()
+        self._report.current_epoch().generate_confusion_heatmaps()
         print(self._report.current_epoch().to_dict())
 
     def train(self):
@@ -123,10 +134,24 @@ class Trainer:
                     )
                     loss = batch_loss.item()
                     predicted = event_predicted_vector.argmax(dim=1).item()
+                    if predicted == 4 and datum.target() == 0:
+                        print(
+                            ' '.join(datum.from_sentence()),
+                            ' '.join(datum.to_sentence()),
+                            'expected: {}'.format(datum.target()),
+                            'got: {}'.format(predicted),
+                        )
+
                     current_epoch_stats = self._report.current_epoch()
                     current_epoch_stats.record_test_iteration(
                         predicted, datum.target(), loss
                     )
+
+    def save_model(self):
+        self._model.save()
+
+    def load_model(self):
+        self._model.load()
 
     def create_checkpoint(self):
         torch.save({

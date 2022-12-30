@@ -15,6 +15,9 @@ class FeaturizedSentence:
     def root(self):
         return self._root
 
+    def text(self):
+        return ' '.join(i.text() for i in self._tokens)
+
     def set_root(self, root):
         self._root = root
 
@@ -23,7 +26,7 @@ class FeaturizedSentence:
         fsent = FeaturizedSentence()
         i2token = {}
         for token in sentence:
-            ft = FeaturizedToken.from_spacy(token)
+            ft = FeaturizedToken.from_spacy(token, sentence)
             i2token[token.i] = ft
             fsent.add_token(ft)
             if token.dep_ == 'ROOT':
