@@ -9,6 +9,9 @@ class Config:
         self._experiment_type = None
         self._book_corpus_data_location = None
         self._heatmaps_location = None
+        self._tsqa_data_location = None
+        self._tsqa_file_names = None
+
 
     @staticmethod
     def instance():
@@ -41,6 +44,12 @@ class Config:
     def heatmaps_location(self):
         return self._heatmaps_location
 
+    def tsqa_data_location(self):
+        return self._tsqa_data_location
+
+    def tsqa_file_names(self):
+        return self._tsqa_file_names
+
     def set_timebank_data_location(self, timebank_data_location):
         self._timebank_data_location = timebank_data_location
 
@@ -65,6 +74,12 @@ class Config:
     def set_heatmaps_location(self, heatmaps_location):
         self._heatmaps_location = heatmaps_location
 
+    def set_tsqa_data_location(self, tsqa_data_location):
+        self._tsqa_data_location = tsqa_data_location
+
+    def set_tsqa_file_names(self, tsqa_file_names):
+        self._tsqa_file_names = tsqa_file_names
+
     @staticmethod
     def from_dict(val):
         config = Config()
@@ -76,4 +91,6 @@ class Config:
         config.set_train_configs_file(val.get('train_configs_file'))
         config.set_model_save_location(val.get('model_save_location'))
         config.set_heatmaps_location(val.get('heatmaps_location'))
+        config.set_tsqa_data_location(val.get('tsqa_data_location'))
+        config.set_tsqa_file_names(val.get('tsqa_file_names'))
         return config
