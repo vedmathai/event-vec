@@ -11,6 +11,7 @@ class Config:
         self._heatmaps_location = None
         self._tsqa_data_location = None
         self._tsqa_file_names = None
+        self._tsqa_file2annotation_map = {}
 
 
     @staticmethod
@@ -50,6 +51,9 @@ class Config:
     def tsqa_file_names(self):
         return self._tsqa_file_names
 
+    def tsqa_file2annotation_map(self):
+        return self._tsqa_file2annotation_map
+
     def set_timebank_data_location(self, timebank_data_location):
         self._timebank_data_location = timebank_data_location
 
@@ -80,6 +84,9 @@ class Config:
     def set_tsqa_file_names(self, tsqa_file_names):
         self._tsqa_file_names = tsqa_file_names
 
+    def set_tsqa_file2annotation_map(self, tsqa_file2annotation_map):
+        self._tsqa_file2annotation_map = tsqa_file2annotation_map
+
     @staticmethod
     def from_dict(val):
         config = Config()
@@ -93,4 +100,5 @@ class Config:
         config.set_heatmaps_location(val.get('heatmaps_location'))
         config.set_tsqa_data_location(val.get('tsqa_data_location'))
         config.set_tsqa_file_names(val.get('tsqa_file_names'))
+        config.set_tsqa_file2annotation_map(val.get('tsqa_file2annotation_map'))
         return config

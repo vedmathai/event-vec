@@ -23,8 +23,6 @@ class QuestionDescriminatorModel(nn.Module):
 
     def forward(self, question, paragraph):
         inputs = self._tokenizer([question], [paragraph], return_tensors="pt", padding='longest', max_length=1000)
-        print(inputs)
-        print(self._tokenizer.convert_ids_to_tokens(inputs.input_ids[0]))
         #labels = torch.tensor([label]).unsqueeze(0)  # Batch size 1
         outputs = self._model(**inputs)
         hidden_states = outputs.last_hidden_state
@@ -36,8 +34,6 @@ class QuestionDescriminatorModel(nn.Module):
         discriminator_output = self._softmax(discriminator_layer_output_2)
         start_output = self._softmax(start_logits)
         end_output = self._softmax(end_logits)
-        print(start_output)
-        print(dir(self._tokenizer))
 
 
 if __name__ == '__main__':
