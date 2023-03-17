@@ -23,7 +23,7 @@ class TSQAConverter:
             qa_datum.set_question(question_text)
             for annotation_answer in annotation_question.tsqa_annotation_answers():
                 qa_answer = QAAnswer()
-                qa_answer.set_paragraph(annotation_answer.para())
+                qa_answer.set_paragraph_idx(annotation_answer.para())
                 qa_answer.set_start_location(annotation_answer.from_token())
                 qa_answer.set_end_location(annotation_answer.end_token())
                 qa_answer.set_text(annotation_answer.answer())
