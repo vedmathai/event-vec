@@ -21,12 +21,32 @@ class TSQAConverter:
             qa_datum.set_id(annotation_question.idx())
             question_text = datum.question()
             qa_datum.set_question(question_text)
+            qa_datum.set_context(annotation.paragraphs())
             for annotation_answer in annotation_question.tsqa_annotation_answers():
                 qa_answer = QAAnswer()
                 qa_answer.set_paragraph_idx(annotation_answer.para())
-                qa_answer.set_start_location(annotation_answer.from_token())
-                qa_answer.set_end_location(annotation_answer.end_token())
+                paragraph = annotation.paragraphs()[annotation_answer.para()]
+                char2wordidx = self._char2wordidx(paragraph)
+                from_token = self._find_nearest(char2wordidx, annotation_answer.from_char())
+                end_token = self._find_nearest(char2wordidx, annotation_answer.end_char())
+                qa_answer.set_start_location(from_token)
+                qa_answer.set_end_location(end_token)
                 qa_answer.set_text(annotation_answer.answer())
                 qa_datum.add_answer(qa_answer)
-            qa_datum.set_context(annotation.paragraphs())
             qa_dataset.add_datum(qa_datum)
+
+    def _char2wordidx(self, sentence):
+        word_i = 1
+        char2wordidx = {0: 0}
+        for ii, i in enumerate(sentence):
+            if i == ' ':
+                char2wordidx[ii] = word_i
+                word_i += 1
+        return char2wordidx
+
+    def _find_nearest(self, char2wordidx, idx):
+        for i in range(0, 4):
+            if idx + i in char2wordidx:
+                return char2wordidx[idx+i]
+            if idx - i in char2wordidx:
+                return char2wordidx[idx-i]

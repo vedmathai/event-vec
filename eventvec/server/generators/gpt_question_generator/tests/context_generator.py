@@ -12,13 +12,15 @@ class TSQA2QA_test(unittest.TestCase):
 
     def test_tsqa2qa_converter(self):
         prompts_templates = [
-            "Paraphrasing {}",
-            "In order for {}, he had to do "
+            "{}", "",
+            #"Paraphrasing {}",
+            #"In order for {}, he had to do "
         ]
         tsqa_datahandler = TSQADatahandler()
         qa_data = tsqa_datahandler.qa_data()
         data = qa_data.data()
         generator = GPTQuestionGenerator()
+        generated_sentences = []
         for datum in data:
             context = datum.context()
             for answer in datum.answers():
@@ -33,10 +35,9 @@ class TSQA2QA_test(unittest.TestCase):
                 for template in prompts_templates:
                     q = template.format(sentence)
                     generated_sentence = generator.generate(q)
-                    print('\n' * 8)
-                    print(generated_sentence)
-                    print('-' * 32)
-            print('-' * 64)
+                    generated_sentences.extend(generated_sentence)
+
+
 
 
 if __name__ == '__main__':
