@@ -33,11 +33,15 @@ class QATrain:
         self.discriminator_losses = []
         self._tsqa_noise_generator = TSQANoiseGenerator()
 
-    def infer(self):
-        for datum in self._data_handler.qa_data().data():
-            self._infer_datum(datum)
+    def train(self):
+        for epochi in range(5):
+            data = self._data_handler.qa_data().data()
+            data_size = len(data)
+            for datumi, datum in enumerate(data):
+                print(float(datumi) / data_size)
+                self._train_datum(datum)
 
-    def _infer_datum(self, qa_datum):
+    def _train_datum(self, qa_datum):
         question = qa_datum.question()
         context = qa_datum.context()
 
@@ -46,7 +50,7 @@ class QATrain:
             for paragraph_i, paragraph in enumerate(context):
                 if paragraph_i == answer.paragraph_idx():
                     if answer.start_location() is not None and answer.end_location() is not None:
-                        discriminator_label, parapraph = self.noisify_context(paragraph, answer.start_location(), answer.end_location())
+                        discriminator_label, parapraph = self.noisify_context(question, paragraph, answer.start_location(), answer.end_location())
                         start_output, end_output, discriminator_output = self._model(question, paragraph)
                         start_token_idx = torch.argmax(start_output[0])
                         end_token_idx = torch.argmax(end_output[0])
@@ -66,7 +70,7 @@ class QATrain:
                         loss_start = self._task_criterion(start_output, start_label_vector)
                         loss_end = self._task_criterion(end_output, end_label_vector)
                         discriminator_label_vector = torch.Tensor(discriminator_label)
-                        print(discriminator_output)
+                        print(discriminator_output, discriminator_label)
                         discriminator_loss = self._discriminator_criterion(discriminator_output, discriminator_label_vector)
                         loss = loss_start + loss_end + discriminator_loss
                         self.task_losses.append(loss_start.item() + loss_end.item())
@@ -81,10 +85,9 @@ class QATrain:
                         self._model.zero_grad()
                         print(np.mean(self.task_losses), np.mean(self.discriminator_losses))
 
-    def noisify_context(self, context, start_token, end_token):
+    def noisify_context(self, question, context, start_token, end_token):
         if random.random() < 0.5:
-            generated_contexts = self._tsqa_noise_generator.generate(context, start_token, end_token)
-            generated_context = random.choice(generated_contexts)
+            generated_context = self._tsqa_noise_generator.generate(question, context, start_token, end_token)
             return [0, 1], generated_context
         return [1, 0], context
 
@@ -123,4 +126,4 @@ class QATrain:
 if __name__ == '__main__':
     qa_train = QATrain()
     qa_train.load()
-    qa_train.infer()
+    qa_train.train()

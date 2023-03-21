@@ -21,6 +21,7 @@ class QuestionDescriminatorModel(nn.Module):
         self._end_classifier_weight = torch.nn.Parameter(torch.randn(768), requires_grad=True)
         self._discriminator_layer_1 = nn.Linear(768, 20)
         self._relu = nn.ReLU()
+        self._dropout = nn.Dropout(0.5)
         self._discriminator_layer_2 = nn.Linear(20, 2)
         self._softmax = nn.Softmax()
 
@@ -34,7 +35,8 @@ class QuestionDescriminatorModel(nn.Module):
         end_logits = torch.matmul(hidden_states, self._end_classifier_weight)
         pooler_output = outputs.pooler_output[0]
         discriminator_layer_output_1 = self._discriminator_layer_1(pooler_output)
-        discriminator_relu_output = self._relu(discriminator_layer_output_1)
+        discriminator_dropout_output = self._dropout(discriminator_layer_output_1)
+        discriminator_relu_output = self._relu(discriminator_dropout_output)
         discriminator_layer_output_2 = self._discriminator_layer_2(discriminator_relu_output)
         discriminator_output = self._softmax(discriminator_layer_output_2)
         start_output = self._softmax(start_logits)
