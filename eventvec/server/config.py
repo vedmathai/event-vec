@@ -12,6 +12,8 @@ class Config:
         self._tsqa_data_location = None
         self._tsqa_file_names = None
         self._tsqa_file2annotation_map = {}
+        self._torque_data_location = None
+        self._torque_data_file_names = None
 
 
     @staticmethod
@@ -54,6 +56,12 @@ class Config:
     def tsqa_file2annotation_map(self):
         return self._tsqa_file2annotation_map
 
+    def torque_data_location(self):
+        return self._torque_data_location
+
+    def torque_data_file_names(self):
+        return self._torque_data_file_names
+
     def set_timebank_data_location(self, timebank_data_location):
         self._timebank_data_location = timebank_data_location
 
@@ -87,6 +95,12 @@ class Config:
     def set_tsqa_file2annotation_map(self, tsqa_file2annotation_map):
         self._tsqa_file2annotation_map = tsqa_file2annotation_map
 
+    def set_torque_data_location(self, torque_data_location):
+        self._torque_data_location = torque_data_location
+
+    def set_torque_data_file_names(self, torque_data_file_names):
+        self._torque_data_file_names = torque_data_file_names
+
     @staticmethod
     def from_dict(val):
         config = Config()
@@ -101,4 +115,6 @@ class Config:
         config.set_tsqa_data_location(val.get('tsqa_data_location'))
         config.set_tsqa_file_names(val.get('tsqa_file_names'))
         config.set_tsqa_file2annotation_map(val.get('tsqa_file2annotation_map'))
+        config.set_torque_data_location(val.get('torque_data_location'))
+        config.set_torque_data_file_names(val.get('torque_data_file_names'))
         return config

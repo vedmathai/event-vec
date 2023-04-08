@@ -11,10 +11,13 @@ class FeaturizedToken:
         self._parent = None
         self._children = []
         self._i = None
+        self._idx = None
         self._deps = defaultdict(list)
         self._dep = None
         self._tag = None
+        self._entity_type = None
         self._vector = None
+        self._coreference = None
         self._i_in_sentence = None
 
     def text(self):
@@ -31,6 +34,9 @@ class FeaturizedToken:
 
     def tag(self):
         return self._tag
+    
+    def entity_type(self):
+        return self._entity_type
 
     def pos(self):
         return self._pos
@@ -43,6 +49,9 @@ class FeaturizedToken:
 
     def children(self):
         return self._deps
+    
+    def coreference(self):
+        return self._coreference
 
     def all_children(self):
         children = []
@@ -78,6 +87,9 @@ class FeaturizedToken:
 
     def i(self):
         return self._i
+    
+    def idx(self):
+        return self._idx
 
     def set_text(self, text):
         self._text = text
@@ -100,6 +112,9 @@ class FeaturizedToken:
     def set_tag(self, tag):
         self._tag = tag
 
+    def set_entity_type(self, entity_type):
+        self._entity_type = entity_type
+
     def set_vector(self, vector):
         self._vector = vector
 
@@ -112,6 +127,9 @@ class FeaturizedToken:
     def set_i(self, i):
         self._i = i
 
+    def set_idx(self, idx):
+        self._idx
+
     def set_i_in_sentence(self, i_in_sentence):
         self._i_in_sentence = i_in_sentence
 
@@ -121,10 +139,14 @@ class FeaturizedToken:
     def set_parent(self, parent):
         self._parent = parent
 
+    def set_coreference(self, coreference):
+        self._coreference = coreference
+
     @staticmethod
-    def from_spacy(token, sentence):
+    def from_spacy(token, sentence, document):
         ftoken = FeaturizedToken()
         ftoken._text = token.text
+        ftoken._idx = token.idx
         ftoken._i = token.i
         ftoken._i_in_sentence = token.i - sentence.start
         ftoken._lemma = token.lemma_
@@ -135,4 +157,7 @@ class FeaturizedToken:
         ftoken._pos = token.pos_
         ftoken._dep = token.dep_
         ftoken._vector = token.vector
+        #coref = document._.coref_chains.resolve(token)
+        #if coref is not None:
+        #    ftoken._coreference = [i.i for i in coref]
         return ftoken
