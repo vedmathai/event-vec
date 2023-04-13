@@ -1,4 +1,4 @@
-from eventvec.server.reporter.report_model.run_statistics import RunStatistics
+from eventvec.server.reporters.report_model.run_statistics import RunStatistics
 
 
 class EpochStatistics:

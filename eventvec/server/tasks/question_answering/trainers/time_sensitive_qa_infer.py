@@ -5,7 +5,7 @@ from transformers import BigBirdForQuestionAnswering, BigBirdTokenizer
 
 from eventvec.server.config import Config
 from eventvec.server.data_readers.time_sensitive_qa_reader.time_sensitive_qa_datareader import TSQADataReader
-from eventvec.server.reporter.report_model.report_model import ReportModel
+from eventvec.server.reporters.report_model.report_model import ReportModel
 
 
 class TimeSensitiveQAInfer:

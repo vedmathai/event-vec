@@ -1,4 +1,4 @@
-from eventvec.server.reporter.report_model.epoch_statistics import EpochStatistics  # noqa
+from eventvec.server.reporters.report_model.epoch_statistics import EpochStatistics  # noqa
 
 
 class ReportModel:

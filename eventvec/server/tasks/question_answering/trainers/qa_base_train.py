@@ -13,7 +13,7 @@ from eventvec.server.data_handlers.qa_datahandlers.tsqa_datahandler.tsqa_datahan
 from eventvec.server.data_handlers.qa_datahandlers.torque_datahandler.torque_datahandler import TorqueDatahandler
 from eventvec.server.model.qa_models.torch_models.qa_descriminator import QuestionDescriminatorModel
 from eventvec.server.model.qa_models.torch_models.qa_base import QuestionAnsweringBase
-from eventvec.server.reporter.report_model.report_model import ReportModel
+from eventvec.server.reporters.report_model.report_model import ReportModel
 from eventvec.server.entry_points.time_sensitive_qa.time_sensitive_qa_generator import TSQANoiseGenerator
 from eventvec.server.model.qa_models.datamodel.qa_datum import QADatum
 from eventvec.server.featurizers.lingusitic_featurizer import LinguisticFeaturizer
