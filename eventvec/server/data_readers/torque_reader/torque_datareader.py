@@ -16,20 +16,23 @@ class TorqueDataReader(AbstractDataReader):
         with open(filepath) as f:
             return f.read()
 
-    def torque_dataset(self) -> TorqueDataset:
+    def torque_train_dataset(self) -> TorqueDataset:
         datasets = []
-        for filename in self._file_names:
-            abs_filename = os.path.join(self._folder, filename)
-            with open(abs_filename) as f:
-                ds = TorqueDataset.from_dict(json.load(f))
-                datasets.append(ds)
+        filename = self._file_names["train"]
+        abs_filename = os.path.join(self._folder, filename)
+        with open(abs_filename) as f:
+            ds = TorqueDataset.from_train_dict(json.load(f))
+            datasets.append(ds)
+        return datasets
+    
+    def torque_test_eval_dataset(self, split_type) -> TorqueDataset:
+        datasets = []
+        filename = self._file_names[split_type]
+        abs_filename = os.path.join(self._folder, filename)
+        with open(abs_filename) as f:
+            ds = TorqueDataset.from_eval_dict(json.load(f))
+            datasets.append(ds)
         return datasets
 
-
-if __name__ == '__main__':
-    tdr = TorqueDataReader()
-    ds = tdr.torque_dataset()
-    for d in ds[0].data():
-        print(d.passage())
-        
-        print(d.events().answer().indices())
+    def torque_eval_dataset(self):
+        return self.torque_test_eval_dataset('eval')

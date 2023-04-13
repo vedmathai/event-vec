@@ -27,11 +27,19 @@ class TorqueDatum:
         self._question_answer_pairs = question_answer_pairs
 
     @staticmethod
-    def from_dict(val):
+    def from_train_dict(val):
         datum = TorqueDatum()
         datum.set_passage(val['passage'])
         datum.set_events(TorqueEvents.from_dict(val['events']))
         datum.set_question_answer_pairs(TorqueQuestionAnswerPairs.from_dict(val['question_answer_pairs']))
+        return datum
+    
+    @staticmethod
+    def from_eval_dict(val):
+        datum = TorqueDatum()
+        datum.set_passage(val['passage'])
+        datum.set_events(TorqueEvents.from_eval_dict(val['events']))
+        datum.set_question_answer_pairs(TorqueQuestionAnswerPairs.from_eval_dict(val['question_answer_pairs'].items()))
         return datum
 
     def to_dict(self):
