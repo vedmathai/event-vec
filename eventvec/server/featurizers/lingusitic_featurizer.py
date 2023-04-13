@@ -2,8 +2,8 @@ import spacy, coreferee
 
 
 
-from eventvec.server.model.featurized_document_model.featurized_document import FeaturizedDocument  # noqa
-from eventvec.server.model.featurized_document_model.featurized_sentence import FeaturizedSentence  # noqa
+from eventvec.server.datamodels.featurized_document_datamodel.featurized_document import FeaturizedDocument  # noqa
+from eventvec.server.datamodels.featurized_document_datamodel.featurized_sentence import FeaturizedSentence  # noqa
 
 
 nlp = spacy.load('en_core_web_lg')

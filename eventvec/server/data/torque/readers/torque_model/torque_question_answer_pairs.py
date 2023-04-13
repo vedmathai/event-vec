@@ -1,4 +1,4 @@
-from eventvec.server.data_readers.torque_reader.torque_model.torque_question import TorqueQuestion
+from eventvec.server.data.torque.readers.torque_model.torque_question import TorqueQuestion
 
 
 class TorqueQuestionAnswerPairs:

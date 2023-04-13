@@ -1,6 +1,6 @@
-from eventvec.server.model.qa_models.datamodel.qa_dataset import  QADataset
-from eventvec.server.model.qa_models.datamodel.qa_datum import  QADatum
-from eventvec.server.model.qa_models.datamodel.qa_answer import  QAAnswer
+from eventvec.server.datamodels.qa_datamodels.qa_dataset import  QADataset
+from eventvec.server.datamodels.qa_datamodels.qa_datum import  QADatum
+from eventvec.server.datamodels.qa_datamodels.qa_answer import  QAAnswer
 from eventvec.server.featurizers.lingusitic_featurizer import LinguisticFeaturizer
 
 question_set_1 = ['What event has already happened?',  "What is happening now?", "What will happen in the future?"]

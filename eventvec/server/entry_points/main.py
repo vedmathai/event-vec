@@ -1,19 +1,28 @@
-import pprint
-
-from timebank_embedding.data_handler import DataHandler
-from timebank_embedding.variables import Variables
-
+from eventvec.server.config import Config
+from eventvec.server.common.run_configs.run_config_loader.run_config_loader import RunConfigsLoader
+from eventvec.server.entry_points.registries.trainer_registry import TrainerRegistry
 
 
-variables = Variables()
-data_handler = DataHandler(variables)
+class Main:
+    def __init__(self):
+        self._config = Config.instance()
+        self._trainer_registry = TrainerRegistry()
+        self._run_config_loader = RunConfigsLoader()
 
-data_handler.load_data()
-data_handler.generate_word2index()
-data_handler.generate_event_sets()
+    def load(self):
+        self._run_config_loader.load()
+
+    def run(self):
+        run_configs = self._run_config_loader.run_configs()
+        for run_config in run_configs.run_configs():
+            if run_config.is_train():
+                trainer = self._trainer_registry.get_trainer(run_config.trainer())
+                trainer = trainer()
+                trainer.load()
+                trainer.train(run_config)
 
 
-
-#pprint.pprint(data_handler._file_name2event_set)
-print('reached')
-print(data_handler.inputTensor('and'))
+if __name__ == '__main__':
+    main = Main()
+    main.load()
+    main.run()

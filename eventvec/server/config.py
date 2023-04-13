@@ -32,8 +32,8 @@ class Config:
     def timebank_data_location(self):
         return self._timebank_data_location
 
-    def train_configs_file(self):
-        return self._train_configs_file
+    def run_configs_file(self):
+        return self._run_configs_file
 
     def experiment_type(self):
         return self._experiment_type
@@ -71,8 +71,8 @@ class Config:
     def set_timebank_dense_data_location(self, timebank_dense_data_location):
         self._timebank_dense_data_location = timebank_dense_data_location
 
-    def set_train_configs_file(self, train_configs_file):
-        self._train_configs_file = train_configs_file
+    def set_run_configs_file(self, run_configs_file):
+        self._run_configs_file = run_configs_file
 
     def set_experiment_type(self, experiment_type):
         self._experiment_type = experiment_type
@@ -109,7 +109,7 @@ class Config:
         config.set_timebank_dense_data_location(val.get('timebank_dense_data_location'))
         config.set_book_corpus_data_location(val.get('book_corpus_data_location'))
         config.set_experiment_type(val.get('experiment_type'))
-        config.set_train_configs_file(val.get('train_configs_file'))
+        config.set_run_configs_file(val.get('run_configs_file'))
         config.set_model_save_location(val.get('model_save_location'))
         config.set_heatmaps_location(val.get('heatmaps_location'))
         config.set_tsqa_data_location(val.get('tsqa_data_location'))

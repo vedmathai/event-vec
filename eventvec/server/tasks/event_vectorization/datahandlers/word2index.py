@@ -1,7 +1,7 @@
 from collections import defaultdict
 import re
 
-from eventvec.utils.data_readers.fervous_wikipedia_reader import FerverousDataset
+from eventvec.server.data.fervous.readers.fervous_wikipedia_reader import FerverousDataset
 
 MIN_WORD_COUNT = 5
 
