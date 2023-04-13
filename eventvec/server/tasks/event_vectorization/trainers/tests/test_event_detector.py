@@ -1,7 +1,7 @@
 import unittest
 
-from eventvec.server.train.vectorizer.event_detector import EventDetector
-from eventvec.server.train.vectorizer.dep_parser_model import parse_sentence
+from eventvec.server.entry_points.vectorizer.event_detector import EventDetector
+from eventvec.server.entry_points.vectorizer.dep_parser_model import parse_sentence
 from eventvec.utils.spacy_utils.utils import SpacyUtils
 
 

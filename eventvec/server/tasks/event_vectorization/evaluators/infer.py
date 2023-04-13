@@ -6,7 +6,7 @@ from eventvec.server.data_handlers.data_handler import DataHandler
 from eventvec.server.model.torch_models.eventvec.event_parts_torch_model import EventPartsRNN
 from eventvec.server.model.torch_models.eventvec.event_relationship_torch_model import EventRelationshipModel
 from eventvec.server.model.torch_models.eventvec.event_torch_model import EventModel
-from eventvec.server.train.vectorizer.document_parser import DocumentParser
+from eventvec.server.entry_points.vectorizer.document_parser import DocumentParser
 from eventvec.server.model.report_models.report import Report
 from eventvec.server.model.report_models.events_report import EventsReport
 

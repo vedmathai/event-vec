@@ -9,7 +9,7 @@ from torch.optim import Adam
 from eventvec.server.model.bert_models.bert_relationship_model import BertRelationshipClassifier  # noqa
 from eventvec.server.model.llm_tense_pretraining_model.llm_tense_pretrain_model import LLMTensePretrainer  # noqa
 from eventvec.server.reporter.report_model.report_model import ReportModel
-from eventvec.server.train.train_config_loader.train_config_loader import TrainConfigsLoader
+from eventvec.server.entry_points.train_config_loader.train_config_loader import TrainConfigsLoader
 from eventvec.server.tasks.event_vectorization.datahandlers.data_handler_registry import DataHandlerRegistry
 
 

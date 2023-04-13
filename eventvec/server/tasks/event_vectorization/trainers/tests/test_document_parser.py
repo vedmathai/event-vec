@@ -1,6 +1,6 @@
 import unittest
 
-from eventvec.server.train.vectorizer.document_parser import DocumentParser
+from eventvec.server.entry_points.vectorizer.document_parser import DocumentParser
 
 
 class TestDocumentParser(unittest.TestCase):

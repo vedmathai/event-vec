@@ -1,12 +1,12 @@
 from collections import defaultdict
 
-from eventvec.server.train.vectorizer.event_detector import EventDetector
+from eventvec.server.entry_points.vectorizer.event_detector import EventDetector
 from eventvec.server.model.document_models.document_model import Document
 from eventvec.utils.spacy_utils.utils import SpacyUtils
-from eventvec.server.train.vectorizer.dep_parser_model import parse_sentence
-from eventvec.server.train.vectorizer.event_extractor import EventExtractor
-from eventvec.server.train.vectorizer.event_relationship_extractor import EventRelationshipExtractor
-from eventvec.server.train.vectorizer.coreference_resolver import CoreferenceResolver
+from eventvec.server.entry_points.vectorizer.dep_parser_model import parse_sentence
+from eventvec.server.entry_points.vectorizer.event_extractor import EventExtractor
+from eventvec.server.entry_points.vectorizer.event_relationship_extractor import EventRelationshipExtractor
+from eventvec.server.entry_points.vectorizer.coreference_resolver import CoreferenceResolver
 
 class DocumentParser:
     def __init__(self):
