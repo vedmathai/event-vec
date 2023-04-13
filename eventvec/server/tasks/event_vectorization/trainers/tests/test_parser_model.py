@@ -2,7 +2,7 @@ import unittest
 
 import spacy
 
-from eventvec.server.train.vectorizer.dep_parser_model import (
+from eventvec.server.entry_points.vectorizer.dep_parser_model import (
     parse_sentence, get_path, follow_down
 )
 from eventvec.utils.spacy_utils.utils import SpacyUtils

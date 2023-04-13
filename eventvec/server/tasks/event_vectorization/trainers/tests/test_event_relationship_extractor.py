@@ -1,8 +1,8 @@
 import unittest
 
-from eventvec.server.train.vectorizer.event_extractor import EventExtractor
-from eventvec.server.train.vectorizer.event_relationship_extractor import EventRelationshipExtractor
-from eventvec.server.train.vectorizer.dep_parser_model import parse_sentence
+from eventvec.server.entry_points.vectorizer.event_extractor import EventExtractor
+from eventvec.server.entry_points.vectorizer.event_relationship_extractor import EventRelationshipExtractor
+from eventvec.server.entry_points.vectorizer.dep_parser_model import parse_sentence
 from eventvec.utils.spacy_utils.utils import SpacyUtils
 
 

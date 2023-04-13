@@ -1,5 +1,5 @@
 from eventvec.server.model.event_models.event_model import Event
-from eventvec.server.train.vectorizer.dep_parser_model import follow_down
+from eventvec.server.entry_points.vectorizer.dep_parser_model import follow_down
 from eventvec.server.model.event_models.path_libary import (
     subject_paths, object_paths, verb_paths, date_paths
 )

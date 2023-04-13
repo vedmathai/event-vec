@@ -1,7 +1,7 @@
-from eventvec.server.train.vectorizer.train import Trainer 
+from eventvec.server.entry_points.vectorizer.train import Trainer 
 from eventvec.utils.data_readers.fervous_wikipedia_reader import FerverousDataset
 from eventvec.utils.dates_document import create_dates_document
-from eventvec.server.train.vectorizer.document_parser import DocumentParser
+from eventvec.server.entry_points.vectorizer.document_parser import DocumentParser
 from eventvec.utils.dates_document import create_dates_document
 
 

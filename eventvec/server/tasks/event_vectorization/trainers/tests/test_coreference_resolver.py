@@ -1,6 +1,6 @@
 import unittest
 
-from eventvec.server.train.vectorizer.coreference_resolver import CoreferenceResolver
+from eventvec.server.entry_points.vectorizer.coreference_resolver import CoreferenceResolver
 from eventvec.server.model.document_models.document_model import Document
 
 
