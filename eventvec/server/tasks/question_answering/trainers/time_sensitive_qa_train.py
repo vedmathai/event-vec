@@ -11,7 +11,7 @@ from eventvec.server.config import Config
 from eventvec.server.data_handlers.qa_datahandlers.tsqa_datahandler.tsqa_datahandler import TSQADatahandler
 from eventvec.server.model.qa_models.torch_models.qa_descriminator import QuestionDescriminatorModel
 from eventvec.server.model.qa_models.torch_models.qa_base import QuestionAnsweringBase
-from eventvec.server.reporter.report_model.report_model import ReportModel
+from eventvec.server.reporters.report_model.report_model import ReportModel
 from eventvec.server.entry_points.time_sensitive_qa.time_sensitive_qa_generator import TSQANoiseGenerator
 
 LEARNING_RATE = 5e-5

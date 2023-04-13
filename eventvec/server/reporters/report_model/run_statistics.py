@@ -2,7 +2,7 @@ from collections import defaultdict
 import numpy as np
 
 
-from eventvec.server.reporter.heatmaps.heatmap_report import HeatmapReport
+from eventvec.server.reporters.heatmaps.heatmap_report import HeatmapReport
 
 
 class RunStatistics:
