@@ -24,6 +24,13 @@ class TorqueEvents:
         datum.set_answer(TorqueEventsAnswer.from_dict(val[0]['answer']))
         datum.set_passage_id(val[0]['passageID'])
         return datum
+    
+    @staticmethod
+    def from_eval_dict(val):
+        datum = TorqueEvents()
+        datum.set_answer(TorqueEventsAnswer.from_dict(val['answer']))
+        datum.set_passage_id(val['passageID'])
+        return datum
 
     def to_dict(self):
         return {

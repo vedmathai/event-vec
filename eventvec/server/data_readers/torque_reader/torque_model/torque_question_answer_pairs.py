@@ -16,7 +16,13 @@ class TorqueQuestionAnswerPairs:
         tqap = TorqueQuestionAnswerPairs()
         tqap.set_questions(TorqueQuestion.from_dict(i) for i in val)
         return tqap
-
+    
+    @staticmethod
+    def from_eval_dict(val):
+        tqap = TorqueQuestionAnswerPairs()
+        tqap.set_questions(TorqueQuestion.from_eval_dict(k, v) for k, v in val)
+        return tqap
+    
     def to_dict(self):
         return {
             "answer": self.answer().to_dict(),

@@ -23,6 +23,13 @@ class TorqueQuestion:
         question.set_answer(TorqueEventsAnswer.from_dict(val['answer']))
         question.set_question(val['question'])
         return question
+    
+    @staticmethod
+    def from_eval_dict(k, v):
+        question = TorqueQuestion()
+        question.set_answer(TorqueEventsAnswer.from_dict(v['answer']))
+        question.set_question(k)
+        return question
 
     def to_dict(self):
         return {

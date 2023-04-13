@@ -9,7 +9,8 @@ from transformers import BigBirdForQuestionAnswering, BigBirdTokenizer
 
 from eventvec.server.config import Config
 from eventvec.server.data_handlers.qa_datahandlers.tsqa_datahandler.tsqa_datahandler import TSQADatahandler
-from eventvec.server.model.time_sensitive_qa.time_sensitive_qa_descriminator import QuestionDescriminatorModel
+from eventvec.server.model.qa_models.torch_models.qa_descriminator import QuestionDescriminatorModel
+from eventvec.server.model.qa_models.torch_models.qa_base import QuestionAnsweringBase
 from eventvec.server.reporter.report_model.report_model import ReportModel
 from eventvec.server.train.time_sensitive_qa.time_sensitive_qa_generator import TSQANoiseGenerator
 
@@ -20,7 +21,7 @@ class QATrain:
     
     def load(self):
         self._data_handler = TSQADatahandler()
-        self._model = QuestionDescriminatorModel()
+        self._model = QuestionAnsweringBase()
         self._config = Config.instance()
         self._task_criterion = nn.CrossEntropyLoss()
         self._discriminator_criterion = nn.CrossEntropyLoss()

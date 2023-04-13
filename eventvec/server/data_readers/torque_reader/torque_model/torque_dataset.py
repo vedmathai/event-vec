@@ -15,11 +15,18 @@ class TorqueDataset:
         self._data.extend(data)
 
     @staticmethod
-    def from_dict(val):
+    def from_train_dict(val):
         dataset = TorqueDataset()
         for item in val:
-            passage_data = [TorqueDatum.from_dict(i) for i in item['passages']]
+            passage_data = [TorqueDatum.from_train_dict(i) for i in item['passages']]
             dataset.extend_data(passage_data)
+        return dataset
+    
+    @staticmethod
+    def from_eval_dict(val):
+        dataset = TorqueDataset()
+        passage_data = [TorqueDatum.from_eval_dict(i) for i in val.values()]
+        dataset.extend_data(passage_data)
         return dataset
 
     def to_dict(self):
