@@ -1,5 +1,5 @@
-from eventvec.server.model.featurized_document_model.featurized_token import FeaturizedToken  # noqa
-from eventvec.server.model.featurized_document_model.utils import find_common_parent, traverse_up
+from eventvec.server.datamodels.featurized_document_datamodel.featurized_token import FeaturizedToken  # noqa
+from eventvec.server.datamodels.featurized_document_datamodel.utils import find_common_parent, traverse_up
 
 class FeaturizedSentence:
     def __init__(self):

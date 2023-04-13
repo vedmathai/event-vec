@@ -1,5 +1,5 @@
-from eventvec.server.data_handlers.qa_datahandlers.torque_datahandler.torque_converter import TorqueConverter
-from eventvec.server.data_readers.torque_reader.torque_datareader import TorqueDataReader
+from eventvec.server.data.torque.datahandlers.torque_converter import TorqueConverter
+from eventvec.server.data.torque.readers.torque_datareader import TorqueDataReader
 
 
 class TorqueDatahandler:

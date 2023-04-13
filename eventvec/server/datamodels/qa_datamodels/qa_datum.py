@@ -1,4 +1,4 @@
-from eventvec.server.model.qa_models.datamodel.qa_answer import QAAnswer
+from eventvec.server.datamodels.qa_datamodels.qa_answer import QAAnswer
 
 
 class QADatum:

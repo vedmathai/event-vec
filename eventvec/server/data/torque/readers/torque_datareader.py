@@ -2,15 +2,15 @@ import json
 import os
 from typing import List
 
-from eventvec.server.data_readers.abstract import AbstractDataReader
-from eventvec.server.data_readers.torque_reader.torque_model.torque_dataset import TorqueDataset
+from eventvec.server.data.abstract import AbstractDatareader
+from eventvec.server.data.torque.readers.torque_model.torque_dataset import TorqueDataset
 
 
-class TorqueDataReader(AbstractDataReader):
+class TorqueDataReader(AbstractDatareader):
     def __init__(self):
         super().__init__()
-        self._folder = self.config.torque_data_location()
-        self._file_names = self.config.torque_data_file_names()
+        self._folder = self._config.torque_data_location()
+        self._file_names = self._config.torque_data_file_names()
 
     def read_file(self, filepath):
         with open(filepath) as f:

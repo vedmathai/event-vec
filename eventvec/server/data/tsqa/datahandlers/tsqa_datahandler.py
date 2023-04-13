@@ -1,5 +1,5 @@
-from eventvec.server.data_readers.time_sensitive_qa_reader.time_sensitive_qa_datareader import TSQADataReader
-from eventvec.server.data_handlers.qa_datahandlers.tsqa_datahandler.tsqa_converter import TSQAConverter
+from eventvec.server.data.tsqa.readers.time_sensitive_qa_datareader import TSQADataReader
+from eventvec.server.data.tsqa.datahandlers.tsqa_converter import TSQAConverter
 
 
 class TSQADatahandler:

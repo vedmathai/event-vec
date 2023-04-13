@@ -1,5 +1,5 @@
-from eventvec.server.data_readers.torque_reader.torque_model.torque_events import TorqueEvents
-from eventvec.server.data_readers.torque_reader.torque_model.torque_question_answer_pairs import TorqueQuestionAnswerPairs
+from eventvec.server.data.torque.readers.torque_model.torque_events import TorqueEvents
+from eventvec.server.data.torque.readers.torque_model.torque_question_answer_pairs import TorqueQuestionAnswerPairs
 
 
 class TorqueDatum:

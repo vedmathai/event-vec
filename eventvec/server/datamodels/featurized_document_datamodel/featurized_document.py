@@ -1,5 +1,5 @@
-from eventvec.server.model.featurized_document_model.featurized_sentence import FeaturizedSentence  # noqa
-from eventvec.server.model.featurized_document_model.utils import resolve_coreference_pointers
+from eventvec.server.datamodels.featurized_document_datamodel.featurized_sentence import FeaturizedSentence  # noqa
+from eventvec.server.datamodels.featurized_document_datamodel.utils import resolve_coreference_pointers
 
 
 class FeaturizedDocument:

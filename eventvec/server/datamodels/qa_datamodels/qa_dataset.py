@@ -1,4 +1,4 @@
-from eventvec.server.model.qa_models.datamodel.qa_datum import QADatum
+from eventvec.server.datamodels.qa_datamodels.qa_datum import QADatum
 
 
 class QADataset:

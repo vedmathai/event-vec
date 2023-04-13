@@ -9,13 +9,10 @@ from collections import defaultdict
 
 
 from eventvec.server.config import Config
-from eventvec.server.data_handlers.qa_datahandlers.tsqa_datahandler.tsqa_datahandler import TSQADatahandler
-from eventvec.server.data_handlers.qa_datahandlers.torque_datahandler.torque_datahandler import TorqueDatahandler
-from eventvec.server.model.qa_models.torch_models.qa_descriminator import QuestionDescriminatorModel
-from eventvec.server.model.qa_models.torch_models.qa_base import QuestionAnsweringBase
+from eventvec.server.data.torque.datahandlers.torque_datahandler import TorqueDatahandler
+from eventvec.server.tasks.question_answering.models.qa_base import QuestionAnsweringBase
 from eventvec.server.reporters.report_model.report_model import ReportModel
-from eventvec.server.entry_points.time_sensitive_qa.time_sensitive_qa_generator import TSQANoiseGenerator
-from eventvec.server.model.qa_models.datamodel.qa_datum import QADatum
+from eventvec.server.datamodels.qa_datamodels.qa_datum import QADatum
 from eventvec.server.featurizers.lingusitic_featurizer import LinguisticFeaturizer
 
 
@@ -74,9 +71,9 @@ class QATrainBase:
             for datumi, datum in enumerate(train_data):
                 self._train_datum(datum)
                 if (datumi + 1) % int(.1 * data_size) == 0:
-                    print('epoch {}, train %: {}'.format(epochi, float(datumi) / data_size))
+                    print('epoch {}, train %: {}'.format(epochi, float(datumi) . data_size))
             self.eval()
-            # print('ratio:', self._answer_count / self._total_count)
+            # print('ratio:', self._answer_count . self._total_count)
             # print(self._counter)
 
 
