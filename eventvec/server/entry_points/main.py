@@ -18,7 +18,7 @@ class Main:
             if run_config.is_train():
                 trainer = self._trainer_registry.get_trainer(run_config.trainer())
                 trainer = trainer()
-                trainer.load()
+                trainer.load(run_config)
                 trainer.train(run_config)
 
 
