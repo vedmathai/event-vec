@@ -3,7 +3,7 @@
         {
             "is_train": true,
             "trainer": "qa_trainer",
-            "llm": "roberta",
+            "llm": "bigbird",
             "use_tense": "false",
             "epochs": 40,
             "dataset": "torque"
@@ -11,7 +11,7 @@
         {
             "is_train": true,
             "trainer": "qa_trainer",
-            "llm": "roberta",
+            "llm": "bigbird",
             "use_tense": "true",
             "epochs": 40,
             "dataset": "torque"

@@ -1,10 +1,12 @@
 import json
+import os
 
 
 class Config:
     _instance = None
 
     def __init__(self):
+        self._pythonpath = None
         self._matres_data_location = None
         self._experiment_type = None
         self._book_corpus_data_location = None
@@ -19,9 +21,15 @@ class Config:
     @staticmethod
     def instance():
         if Config._instance is None:
-            with open('eventvec/server/config.json') as f:
+            pythonpath = os.environ['PYTHONPATH']
+            config_filepath = os.path.join(pythonpath, 'eventvec/server/config.json')
+            with open(config_filepath) as f:
                 Config._instance = Config.from_dict(json.load(f))
+            Config._instance.set_pythonpath(pythonpath)
         return Config._instance
+    
+    def pythonpath(self):
+        return self._pythonpath
 
     def matres_data_location(self):
         return self._matres_data_location
@@ -34,6 +42,10 @@ class Config:
 
     def run_configs_file(self):
         return self._run_configs_file
+    
+    def run_configs_abs_filepath(self):
+        filepath = os.path.join(self.pythonpath(), self.run_configs_file())
+        return filepath
 
     def experiment_type(self):
         return self._experiment_type
@@ -61,6 +73,9 @@ class Config:
 
     def torque_data_file_names(self):
         return self._torque_data_file_names
+    
+    def set_pythonpath(self, pythonpath):
+        self._pythonpath = pythonpath
 
     def set_timebank_data_location(self, timebank_data_location):
         self._timebank_data_location = timebank_data_location

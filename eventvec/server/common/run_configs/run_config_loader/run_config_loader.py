@@ -10,7 +10,7 @@ class RunConfigsLoader:
         self._run_configs = None
 
     def load(self):
-        with open(self._config.run_configs_file(), 'rt') as f:
+        with open(self._config.run_configs_abs_filepath(), 'rt') as f:
             run_configs_dict = json.load(f)
             self._run_configs = RunConfigs.from_dict(run_configs_dict)
         return run_configs_dict
