@@ -49,8 +49,8 @@ class QATrainBase:
         self._base_model = base_model_class()
         self._base_model.to(device)
         self._config = Config.instance()
-        self._task_criterion = nn.CrossEntropyLoss(weight=torch.tensor([0.025, 1-.025]))
-        self._tense_criterion = nn.CrossEntropyLoss(weight=torch.tensor([0.995, .99, .99, .014]))
+        self._task_criterion = nn.CrossEntropyLoss(weight=torch.tensor([0.025, 1-.025])).to(device)
+        self._tense_criterion = nn.CrossEntropyLoss(weight=torch.tensor([0.995, .99, .99, .014])).to(device)
         self._linguistic_featurizer = LinguisticFeaturizer()
 
         self._base_model_optimizer = Adam(
@@ -103,14 +103,16 @@ class QATrainBase:
         self._total_count += len(answer_bitmap)
         required_answer, answer_bitmap = self._datum2bitmap(qa_datum, answer_bitmap, tokens, run_config)
         answer = []
+        answer_bitmap = torch.Tensor(answer_bitmap).to(device)
+        token_outputs = token_outputs.to(device)
+        loss = self._task_criterion(token_outputs, answer_bitmap)
         for token_i, token in enumerate(token_outputs):
-            answer_tensor = torch.Tensor(answer_bitmap[token_i], device=device)
-            tense_answer_tensor = torch.Tensor(tense_bitmap[token_i], device=device)
+            #answer_tensor = torch.Tensor(answer_bitmap[token_i]).to(device)
+            #tense_answer_tensor = torch.Tensor(tense_bitmap[token_i]).to(device)
             if token[1] > token[0]:
                 answer += [tokens[token_i]]
-            loss = self._task_criterion(token, answer_tensor)
-            tense_loss = self._tense_criterion(tense_answer[token_i], tense_answer_tensor)
-            losses += [loss]
+            #tense_loss = self._tense_criterion(tense_answer[token_i], tense_answer_tensor)
+        losses += [loss]
         answer = self._tokens2words(answer)
         loss_item_mean = np.mean([l.item() for l in losses])
         self._jade_logger.new_train_datapoint(required_answer, answer, loss_item_mean, {"question": question})
@@ -210,16 +212,13 @@ class QATrainBase:
             answer = []
             token_i = 0
             losses = []
-            while token_i < len(token_outputs):
-                token = token_outputs[token_i]
-                answer_tensor = torch.Tensor(answer_bitmap[token_i], device=device)
-                loss = self._task_criterion(token, answer_tensor)
-                losses.append(loss)
-                if token[1] > token[0] and token_i < len(tokens):
-                    answer_tokens = []
-                    answer_tokens += [tokens[token_i]]
-                    answer += self._tokens2words(answer_tokens)
-                token_i += 1
+            answer_tensor = torch.Tensor(answer_bitmap).to(device)
+            loss = self._task_criterion(token_outputs, answer_tensor)
+            losses.append(loss)
+            for token_i, token in enumerate(token_outputs):
+                if token[1] > token[0]:
+                    answer += [tokens[token_i]]
+            answer = self._tokens2words(answer)
             loss_item_mean = np.mean([l.item() for l in losses])
             self._jade_logger.new_evaluate_datapoint(required_answer, answer, loss_item_mean, {"question": question})
 
