@@ -9,7 +9,7 @@ from eventvec.server.data.torque.readers.torque_model.torque_dataset import Torq
 class TorqueDataReader(AbstractDatareader):
     def __init__(self):
         super().__init__()
-        self._folder = self._config.torque_data_location()
+        self._folder = self._config.torque_abs_data_location()
         self._file_names = self._config.torque_data_file_names()
 
     def read_file(self, filepath):

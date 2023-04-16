@@ -1,5 +1,6 @@
 import json
 import os
+from jadelogs import JadeLogger
 
 
 class Config:
@@ -16,6 +17,7 @@ class Config:
         self._tsqa_file2annotation_map = {}
         self._torque_data_location = None
         self._torque_data_file_names = None
+        self._jade_logger = JadeLogger()
 
 
     @staticmethod
@@ -68,8 +70,9 @@ class Config:
     def tsqa_file2annotation_map(self):
         return self._tsqa_file2annotation_map
 
-    def torque_data_location(self):
-        return self._torque_data_location
+    def torque_abs_data_location(self):
+        location = self._jade_logger.file_manager.data_filepath(self._torque_data_location)
+        return location
 
     def torque_data_file_names(self):
         return self._torque_data_file_names

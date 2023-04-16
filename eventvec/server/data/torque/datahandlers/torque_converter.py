@@ -10,7 +10,7 @@ class TorqueConverter:
         qa_dataset = QADataset()
         for torque_document in torque_documents:
             data_length = len(torque_document.data())
-            for datum in torque_document.data()[-int(0.4 * data_length):]:
+            for datum in torque_document.data():
                 self._torque_datum2qa_data(datum, qa_dataset)
         qa_dataset.set_name("Torque_dataset")
         return qa_dataset
