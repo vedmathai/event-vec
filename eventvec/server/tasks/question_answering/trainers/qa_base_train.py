@@ -12,9 +12,10 @@ from eventvec.server.datamodels.qa_datamodels.qa_datum import QADatum
 from eventvec.server.featurizers.lingusitic_featurizer import LinguisticFeaturizer
 from eventvec.server.tasks.question_answering.datahandlers.datahanders_registry import DatahandlersRegistry
 from eventvec.server.tasks.question_answering.models.registry import QuestionAnsweringModelsRegistry
+from eventvec.server.tasks.question_answering.trainers.optimization import BertAdam
 
 
-LEARNING_RATE = 2e-5
+LEARNING_RATE = 1e-5
 BATCH_SIZE = 64
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -36,6 +37,16 @@ future_modals = [
     'going to',
 ]
 
+sentence_breaks = {
+    'bigbird': '[SEP]',
+    'roberta': '</s>',
+}
+
+token_delimiters = {
+    'bigbird': '▁',
+    'roberta': 'Ġ',
+}
+
 class QATrainBase:
     def __init__(self):
         self._jade_logger = JadeLogger()
@@ -46,17 +57,31 @@ class QATrainBase:
         datahandler_class = self._datahandlers_registry.get_datahandler(run_config.dataset())
         self._datahandler = datahandler_class()
         base_model_class = self._models_registry.get_model('qa_base')
-        self._base_model = base_model_class()
+        self._base_model = base_model_class(run_config)
         self._base_model.to(device)
         self._config = Config.instance()
         self._task_criterion = nn.CrossEntropyLoss(weight=torch.tensor([0.025, 1-.025])).to(device)
         self._tense_criterion = nn.CrossEntropyLoss(weight=torch.tensor([0.995, .99, .99, .014])).to(device)
         self._linguistic_featurizer = LinguisticFeaturizer()
 
+
+        param_optimizer = list(self._base_model.named_parameters())
+        no_decay = ['bias', 'LayerNorm.bias', 'LayerNorm.weight']
+        optimizer_grouped_parameters = [
+            {'params': [p for n, p in param_optimizer if not any(nd in n for nd in no_decay)], 'weight_decay': 0.01},
+            {'params': [p for n, p in param_optimizer if any(nd in n for nd in no_decay)], 'weight_decay': 0.0}
+        ]
+    
+        #self._base_model_optimizer = BertAdam(optimizer_grouped_parameters,
+        #                     lr=1e-5,
+        #                     warmup=0.1,
+        #                     t_total=24000 * 10)
+        
         self._base_model_optimizer = Adam(
             self._base_model.parameters(),
             lr=LEARNING_RATE,
         )
+
         self.losses = []
         self.task_losses = []
         self._total_count = 0
@@ -101,19 +126,22 @@ class QATrainBase:
         answer_bitmap = [[1, 0] for _ in token_outputs]
         tense_bitmap = [[0, 0, 0, 1] for _ in token_outputs]
         self._total_count += len(answer_bitmap)
-        required_answer, answer_bitmap = self._datum2bitmap(qa_datum, answer_bitmap, tokens, run_config)
+        required_answer, answer_bitmap, tense_bitmap = self._datum2bitmap(qa_datum, answer_bitmap, tense_bitmap, tokens, run_config)
         answer = []
         answer_bitmap = torch.Tensor(answer_bitmap).to(device)
+        tense_bitmap = torch.Tensor(tense_bitmap).to(device)
         token_outputs = token_outputs.to(device)
         loss = self._task_criterion(token_outputs, answer_bitmap)
+        tense_loss = self._tense_criterion(tense_answer, tense_bitmap)
         for token_i, token in enumerate(token_outputs):
             #answer_tensor = torch.Tensor(answer_bitmap[token_i]).to(device)
             #tense_answer_tensor = torch.Tensor(tense_bitmap[token_i]).to(device)
             if token[1] > token[0]:
                 answer += [tokens[token_i]]
-            #tense_loss = self._tense_criterion(tense_answer[token_i], tense_answer_tensor)
+        if run_config.use_tense() is True:
+            loss = loss + tense_loss
         losses += [loss]
-        answer = self._tokens2words(answer)
+        answer = self._tokens2words(answer, run_config)
         loss_item_mean = np.mean([l.item() for l in losses])
         self._jade_logger.new_train_datapoint(required_answer, answer, loss_item_mean, {"question": question})
         self.losses += [sum(losses)]
@@ -125,8 +153,9 @@ class QATrainBase:
             self.losses = []
             self._jade_logger.new_train_batch()
 
-    def _datum2bitmap(self, qa_datum, answer_bitmap, tokens, run_config):
+    def _datum2bitmap(self, qa_datum, answer_bitmap, tense_bitmap, tokens, run_config):
         token_indices = []
+        token2tense = {}
         required_answer = []
         context = qa_datum.context()
         if context[0] not in self._featurized_context_cache:
@@ -135,17 +164,25 @@ class QATrainBase:
         context_i2token = {}
         for sentence in featurized_context.sentences():
             for token in sentence.tokens():
-                context_i2token[token.i()] = token
+                context_i2token[token.idx()] = token
         for answer in qa_datum.answers():
             required_answer.append(answer.text())
             for paragraph_i, paragraph in enumerate(context):
                 if paragraph_i == answer.paragraph_idx():
                     if answer.start_location() is not None and answer.end_location() is not None:
                         answer_token_indices = self._align_answer(run_config.llm(), tokens, context, answer.start_location(), answer.end_location())
-                        token_indices.extend(answer_token_indices)
+                        token_indices.extend(answer_token_indices) 
+                        token = context_i2token.get(answer.start_location())
+                        for index in answer_token_indices:
+                            token2tense[index] = token.tense() if token is not None else None
+                            if any(future_modal in paragraph[max(0, answer.start_location() - 20): answer.start_location()].lower() for future_modal in future_modals):
+                                token2tense[index] = 'Future'
         for index in token_indices:
             answer_bitmap[index] = [0, 1]
-        return required_answer, answer_bitmap
+            tense_array = [0] * 4
+            tense_array[tense_mapping[token2tense[index]]] = 1
+            tense_bitmap[index] = tense_array
+        return required_answer, answer_bitmap, tense_bitmap
 
     def _align_answer(self, llm, tokens, paragraph, start_index, end_index):
         if llm == 'bigbird':
@@ -156,8 +193,8 @@ class QATrainBase:
 
     def _align_answer_bigbird(self, llm, tokens, paragraph, start_index, end_index):
         answer = paragraph[0][start_index: end_index]
-        token_delimiter = '▁'
-        token_i = tokens.index('[SEP]')
+        token_delimiter = token_delimiters.get(llm)
+        token_i = tokens.index(sentence_breaks.get(llm))
         summed_token_indices = []
         all_answer_indices = []
         summed_token = ""
@@ -174,15 +211,38 @@ class QATrainBase:
             token_i += 1
         return all_answer_indices
     
-    def _tokens2words(self, tokens):
+    def _align_answer_roberta(self, llm, tokens, paragraph, start_index, end_index):
+        answer = paragraph[0][start_index: end_index]
+        token_delimiter = token_delimiters.get(llm)
+        sentence_break = sentence_breaks.get(llm)
+        token_i = tokens.index(sentence_break)
+        summed_token_indices = []
+        all_answer_indices = []
+        summed_token = ""
+        while token_i < len(tokens):
+            token = tokens[token_i]
+            if token[0] == token_delimiter :
+                summed_token = token[1:]
+                summed_token_indices = [token_i]
+            if token[0] != token_delimiter and token not in [',', '.', '?', ':', ';', sentence_break]:
+                summed_token += token
+                summed_token_indices.append(token_i)
+            if summed_token.lower() == answer.lower():
+                all_answer_indices.extend(summed_token_indices)
+            token_i += 1
+        return all_answer_indices
+    
+    def _tokens2words(self, tokens, run_config):
+        token_delimiter = token_delimiters.get(run_config.llm())
+        sentence_break = sentence_breaks.get(run_config.llm())
         all_words = []
         current_word = []
         for token in tokens:
-            if token[0] == '▁':
+            if token[0] == token_delimiter:
                 if len(current_word) > 0:
                     all_words.append(''.join(current_word))
                 current_word = [token[1:]]
-            else:
+            elif token not in [sentence_break]:
                 current_word += [token]
         return all_words
                 
@@ -206,9 +266,10 @@ class QATrainBase:
         with torch.no_grad():
             token_outputs, tense_outputs = self._base_model(question, context[0])
             answer_bitmap = [[1, 0] for _ in token_outputs]
+            tense_bitmap = [[0, 0, 0, 1] for _ in token_outputs]
             required_answer = []
             wordid2tokenid, tokens = self._base_model.wordid2tokenid(question, context[0])
-            required_answer, answer_bitmap = self._datum2bitmap(qa_datum, answer_bitmap, tokens, run_config)
+            required_answer, answer_bitmap, tense_bitmap = self._datum2bitmap(qa_datum, answer_bitmap, tense_bitmap, tokens, run_config)
             answer = []
             token_i = 0
             losses = []
@@ -218,7 +279,7 @@ class QATrainBase:
             for token_i, token in enumerate(token_outputs):
                 if token[1] > token[0]:
                     answer += [tokens[token_i]]
-            answer = self._tokens2words(answer)
+            answer = self._tokens2words(answer, run_config)
             loss_item_mean = np.mean([l.item() for l in losses])
             self._jade_logger.new_evaluate_datapoint(required_answer, answer, loss_item_mean, {"question": question})
 
