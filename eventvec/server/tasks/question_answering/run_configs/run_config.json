@@ -5,8 +5,14 @@
             "trainer": "qa_trainer",
             "llm": "roberta",
             "use_tense": true,
-            "epochs": 40,
-            "dataset": "torque"
+            "use_aspect": true,
+            "use_part_of_speech": true,
+            "epochs": 60,
+            "dataset": "torque",
+            "use_negation": true,
+            "use_question_event": true,
+            "use_root_verb": true,
+            "use_question_classification": true
         }
     ]
 }
