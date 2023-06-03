@@ -9,6 +9,8 @@ class QADatum:
         self._answers = []
         self._alternate_answer_sets = []
         self._question_events = None
+        self._use_in_eval = False
+        self._context_events = []
 
     def id(self):
         return self._id
@@ -27,6 +29,12 @@ class QADatum:
     
     def alternate_answer_sets(self):
         return self._alternate_answer_sets
+    
+    def use_in_eval(self):
+        return self._use_in_eval
+    
+    def context_events(self):
+        return self._context_events
 
     def set_id(self, id):
         self._id = id
@@ -52,6 +60,15 @@ class QADatum:
     def set_question_events(self, question_events):
         self._question_events = question_events
 
+    def set_use_in_eval(self, use_in_eval):
+        self._use_in_eval = use_in_eval
+
+    def set_context_events(self, context_events):
+        self._context_events = context_events
+
+    def add_context_event(self, context_event):
+        self._context_events.append(context_event)
+
     def to_dict(self):
         return {
             "id": self.id(),
@@ -59,7 +76,9 @@ class QADatum:
             "context": self.context(),
             "answers": [i.to_dict() for i in self.answers()],
             "alternate_answer_sets": [[i.to_dict() for i in k] for k in self.alternate_answer_sets()],
-            "question_events": self._question_events()
+            "question_events": self.question_events(),
+            "use_in_eval": self.use_in_eval(),
+            "context_events": self.context_events(),
         }
 
     @staticmethod
@@ -71,4 +90,6 @@ class QADatum:
         qa_datum.set_answers(QAAnswer.from_dict(i) for i in (val['answers']))
         qa_datum.set_alternate_answer_sets([[QAAnswer.from_dict(i) for i in k] for k in val['alternate_answer_sets']])
         qa_datum.set_question_events(val['question_events'])
+        qa_datum.set_use_in_eval(val['use_in_eval'])
+        qa_datum.set_context_events(val['context_events'])
         return qa_datum

@@ -15,6 +15,21 @@ class TorqueConverter:
 
     def _torque_datum2qa_data(self, torque_datum, qa_dataset):
         answer_spans = set([i.lower() for i in torque_datum.events().answer().spans()])
+        qa_datum = QADatum()
+        question_text = 'Extract all the events'
+        qa_datum.set_question(question_text)
+        qa_datum.set_context([torque_datum.passage()])
+        context_events = []
+        for answeri, answer in enumerate(torque_datum.events().answer().indices()):
+            qa_answer = QAAnswer()
+            qa_answer.set_paragraph_idx(0)
+            qa_answer.set_start_location(answer[0])
+            qa_answer.set_end_location(answer[1])
+            answer_text = torque_datum.events().answer().spans()[answeri]
+            qa_answer.set_text(answer_text)
+            qa_datum.add_answer(qa_answer)
+            qa_datum.set_use_in_eval(False)
+            context_events.append(qa_answer)
         for question in torque_datum.question_answer_pairs().questions():
             qa_datum = QADatum()
             question_text = question.question()
@@ -22,11 +37,12 @@ class TorqueConverter:
             common = []
             for answer_token in answer_spans:
                 for question_token in question_tokens:
-                    if answer_token in question_token:
+                    if answer_token.lower() in question_token:
                         common.append(answer_token)
             qa_datum.set_question_events(common)
             qa_datum.set_question(question_text)
             qa_datum.set_context([torque_datum.passage()])
+            qa_datum.set_context_events(context_events)
             for answeri, answer in enumerate(question.answer().indices()):
                 qa_answer = QAAnswer()
                 qa_answer.set_paragraph_idx(0)
