@@ -2,9 +2,9 @@ from transformers import RobertaTokenizer
 
 
 from eventvec.server.featurizers.lingusitic_featurizer import LinguisticFeaturizer  # noqa
-from eventvec.server.data_handlers.book_corpus_datahandlers.bookcorpus_datahandler import BookCorpusDatahandler  # noqa
-from eventvec.server.data_handlers.book_corpus_input_datum.book_corpus_model_input_data import BookCorpusModelInputData  # noqa
-from eventvec.server.data_handlers.book_corpus_input_datum.book_corpus_model_input_datum import BookCorpusModelInputDatum  # noqa
+from eventvec.server.data.book_corpus.book_corpus_datahandlers.bookcorpus_datahandler import BookCorpusDatahandler  # noqa
+from eventvec.server.tasks.tense_classification.datahandlers.book_corpus_input_datum.book_corpus_model_input_data import BookCorpusModelInputData  # noqa
+from eventvec.server.tasks.tense_classification.datahandlers.book_corpus_input_datum.book_corpus_model_input_datum import BookCorpusModelInputDatum  # noqa
 
 verb_tags = ["VB", "VBD", "VBG", "VBN", "VBP", "VBZ"]
 

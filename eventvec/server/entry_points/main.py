@@ -1,3 +1,5 @@
+import os
+
 from eventvec.server.config import Config
 from eventvec.server.common.run_configs.run_config_loader.run_config_loader import RunConfigsLoader
 from eventvec.server.entry_points.registries.trainer_registry import TrainerRegistry
@@ -15,7 +17,7 @@ class Main:
     def run(self):
         run_configs = self._run_config_loader.run_configs()
         for run_config in run_configs.run_configs():
-            if run_config.is_train():
+            if run_config.is_train() and run_config.id() == os.environ['RUNCONFIGID']:
                 trainer = self._trainer_registry.get_trainer(run_config.trainer())
                 trainer = trainer()
                 trainer.load(run_config)
