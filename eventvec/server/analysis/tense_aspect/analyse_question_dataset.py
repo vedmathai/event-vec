@@ -42,7 +42,40 @@ future_modals = [
     'may',
     'can',
     'going to',
+    'to be',
 ]
+
+said_verbs = set(["observe", "observes", "observed", "describe", "describes", "described", "discuss", "discusses", "discussed",
+					  "report", "reports", "reported", "outline", "outlines", "outlined", "remark", "remarks", "remarked", 	
+					  "state", "states", "stated", "go on to say that", "goes on to say that", "went on to say that", 	
+					  "quote that", "quotes that", "quoted that", "say", "says", "said", "mention", "mentions", "mentioned",
+					  "articulate", "articulates", "articulated", "write", "writes", "wrote", "relate", "relates", "related",
+					  "convey", "conveys", "conveyed", "recognise", "recognises", "recognised", "clarify", "clarifies", "clarified",
+					  "acknowledge", "acknowledges", "acknowledged", "concede", "concedes", "conceded", "accept", "accepts", "accepted",
+					  "refute", "refutes", "refuted", "uncover", "uncovers", "uncovered", "admit", "admits", "admitted",
+					  "demonstrate", "demonstrates", "demonstrated", "highlight", "highlights", "highlighted", "illuminate", "illuminates", "illuminated", 							  
+                      "support", "supports", "supported", "conclude", "concludes", "concluded", "elucidate", "elucidates", "elucidated",
+					  "reveal", "reveals", "revealed", "verify", "verifies", "verified", "argue", "argues", "argued", "reason", "reasons", "reasoned",
+					  "maintain", "maintains", "maintained", "contend", "contends", "contended", 
+					    "feel", "feels", "felt", "consider", "considers", "considered", 						  
+                      "assert", "asserts", "asserted", "dispute", "disputes", "disputed", "advocate", "advocates", "advocated",
+					  "opine", "opines", "opined", "think", "thinks", "thought", "imply", "implies", "implied", "posit", "posits", "posited",
+					  "show", "shows", "showed", "illustrate", "illustrates", "illustrated", "point out", "points out", "pointed out",
+					  "prove", "proves", "proved", "find", "finds", "found", "explain", "explains", "explained", "agree", "agrees", "agreed",
+					  "confirm", "confirms", "confirmed", "identify", "identifies", "identified", "evidence", "evidences", "evidenced",
+					  "attest", "attests", "attested", "believe", "believes", "believed", "claim", "claims", "claimed", "justify", "justifies", "justified", 							  
+                      "insist", "insists", "insisted", "assume", "assumes", "assumed", "allege", "alleges", "alleged", "deny", "denies", "denied",
+					   "disregard", "disregards", "disregarded", 
+					   "surmise", "surmises", "surmised", "note", "notes", "noted",
+					  "suggest", "suggests", "suggested", "challenge", "challenges", "challenged", "critique", "critiques", "critiqued",
+					  "emphasise", "emphasises", "emphasised", "declare", "declares", "declared", "indicate", "indicates", "indicated",
+					  "comment", "comments", "commented", "uphold", "upholds", "upheld"])
+
+future_said_verbs = set([
+    'anticipate', 'anticipates', 'anticipated', "hypothesise", "hypothesises", "hypothesised", "propose", "proposes", "proposed", "theorise", "theorises", "theorised", "posit", "posits", "posited",
+    "speculate", "speculates", "speculated", "suppose", "supposes", "supposed", "conjecture", "conjectures", "conjectured", "envisioned", "envision", "envisions", "forecasts", 'foresee', 'forecast', 'forecasted',
+    'foresaw', 'estimate', 'estimated', 'estimates'
+])
 
 past_perf_aux = [
     'had',
@@ -87,30 +120,34 @@ class TenseAspectAnalyser:
         self._analyze_train_data()
 
     def _analyze_train_data(self):
-        train_data = self._eval_data
+        train_data = self._train_data
         data_size = len(train_data)
         for datum_i, datum in enumerate(train_data):
             self._analyze_datum(datum_i, datum)
         for k, v in sorted(self._counter.items(), key=lambda x: str(x[0])):
-            print(k, v)
+            pass
+            # print(k, v)
         print('-' * 24)
         for k, v in sorted(self._answer_counter.items(), key=lambda x: str(x[0])):
-            print(k, v)
+            pass
+            #print(k, v)
         tuples = []
         for k, v in self._counter.items():
             tuples.append((k[0], k[1], v))
         mutual_information = self.calculate_mutual_information(tuples)
         info, totals = self.calculate_feature_information(tuples)
-        for ii, (k, v) in enumerate(sorted(info.items(), key=lambda x: str(x[0]))):
-            print('{} & {} & {} & {} & {} \\\\'.format(ii + 1, k[1][0], k[2], int(v*1000) / 1000, totals[k]))
+        for ii, (k, v) in enumerate(sorted(info.items(), key=lambda x: totals[x[0]])):
+            pass
+            #print('info {} & {} & {} & {} & {} & {} & {} \\\\'.format(ii + 1, k[0][0], k[0][1], k[1][0], k[1][1], int(v*1000) / 1000, totals[k]))
         contexts = {}
         for ii, i in enumerate(self._examples):
             contexts[i[6]] = len(contexts)
         for ii, i in enumerate(contexts.keys()):
-            print('{} & {} \\\\'.format(ii + 1, i))
-        for ii, i in enumerate(self._examples):
+            pass
+            #print('{} & {} \\\\'.format(ii + 1, i))
+        for ii, i in enumerate(sorted(self._examples, key=lambda x: x[7])):
             context = contexts[i[6]]
-            print('{} & {} & {} & {} & {} & {} & {} & {} & {} \\\\'.format(ii + 1, i[0], i[1], i[2], i[3], i[4], i[5], context, i[7]))
+            #print('{} & {} & {} & {} & {} & {} & {} & {} & {} \\\\'.format(ii + 1, i[0], i[1], i[2], i[3], i[4], i[5], context, i[7]))
 
 
 
@@ -138,6 +175,8 @@ class TenseAspectAnalyser:
         answer_tenses = []
         answer_tuples = []
         bracket_context = []
+        self._tokeni2tense = defaultdict()
+
         tense2count = defaultdict(int)
         if context[0] not in self._featurized_context_cache:
             self._featurized_context_cache[context[0]] = self._linguistic_featurizer.featurize_document(context[0])
@@ -153,81 +192,21 @@ class TenseAspectAnalyser:
             for token in sentence.tokens():
                 context_i2token[token.idx()] = token
                 if token.text() in qa_datum.question_events():
-                    question_token = token
-                    question_tense = token.tense()
-                    question_aspect = token.aspect() if (token is not None) else None
-                    #question_aspect = token.aspect() if (token is not None and token.text() in past_perf_aux + pres_perf_aux) else None
-                    if use_parent and token is not None and 'aux' in token.children():
-                        for child in token.children()['aux']:
-                            if child.tense() is not None:
-                                question_tense = child.tense()
-                                if child.text() in past_perf_aux + pres_perf_aux:
-                                    aspect = 'Perf'
-                    paragraph = context[0]
-                    pos = token.tag()
-                    if any(future_modal in paragraph[max(0, token.idx() - 20): token.idx()].lower() for future_modal in future_modals):
-                        question_tense = 'VFuture'
-                    temp = token
-                    while use_parent and question_tense is None and token is not None and (temp.tense() is None) and temp.parent() is not None:
-                        temp = temp.parent()
-                        question_tense = temp.tense()
-                        question_aspect = token.aspect() if (token is not None and token.text() in past_perf_aux + pres_perf_aux ) else None
-                        question_pos = token.tag() if token is not None else None
-                        if any(future_modal in paragraph[max(0, token.idx() - 20): token.idx()].lower() for future_modal in future_modals):
-                            question_tense = 'VFuture'
-                            question_pos = 'VFuture'
-                    if str(pos)[0] == 'V':
-                        question_pos = verb_map.get(pos, verb_map['VB'])
-                    question_pos = pos
+                    tense, aspect = self.question_tense_aspect(token, context)
+                    question_tense = tense
+                    question_aspect = aspect
+
         for answer in qa_datum.answers():
             required_answer.append(answer.text())
             for paragraph_i, paragraph in enumerate(context):
                 if paragraph_i == answer.paragraph_idx():
                     if answer.start_location() is not None and answer.end_location() is not None:
                         token = context_i2token.get(answer.start_location())
-                        tense = token.tense() if token is not None else None
-                        temp = token
-
-                        pos = token.tag() if token is not None else None
-                        aspect = token.aspect() if (token is not None) else None
-                        # aspect = token.aspect() if (token is not None and token.text() in past_perf_aux + pres_perf_aux) else None
-
-                        if any(future_modal in paragraph[max(0, answer.start_location() - 20): answer.start_location()].lower() for future_modal in future_modals):
-                            tense = 'VFuture'
-                            pos = 'VFuture'
-
-                        if use_parent and token is not None and 'aux' in token.children():
-                            for child in token.children()['aux']:
-                                if child.tense() is not None:
-                                    tense = child.tense()
-                                    if child.text() in past_perf_aux + pres_perf_aux:
-                                        aspect = 'Perf'
-
-                        
-                        while use_parent and (tense is None and token is not None and (temp.tense() is None) and temp.parent() is not None):
-                            temp = temp.parent()
-                            tense = temp.tense()
-                            aspect = token.aspect() if (token is not None and token.text() in past_perf_aux + pres_perf_aux) is not None else None
-                            pos = token.tag() if token is not None else None
-                            if any(future_modal in paragraph[max(0, token.idx() - 20): token.idx()].lower() for future_modal in future_modals):
-                                tense = 'VFuture'
-                                pos = 'VFuture'
-
+                        tense, aspect = self.question_tense_aspect(token, context)
                         answer_tenses += [tense]
                         answer_aspects += [aspect]
-                        if str(pos)[0] == 'V':
-                            answer_pos = verb_map.get(pos, verb_map['VB'])
                         answer_tuples += [tuple([tense, aspect, 'in'])]
-                        if tense == 'VFuture':
-                            self._questions.add(qa_datum.question())
                         key = (question_tense, question_aspect, tense, aspect, 'in')
-                        if self._example_counter[key] <= 0 and question_tense in ['Pres', 'Past', 'VFuture'] and tense in ['Pres', 'Past', 'VFuture'] :
-                            self._examples.append([question_tense, question_aspect, tense, aspect, answer.text(), qa_datum.question(), qa_datum.context()[0], 'in'])
-                            self._example_counter[key] += 1
-                        #if True and question_tense == 'Past' and question_aspect is None and tense == 'Past' and aspect is None and 'happened before' in qa_datum.question():
-
-                        #    print(qa_datum.question(), question_token.text(), token.text(), ' '.join([str(i) for i in bracket_context]))
-                        #    print()
 
         for answer in qa_datum.context_events():
             if answer.text() not in required_answer:
@@ -235,60 +214,24 @@ class TenseAspectAnalyser:
                     if paragraph_i == answer.paragraph_idx():
                         if answer.start_location() is not None and answer.end_location() is not None:
                             token = context_i2token.get(answer.start_location())
-                            tense = token.tense() if token is not None else None
-                            temp = token
-
-                            pos = token.tag() if token is not None else None
-                            aspect = token.aspect() if (token is not None and token.text() in past_perf_aux + pres_perf_aux) else None
-                            aspect = token.aspect() if (token is not None) else None
-
-
-                            if tense == 'Pres' and any(future_modal in paragraph[max(0, answer.start_location() - 20): answer.start_location()].lower() for future_modal in future_modals):
-                                tense = 'VFuture'
-                                pos = 'VFuture'
-
-                            if use_parent and token is not None and 'aux' in token.children():
-                                for child in token.children()['aux']:
-                                    if child.tense() is not None:
-                                        tense = child.tense()
-                                        if child.text() in past_perf_aux + pres_perf_aux:
-                                            aspect = 'Perf'
-
-                            while use_parent and token is not None and (temp.tense() is None) and temp.parent() is not None:
-                                temp = temp.parent()
-                                tense = temp.tense()
-                                aspect = token.aspect() if (token is not None and token.text() in past_perf_aux + pres_perf_aux) else None
-                                pos = token.tag() if token is not None else None
-                                if any(future_modal in paragraph[max(0, token.idx() - 20): token.idx()].lower() for future_modal in future_modals):
-                                    tense = 'VFuture'
-                                    pos = 'VFuture'
-
+                            tense, aspect = self.question_tense_aspect(token, context)
                             answer_tenses += [tense]
                             answer_aspects += [aspect]
-                            if str(pos)[0] == 'V':
-                                answer_pos = verb_map.get(pos, verb_map['VB'])
                             answer_tuples += [tuple([tense, aspect, 'out'])]
                             key = (question_tense, question_aspect, tense, aspect, 'out')
-                            if self._example_counter[key] == 0 and question_tense in ['Pres', 'Past', 'VFuture'] and tense in ['Pres', 'Past', 'VFuture']:
-                                self._examples.append([question_tense, question_aspect, tense, aspect, answer.text(), qa_datum.question(), qa_datum.context()[0], 'out'])
-                                self._example_counter[key] += 1
-                            #if False and question_tense == 'Past' and question_aspect is None and tense == 'Pres' and aspect is None and 'happened after' in qa_datum.question():
-                            #    print(qa_datum.question(), question_token.text(), token.text(), '|||', ' '.join([str(i) for i in bracket_context]))
-                            #    print()
 
 
         for answer_tuple in answer_tuples:
-            question_tuple = tuple([question_tense])
+            question_tuple = tuple([question_tense, question_aspect])
             if True or question_tense == 'Past' and answer_tuple[0] == 'Pres':
                 if 'happened after' in qa_datum.question():
-                    self._counter[((question_tuple, (question_tuple[0],), 'after')), (answer_tuple[-1])] += 1
+                    self._counter[((question_tuple, (answer_tuple[0], answer_tuple[1]), 'after')), (answer_tuple[-1])] += 1
                 if 'happened before' in qa_datum.question():
-                    self._counter[((question_tuple, (question_tuple[0],), 'before')), (answer_tuple[-1])] += 1
+                    self._counter[((question_tuple, (answer_tuple[0], answer_tuple[1]), 'before')), (answer_tuple[-1])] += 1
                 if any(i in qa_datum.question() for i in ['happened during', 'happened while']):
-                    self._counter[((question_tuple, (question_tuple[0],), 'during')), (answer_tuple[-1])] += 1
+                    self._counter[((question_tuple, (answer_tuple[0], answer_tuple[1]), 'during')), (answer_tuple[-1])] += 1
 
         
-
         if 'after' in qa_datum.question():
             self._answer_counter[(len(qa_datum.answers()), 'after')] += 1
         if 'before' in qa_datum.question():
@@ -296,10 +239,66 @@ class TenseAspectAnalyser:
         if 'during' in qa_datum.question():
             self._answer_counter[(len(qa_datum.answers()), 'during')] += 1
 
+
+    def question_tense_aspect(self, token, context):
+        tense = None
+        aspect = None
+        if token is not None:
+            #tense = 'Pres'
+            tense = None
+
+            if token.tense() is not None:
+                tense = token.tense()
+            aspect = token.aspect()
+            aux_there = False
+            if 'aux' in token.children():
+                for child in token.children()['aux']:
+                    if child.tense() is not None:
+                        tense = child.tense()
+                        if child.text() in past_perf_aux + pres_perf_aux:
+                            aux_there = True
+                            aspect = 'Perf'
+                    if child.text() == 'to':
+                        parent = token.parent()
+                        if parent is not None and parent.idx() in self._tokeni2tense:
+                            tense, aspect = self._tokeni2tense[parent.idx()]
+
+
+            if aux_there is False and aspect == 'Perf':
+                aspect = None
+        
+            paragraph = context[0]
+            if any(future_modal in paragraph[max(0, token.idx() - 20): token.idx()].lower() for future_modal in future_modals):
+                tense = 'Future'
+            #if token.text() == 'be' and 'to' in [i.text() for i in token.all_children()]:
+            #    tense = 'Future'
+
+            parent = token.parent()
+            parent_tense = None
+            parent_aspect = None
+            if parent is not None and parent.text() in said_verbs and token.dep() in ['parataxis', 'ccomp']:
+                parent_tense = parent.tense()
+                parent_aspect = parent.aspect()
+
+            if parent is not None and parent.text() in future_said_verbs and token.dep() in ['parataxis', 'ccomp']:
+                parent_tense = 'Future'
+                parent_aspect = parent.aspect()
+            
+            if parent_tense is not None and token.parent() is not None and token.tag() == 'VBG' and token.parent().idx() in self._tokeni2tense:
+                parent_tense, parent_aspect = self._tokeni2tense[token.parent().idx()]
+
+            self._tokeni2tense[token.idx()] = (tense, aspect) 
+            tense = '{}{}'.format(parent_tense, tense)
+            aspect = '{}{}'.format(parent_aspect, aspect)
+            
+        return tense, aspect
+
+
     def calculate_feature_information(self, tuples):
         X = defaultdict(lambda: defaultdict(int))
         info = defaultdict(int)
         totals = defaultdict(int)
+        weighted_average = 0
 
         for t in tuples:
             X[t[0]][t[1]] += t[2]
@@ -312,28 +311,39 @@ class TenseAspectAnalyser:
         for k in X:
             for v in X[k]:
                 info[k] -= (X[k][v] * np.log2(X[k][v]))
+        numer = 0
+        denom = 0
+        for k in info:
+            numer += info[k] * totals[k]
+            denom += totals[k]
+        print('total', numer/denom)
         return info, totals
 
     def calculate_mutual_information(self, tuples):
         X = defaultdict(int)
         Y = defaultdict(int)
         XY = defaultdict(int)
+        info = defaultdict(int)
+        info_marginal = defaultdict(int)
         for t in tuples:
-            X[t[0]] += t[2]
-            Y[t[1]] += t[2]
-            XY[(t[0], t[1])] += t[2]
+            X[tuple(t[0][0:2])] += t[2]
+            Y[tuple(t[0][2:])] += t[2]
+            XY[(tuple(t[0][0:2]), tuple(t[0][2:]))] += t[2]
         X_sum = sum(X.values())
         Y_sum = sum(Y.values())
         XY_sum = sum(XY.values())
-        total = 0
         for x in X.keys():
             px = float(X[x]) / X_sum
             for y in Y.keys():
                 py = float(Y[y]) / Y_sum
                 pxy = float(XY[(x, y)]) / XY_sum
                 if pxy != 0:
-                    total += pxy * np.log((pxy)/px / py)
-        return total
+                    info[(x, y)] = pxy * (np.log2(pxy) - np.log2(XY_sum) - np.log2(px) + np.log2(X_sum) - np.log2(py) + np.log(Y_sum))
+                    info_marginal[x] += info[(x, y)]
+        #for key, value in sorted(info.items(), key=lambda x: str(x[0])):
+        #    print('-->', key, value)
+        return info
+
 
 if __name__ == '__main__':
     qa_train = TenseAspectAnalyser()

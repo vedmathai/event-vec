@@ -87,7 +87,7 @@ class QADatum:
         qa_datum.set_id(val['id'])
         qa_datum.set_question(val['question'])
         qa_datum.set_context(val['context'])
-        qa_datum.set_answers(QAAnswer.from_dict(i) for i in (val['answers']))
+        qa_datum.set_answers([QAAnswer.from_dict(i) for i in (val['answers'])])
         qa_datum.set_alternate_answer_sets([[QAAnswer.from_dict(i) for i in k] for k in val['alternate_answer_sets']])
         qa_datum.set_question_events(val['question_events'])
         qa_datum.set_use_in_eval(val['use_in_eval'])

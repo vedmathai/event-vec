@@ -14,11 +14,87 @@ from eventvec.server.tasks.question_answering.datahandlers.datahanders_registry 
 from eventvec.server.tasks.question_answering.models.registry import QuestionAnsweringModelsRegistry
 from eventvec.server.tasks.question_answering.trainers.optimization import BertAdam
 from eventvec.server.tasks.question_answering.trainers.question_clusterer import QuestionClusterer
+from eventvec.server.data.torque.datahandlers.date_question_creator import DateQuestionCreator
 
 
 LEARNING_RATE = 1e-5
 BATCH_SIZE = 24
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+said_verbs = set(["observe", "observes", "observed", "describe", "describes", "described", "discuss", "discusses", "discussed",
+					  "report", "reports", "reported", "outline", "outlines", "outlined", "remark", "remarks", "remarked", 	
+					  "state", "states", "stated", "go on to say that", "goes on to say that", "went on to say that", 	
+					  "quote that", "quotes that", "quoted that", "say", "says", "said", "mention", "mentions", "mentioned",
+					  "articulate", "articulates", "articulated", "write", "writes", "wrote", "relate", "relates", "related",
+					  "convey", "conveys", "conveyed", "recognise", "recognises", "recognised", "clarify", "clarifies", "clarified",
+					  "acknowledge", "acknowledges", "acknowledged", "concede", "concedes", "conceded", "accept", "accepts", "accepted",
+					  "refute", "refutes", "refuted", "uncover", "uncovers", "uncovered", "admit", "admits", "admitted",
+					  "demonstrate", "demonstrates", "demonstrated", "highlight", "highlights", "highlighted", "illuminate", "illuminates", "illuminated", 							  
+                      "support", "supports", "supported", "conclude", "concludes", "concluded", "elucidate", "elucidates", "elucidated",
+					  "reveal", "reveals", "revealed", "verify", "verifies", "verified", "argue", "argues", "argued", "reason", "reasons", "reasoned",
+					  "maintain", "maintains", "maintained", "contend", "contends", "contended", 
+					    "feel", "feels", "felt", "consider", "considers", "considered", 						  
+                      "assert", "asserts", "asserted", "dispute", "disputes", "disputed", "advocate", "advocates", "advocated",
+					  "opine", "opines", "opined", "think", "thinks", "thought", "imply", "implies", "implied", "posit", "posits", "posited",
+					  "show", "shows", "showed", "illustrate", "illustrates", "illustrated", "point out", "points out", "pointed out",
+					  "prove", "proves", "proved", "find", "finds", "found", "explain", "explains", "explained", "agree", "agrees", "agreed",
+					  "confirm", "confirms", "confirmed", "identify", "identifies", "identified", "evidence", "evidences", "evidenced",
+					  "attest", "attests", "attested", "believe", "believes", "believed", "claim", "claims", "claimed", "justify", "justifies", "justified", 							  
+                      "insist", "insists", "insisted", "assume", "assumes", "assumed", "allege", "alleges", "alleged", "deny", "denies", "denied",
+					   "disregard", "disregards", "disregarded", 
+					   "surmise", "surmises", "surmised", "note", "notes", "noted",
+					  "suggest", "suggests", "suggested", "challenge", "challenges", "challenged", "critique", "critiques", "critiqued",
+					  "emphasise", "emphasises", "emphasised", "declare", "declares", "declared", "indicate", "indicates", "indicated",
+					  "comment", "comments", "commented", "uphold", "upholds", "upheld", "rule", "ruled", "ruling", "look", "looked", "looking",
+                      "announced", "cited", "quoted", "telling", "continued", "replied", "derided", "declined", "estimates", "urges", "quipped",
+                      "recommends", "denounced", "recalled", "recommended"
+                      'rule', 'ruled', 'ruling', 'look', 'looked', 'looking',
+                      'continue', 'continued', 'continuing',
+                      'lies', 'lying', 'lied',
+                      'replied', 'replies', 'replied',
+                      'heard', 'hears', 'hearing',
+                      'adds', 'added', 'adding',
+                       'estimates', 'estimated', 'estimating',
+                      'promised', 'promise', 'promising',
+                      'hoped', 'hoping', 'hopes', 'hope',
+                      'accused', 'accusing', 'accuses', 
+                      'urges', 'urged', 'urging', 
+                      'stipulates', 'stipulated', 'stipulating',
+                      'speculated', 'speculates', 'speculating', 
+                      'assured', 'assuring', 'assures',
+                      'predicted', 'predicts', 'predicting',
+                      'announced', 'announces', 'announcing',
+                      'cited', 'citing', 'cites',
+                      'portends', 'portending', 'portended',
+                      'recommends', 'recommending', 'recommended',
+                      'quipped', 'quipping', 'quips',
+                      'criticised', 'criticising', 'critises',
+                      'reassured', 'reassuring', 'reassures',
+                      'quoted', 'quotes', 'quoting', 
+                      'demands', 'demanded', 'demanding', 
+                      'replied', 'replies', 'replying',
+                      'denounced', 'denouncing', 'denounces',
+                      'knowing', 'knowed', 'knows',
+                      'reiterated', 'reiterates', 'reiterating', 
+                      'reading', 'read',
+                      'questions', 'questioning', 'questioned',
+                      'arguing', 'argued', 'argues',
+                      'signalled', 'signals', 'signalling',
+                      'accuse', 'accusing', 'accused', 
+                      'hinted', 'hints', 'hinting',
+                      'questioned', 'questioning', 'questions',
+                      'asked', 'asking', 'asks',
+                      'tells', 'told', 'telling',
+                      'vowed', 'vows', 
+                      'urged', 'urging', 'urges',
+])
+
+future_said_verbs = set([
+    'anticipate', 'anticipates', 'anticipated', "hypothesise", "hypothesises", "hypothesised", "propose", "proposes", "proposed", "theorise", "theorises", "theorised", "posit", "posits", "posited",
+    "speculate", "speculates", "speculated", "suppose", "supposes", "supposed", "conjecture", "conjectures", "conjectured", "envisioned", "envision", "envisions", "forecasts", 'foresee', 'forecast', 'forecasted',
+    'foresaw', 'estimate', 'estimated', 'estimates'
+])
+
 
 tense_mapping = {
     "Pres": 0,
@@ -26,6 +102,26 @@ tense_mapping = {
     'Future': 2,
     None: 3,
 }
+
+tense2mapping = {
+    'PastPast': 0,
+    'PastPres': 1,
+    'PastFuture': 2,
+    'PresPast': 3,
+    'PresPres': 4,
+    'PresFuture': 5,
+    'FuturePast': 6,
+    'FuturePres': 7,
+    'FutureFuture': 8,
+    'NonePast': 9,
+    'NonePres': 10,
+    'NoneFuture': 11,
+    'PastNone': 12,
+    'PresNone': 13,
+    'FutureNone': 14,
+    'NoneNone': 15,
+}
+tense_mapping = tense2mapping
 
 tense_num = len(tense_mapping.keys())
 
@@ -44,6 +140,21 @@ aspect_mapping = {
     "Prog": 1,
     None: 2,
 }
+
+
+aspect2mapping = {
+    "PerfPerf": 0,
+    "PerfProg": 1,
+    "PerfNone": 2,
+    "ProgPerf": 3,
+    "ProgProg": 4,
+    "ProgNone": 5,
+    "NonePerf": 6,
+    "NoneProg": 7,
+    "NoneNone": 8,
+}
+
+aspect_mapping = aspect2mapping
 
 aspect_num = len(aspect_mapping.keys())
 
@@ -84,6 +195,7 @@ class QATrainBase:
         self._models_registry = QuestionAnsweringModelsRegistry()
         self._aspects_counter = defaultdict(int)
         self._question_clusterer = QuestionClusterer()
+        self._date_question_creator = DateQuestionCreator()
 
     def load(self, run_config):
         datahandler_class = self._datahandlers_registry.get_datahandler(run_config.dataset())
@@ -96,9 +208,12 @@ class QATrainBase:
         self._question_event_criterion = nn.CrossEntropyLoss(weight=torch.tensor([0.025, 1-.025])).to(device)
         self._tense_criterion = nn.CrossEntropyLoss(weight=torch.tensor([0.995, .99, .99, .014])).to(device)
         self._aspect_criterion = nn.CrossEntropyLoss(weight=torch.tensor([0.99, .99, 0.14])).to(device)
+        self._tense_criterion = nn.CrossEntropyLoss(weight=torch.tensor([0.99, .99, 0.99, .99, 0.99, .99, 0.99, .99, 0.99, .99, 0.99, 0.99, .99, 0.99, .99, 0.14])).to(device)
+        self._aspect_criterion = nn.CrossEntropyLoss(weight=torch.tensor([.99, 0.99, .99, 0.99, 0.99, .99, 0.99, .99, 0.14])).to(device)
         self._pos_criterion = nn.CrossEntropyLoss(weight=torch.tensor([0.99, .99, .99, .99, 0.14])).to(device)
         self._question_classification_criterion =  nn.CrossEntropyLoss()
         self._linguistic_featurizer = LinguisticFeaturizer()
+        self._date_question_creator.load()
 
 
         param_optimizer = list(self._base_model.named_parameters())
@@ -126,10 +241,10 @@ class QATrainBase:
         self._train_data = self._datahandler.qa_train_data().data()
         self._eval_data = self._train_data[int(len(self._train_data) * 0.8):] + self._eval_data
         self._train_data = self._train_data[:int(0.8 * len(self._train_data))]
+        self._date_augmented_data = self._date_question_creator.create()
         self._featurized_context_cache = {}
 
     def train(self, run_config):
-        print(len(self._train_data), len(self._eval_data))
         self._jade_logger.new_experiment()
         self._jade_logger.set_experiment_type('question_answering')
         self._jade_logger.set_total_epochs(run_config.epochs())
@@ -149,6 +264,7 @@ class QATrainBase:
             self._train_datum(run_config, datum_i, datum)
 
     def _eval_epoch(self, epoch_i, run_config):
+        print('eval')
         eval_data = self._eval_data
         self._f1s = []
         self._exact_matches = []
@@ -166,8 +282,8 @@ class QATrainBase:
         token_classification_output, question_event_classification_output, tense_classification_output, aspect_classification_output, pos_classification_output, question_classification_output = self._base_model(question, context[0])
         answer_bitmap = [[1, 0] for _ in token_classification_output]
         question_event_bitmap = [[1, 0] for _ in token_classification_output]
-        tense_bitmap = [[0, 0, 0, 1] for _ in token_classification_output]
-        aspect_bitmap = [[0, 0, 1] for _ in token_classification_output]
+        tense_bitmap = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1] for _ in token_classification_output]
+        aspect_bitmap = [[0, 0, 0, 0, 0, 0, 0, 0, 1] for _ in token_classification_output]
         pos_bitmap = [[0, 0, 0, 0, 1] for _ in token_classification_output]
         cluster_bitmap = self._question_clusterer.cluster(question)
         cluster_bitmap = cluster_bitmap
@@ -207,8 +323,9 @@ class QATrainBase:
             given_loss += [loss] + [question_classification_loss]
         losses += [sum(given_loss) / len(given_loss)]
         answer = self._tokens2words(answer, run_config)
+        answer = [i for i in answer if i in bitmaps['possible_answers']]
         loss_item_mean = np.mean([l.item() for l in losses])
-        self._jade_logger.new_train_datapoint(bitmaps['required_answer'], answer, loss_item_mean, {"question": question})
+        self._jade_logger.new_train_datapoint(bitmaps['required_answer'], answer, loss_item_mean, {"question": question, "use": bitmaps['use'], 'altered_required': bitmaps['altered_required'], 'possible_answers': bitmaps['possible_answers']})
         self.losses += [sum(losses)]
         losses = []
         if len(self.losses) >= BATCH_SIZE:
@@ -226,6 +343,7 @@ class QATrainBase:
         required_answer = []
         context = qa_datum.context()
         answer_tenses = []
+        use = False
         if context[0] not in self._featurized_context_cache:
             self._featurized_context_cache[context[0]] = self._linguistic_featurizer.featurize_document(context[0])
         featurized_context = self._featurized_context_cache[context[0]]
@@ -251,45 +369,44 @@ class QATrainBase:
                             token2pos[index] = token.pos() if token is not None else None
         sentence_break = sentence_breaks.get(run_config.llm())
         start = tokens.index(sentence_break) + 2
+        tokeni2tense = defaultdict()
+        altered_required = []
+        possible_answers = []
         for token_i in range(start, len(tokens) - 1):
-            if token_i not in token2featurized_token or not ((run_config.use_question_event_features() is True and token2featurized_token[token_i].text().lower() in qa_datum.question_events()) or token_i in token_indices):
+            if token_i not in token2featurized_token or not ((run_config.use_question_event_features() is True and token2featurized_token[token_i].text().lower() in qa_datum.question_events()) or token_i not in token_indices):
                 continue
-            #if token_i not in token2featurized_token:
-            #    continue
             featurized_token = token2featurized_token[token_i]
-            original_featurized = featurized_token
             token = featurized_token
-            tense = featurized_token.tense()
-            aspect = featurized_token.aspect() if (token is not None and token.text() in past_perf_aux + pres_perf_aux) else None
-            #aspect = featurized_token.aspect() if token is not None else None
-            if any(future_modal in context[0][max(0, token.idx() - 20): token.idx()].lower() for future_modal in future_modals):
-                tense = 'Future'
-            if token is not None and 'aux' in token.children():
-                for child in token.children()['aux']:
-                    if child.tense() is not None:
-                        tense = child.tense()
-                        if child.text() in past_perf_aux + pres_perf_aux:
-                            aspect = 'Perf'
-            if run_config.use_root_verb() is True:
-                #while not (featurized_token.pos() in ['AUX', 'VERB'] or featurized_token.dep() == 'ROOT'):
-                #    featurized_token = featurized_token.parent()
-                temp = featurized_token
-                while tense is None and token is not None and (temp.tense() is None) and temp.parent() is not None:
-                    temp = temp.parent()
-                    tense = temp.tense()
-                    aspect = token.aspect() if (token is not None and token.text() in past_perf_aux + pres_perf_aux) else None
-                    #aspect = featurized_token.aspect() if token is not None else None
-                    pos = token.tag() if token is not None else None
-                    if any(future_modal in context[0][max(0, token.idx() - 20): token.idx()].lower() for future_modal in future_modals):
-                        tense = 'Future'
+
+            tense = None
+            aspect = None
+            
+            tense, aspect = self.token2tense(qa_datum, token)
+            parent_token = self.token2parent(qa_datum, token)
+            parent_tense, parent_aspect = self.token2tense(qa_datum, parent_token)
+
+            if parent_token is not None and parent_token.text() in said_verbs:
+                if token.text() in qa_datum.question().split() and parent_token.text() in [i.text() for i in qa_datum.answers()]:
+                    altered_required.append(parent_token.text())
+                if token.text() in qa_datum.question().split():
+                    possible_answers.append(parent_token.text())
+
+                if parent_token.text() in qa_datum.question().split() and token.text() in [i.text() for i in qa_datum.answers()]:
+                    altered_required.append(token.text())
+                if parent_token.text() in qa_datum.question().split():
+                    possible_answers.append(token.text())
+
+            tokeni2tense[token.idx()] = (tense, aspect) 
+            tense = '{}{}'.format(parent_tense, tense)
+            aspect = '{}{}'.format(parent_aspect, aspect)
+            if parent_tense is not None:
+                use = True
+
             if featurized_token.text().lower() in qa_datum.question_events():
                 question_event_bitmap[token_i] = [0, 1]
             tense_array = [0] * tense_num
             aspect_array = [0] * aspect_num
             pos_array = [0] * pos_num
-            #if featurized_token.pos() in ['VERB', 'AUX']:
-            #    if any(future_modal in context[0][max(0, featurized_token.idx() - 20): featurized_token.idx()].lower() for future_modal in future_modals):
-            #        tense = 'Future'
             if featurized_token.text().lower() in qa_datum.question_events():
                 question_event_bitmap[token_i] = [0, 1]
             # uncomment for ta-16 tense = token.tense() if tense != 'Future' else 'Future'
@@ -311,8 +428,52 @@ class QATrainBase:
             'aspect_bitmap': aspect_bitmap,
             'pos_bitmap': pos_bitmap,
             'question_event_bitmap': question_event_bitmap,
+            'use': use,
+            'altered_required': altered_required,
+            'possible_answers': possible_answers,
         }
         return bitmaps
+    
+    def token2tense(self, qa_datum, token):
+        context = qa_datum.context()
+        tense = None
+        aspect = None
+        if token is None:
+            return tense, aspect
+        if token.pos() in ['VERB', 'ROOT', 'AUX']:
+            tense = 'Pres'
+            if token.tense() is not None:
+                tense = token.tense()
+            aspect = token.aspect()
+            aux_there = False
+            if 'aux' in token.children():
+                for child in token.children()['aux']:
+                    if child.tense() is not None:
+                        tense = child.tense()
+                        if child.text() in past_perf_aux + pres_perf_aux:
+                            aux_there = True
+                            aspect = 'Perf'
+            if aux_there is False and aspect == 'Perf':
+                aspect = None
+        
+            paragraph = context[0]
+            if any(future_modal in paragraph[max(0, token.idx() - 20): token.idx()].lower() for future_modal in future_modals):
+                tense = 'Future'
+        return tense, aspect
+
+    def token2parent(self, qa_datum, token):
+        deps = ['ccomp', 'xcomp', "parataxis", '-relcl', 'conj']
+        parent = None
+        use = False
+        if token.dep() in deps:
+            parent = token.parent()
+            while not (parent is None or parent.text() in said_verbs or parent.dep() == 'ROOT'):
+                if (token.dep() in deps and token.pos() in ['VERB']) or parent.dep() in ['ccomp', 'xcomp']:
+                    use = True
+                parent = parent.parent()
+        if use is False or (parent is not None and parent.text() not in said_verbs):
+            parent = None
+        return parent
 
     def _align_answer(self, llm, tokens, paragraph, start_index, end_index):
         if llm == 'bigbird':
@@ -417,8 +578,8 @@ class QATrainBase:
             token_classification_output, question_event_classification_output, tense_classification_output, aspect_classification_output, pos_classification_output, question_classification_output = self._base_model(question, context[0])
             answer_bitmap = [[1, 0] for _ in token_classification_output]
             question_event_bitmap = [[1, 0] for _ in token_classification_output]
-            tense_bitmap = [[0, 0, 0, 1] for _ in token_classification_output]
-            aspect_bitmap = [[0, 0, 1] for _ in token_classification_output]
+            tense_bitmap = [[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1] for _ in token_classification_output]
+            aspect_bitmap = [[0, 0, 0, 0, 0, 0, 0, 0, 1] for _ in token_classification_output]
             pos_bitmap = [[0, 0, 0, 0, 1] for _ in token_classification_output]
             required_answer = []
             wordid2tokenid, tokens = self._base_model.wordid2tokenid(question, context[0])
@@ -436,12 +597,13 @@ class QATrainBase:
                 if token[1] > token[0]:
                     answer += [tokens[token_i]]
             answer = self._tokens2words(answer, run_config)
+            answer = [i for i in answer if i in bitmaps['possible_answers']]
             loss_item_mean = np.mean([l.item() for l in losses])
             if run_config.use_best_of_annotators() is True:
                 best_required_answer = self._find_best_required_answer(answer, qa_datum)
             else:
                 best_required_answer = self._voted_required_answer(qa_datum)
-            self._jade_logger.new_evaluate_datapoint(best_required_answer, answer, loss_item_mean, {"question": question})
+            self._jade_logger.new_evaluate_datapoint(best_required_answer, answer, loss_item_mean, {"question": question, 'use': bitmaps['use'], 'altered_required': bitmaps['altered_required'], 'possible_answers': bitmaps['possible_answers']})
 
     def _voted_required_answer(self, qa_datum):
         expected_label = []
