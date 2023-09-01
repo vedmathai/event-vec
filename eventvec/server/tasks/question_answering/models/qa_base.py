@@ -30,9 +30,9 @@ class QuestionAnsweringBase(nn.Module):
         self._base_classifier_activation = nn.Tanh().to(device)
         classifier_size = hidden_layer_size
         if run_config.forward_type() == 'features' and run_config.use_tense() is True:
-            classifier_size += 4
+            classifier_size += 16
         if run_config.forward_type() == 'features' and run_config.use_aspect() is True:
-            classifier_size += 3
+            classifier_size += 9
         if run_config.forward_type() == 'features' and run_config.use_pos() is True:
             classifier_size += 5
 
@@ -53,13 +53,13 @@ class QuestionAnsweringBase(nn.Module):
         self._pos_attention = nn.MultiheadAttention(16, 16).to(device)
         self._attention = nn.MultiheadAttention(16, 16).to(device)
         self._question_event_classifier = torch.nn.Linear(hidden_layer_size, 2).to(device)
-        self._tense_classifier = torch.nn.Linear(hidden_layer_size, 4).to(device)
+        self._tense_classifier = torch.nn.Linear(hidden_layer_size, 16).to(device)
         self._tense_intermediate_classifier = torch.nn.Linear(768, hidden_layer_size).to(device)
 
         self._pos_classifier = torch.nn.Linear(hidden_layer_size, 5).to(device)
         self._pos_intermediate_classifier = torch.nn.Linear(768, hidden_layer_size).to(device)
 
-        self._aspect_classifier = torch.nn.Linear(hidden_layer_size, 3).to(device)
+        self._aspect_classifier = torch.nn.Linear(hidden_layer_size, 9).to(device)
         self._aspect_intermediate_classifier = torch.nn.Linear(768, hidden_layer_size).to(device)
         self._question_classifier = torch.nn.Linear(768, 12).to(device)
 

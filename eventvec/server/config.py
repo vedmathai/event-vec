@@ -17,6 +17,10 @@ class Config:
         self._tsqa_file2annotation_map = {}
         self._torque_data_location = None
         self._torque_data_file_names = None
+        self._wiki_data_location = None
+        self._nyt_data_location = None
+        self._hansard_data_location = None
+        self._mnli_data_location = None
         self._jade_logger = JadeLogger()
 
 
@@ -54,6 +58,18 @@ class Config:
 
     def book_corpus_data_location(self):
         return self._book_corpus_data_location
+    
+    def wiki_data_location(self):
+        return self._wiki_data_location
+    
+    def nyt_data_location(self):
+        return self._nyt_data_location
+    
+    def hansard_data_location(self):
+        return self._hansard_data_location
+    
+    def mnli_data_location(self):
+        return self._mnli_data_location
 
     def model_save_location(self):
         return self._model_save_location
@@ -98,6 +114,18 @@ class Config:
     def set_book_corpus_data_location(self, book_corpus_data_location):
         self._book_corpus_data_location = book_corpus_data_location
 
+    def set_wiki_data_location(self, wiki_data_location):
+        self._wiki_data_location = wiki_data_location
+
+    def set_nyt_data_location(self, nyt_data_location):
+        self._nyt_data_location = nyt_data_location
+
+    def set_hansard_data_location(self, hansard_data_location):
+        self._hansard_data_location = hansard_data_location
+
+    def set_mnli_data_location(self, mnli_data_location):
+        self._mnli_data_location = mnli_data_location
+
     def set_model_save_location(self, model_save_location):
         self._model_save_location = model_save_location
 
@@ -135,4 +163,8 @@ class Config:
         config.set_tsqa_file2annotation_map(val.get('tsqa_file2annotation_map'))
         config.set_torque_data_location(val.get('torque_data_location'))
         config.set_torque_data_file_names(val.get('torque_data_file_names'))
+        config.set_wiki_data_location(val.get('wiki_data_location'))
+        config.set_nyt_data_location(val.get('nyt_data_location'))
+        config.set_hansard_data_location(val.get('hansard_data_location'))
+        config.set_mnli_data_location(val.get('mnli_data_location'))
         return config

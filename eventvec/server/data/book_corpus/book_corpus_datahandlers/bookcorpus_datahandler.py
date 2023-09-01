@@ -14,4 +14,4 @@ class BookCorpusDatahandler:
     def read_file(self, filename):
         fullpath = os.path.join(self._book_corpus_folder, filename)
         with open(fullpath) as f:
-            return f.read()
+            return [f.read()]
