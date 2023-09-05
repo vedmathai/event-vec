@@ -1,8 +1,8 @@
 from collections import defaultdict
 import os
 
-from eventvec.server.data_readers.timebank_reader.timebank_reader import TimeMLDataReader  # noqa
-from eventvec.server.data_readers.timebank_reader.timebank_dense_reader import TimeBankDenseDataReader  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_reader import TimeMLDataReader  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_dense_reader import TimeBankDenseDataReader  # noqa
 from eventvec.server.graph_parser.graph_creator.event_graph_creator import EventGraphCreator  # noqa
 from eventvec.server.graph_parser.graph_creator.word_graph_creator import WordGraphCreator  # noqa
 from eventvec.server.graph_parser.graph_measures.cluster_measures import ClusterMeasures  # noqa

@@ -1,7 +1,7 @@
 from eventvec.server.model.word_graph.word_graph import WordGraph
 from eventvec.server.model.word_graph.relationship import Relationship
 from eventvec.server.model.word_graph.event_trigger import EventTrigger
-from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_event import TimebankEvent  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_event import TimebankEvent  # noqa
 
 
 class EventGraphCreator():

@@ -1,10 +1,10 @@
 
-from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_enamex import TimebankEnamex  # noqa
-from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_event import TimebankEvent  # noqa
-from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_numex import TimebankNumex  # noqa
-from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_signal import TimebankSignal  # noqa 
-from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_text_segment import TimebankTextSegment  # noqa
-from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_timex import TimebankTimex  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_enamex import TimebankEnamex  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_event import TimebankEvent  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_numex import TimebankNumex  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_signal import TimebankSignal  # noqa 
+from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_text_segment import TimebankTextSegment  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_timex import TimebankTimex  # noqa
 
 
 class TimebankSentence:

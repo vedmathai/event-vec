@@ -1,4 +1,4 @@
-from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_abstract_sp import AbstractSentencePart  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_abstract_sp import AbstractSentencePart  # noqa
 
 
 class TimebankTextSegment(AbstractSentencePart):

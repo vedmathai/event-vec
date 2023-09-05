@@ -19,6 +19,6 @@ class LinguisticFeaturizer():
     def featurize_sentence(self, sentence):
         spacy_doc = nlp(sentence)
         featurized_sentence = FeaturizedSentence.from_spacy(
-            list(spacy_doc.sents)[0]
+            list(spacy_doc.sents)[0], None
         )
         return featurized_sentence

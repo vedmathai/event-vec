@@ -1,12 +1,13 @@
 from bs4 import BeautifulSoup
 from typing import List
+import re
 
 
-from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_sentence import TimebankSentence  # noqa
-from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_tlink import TimebankTlink  # noqa
-from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_slink import TimebankSlink  # noqa
-from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_alink import TimebankAlink  # noqa
-from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_makeinstance import MakeInstance  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_sentence import TimebankSentence  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_tlink import TimebankTlink  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_slink import TimebankSlink  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_alink import TimebankAlink  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_makeinstance import MakeInstance  # noqa
 
 
 class TimebankDocument:
@@ -166,11 +167,23 @@ class TimebankDocument:
     def from_xml(document):
         timebank_document = TimebankDocument()
         soup = BeautifulSoup(document, 'lxml')
-
+        #docno = soup.find('docno')
         docno = soup.find('docid')
+
         timebank_document.set_file_name(docno.text)
 
         sentences = list(soup.find_all('s'))
+        if len(sentences) == 0:
+            text = soup.find('text')
+            contents = ' '.join([str(i) for i in text.contents])
+            contents = re.sub('\.\s', '.\n', contents)
+            split_text = contents.split('\n')
+            new_text = ''
+            for sentence in split_text:
+                new_text += ('<s>{}</s> '.format(sentence))
+            new_text = '<?xml version="1.0" ?><text>{}</text>'.format(new_text)
+            new_soup = BeautifulSoup(new_text, 'lxml')
+            sentences = list(new_soup.find_all('s'))
         start_token_global_i = 0
         for s_i, s in enumerate(sentences):
             timebank_sentence = TimebankSentence.from_bs_obj(

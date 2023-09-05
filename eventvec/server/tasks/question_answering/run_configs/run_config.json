@@ -341,6 +341,25 @@
             "use_root_verb": false,
             "use_question_classification": false,
             "use_best_of_annotators": false
+        },
+        {
+            "id": "18",
+            "is_train": true,
+            "trainer": "relationship_trainer",
+            "llm": "roberta",
+            "use_tense": true,
+            "use_aspect": true,
+            "forward_type": "features_only", 
+            "use_attention_forward": false,
+            "use_pos": false,
+            "epochs": 60,
+            "dataset": "torque",
+            "use_negation": false,
+            "use_question_event": false,
+            "use_question_event_features": true,
+            "use_root_verb": false,
+            "use_question_classification": false,
+            "use_best_of_annotators": false
         }
     ]
 }

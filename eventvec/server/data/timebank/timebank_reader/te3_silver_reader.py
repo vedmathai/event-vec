@@ -5,25 +5,23 @@ from eventvec.server.data.abstract import AbstractDatareader
 from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_document import TimebankDocument  # noqa
 
 
-class TimeBankDenseDataReader(AbstractDatareader):
+class TE3SilverDatareader(AbstractDatareader):
     def __init__(self):
         super().__init__()
-        self.folder = self._config.timebank_dense_data_location()
-        self._run2sub_folder = {
-            "dev": "dev",
-            "test": "test",
-            "train": "train",
-        }
+        self._silver_folder = self._config.te3_silver_data_location()
 
     def list_folder(self, run_name):
         """
             Lists the files in extra
         """
-        subfolder = self._run2sub_folder.get(run_name)
-        absolute_extra_folder_path = os.path.join(self.folder,
-                                                  subfolder)
-        filelist = [os.path.join(absolute_extra_folder_path, i)
-                    for i in os.listdir(absolute_extra_folder_path)]
+        subfolders = []
+        for folder in os.listdir(self._silver_folder):
+            if 'Silver' in folder:
+                subfolders.append(folder)
+        for subfolder in subfolders:
+            abs_subfolder = os.path.join(self._silver_folder, subfolder)
+        filelist = [os.path.join(abs_subfolder, i)
+                    for i in os.listdir(abs_subfolder)]
         return filelist
 
     def read_file(self, filepath):
@@ -42,12 +40,3 @@ class TimeBankDenseDataReader(AbstractDatareader):
             timebank_document = self.xml2timebank_document(content)
             timebank_documents.append(timebank_document)
         return timebank_documents
-
-    def train_documents(self) -> List[TimebankDocument]:
-        return self.timebank_documents('train')
-
-    def dev_documents(self) -> List[TimebankDocument]:
-        return self.timebank_documents('dev')
-
-    def test_documents(self) -> List[TimebankDocument]:
-        return self.timebank_documents('test')

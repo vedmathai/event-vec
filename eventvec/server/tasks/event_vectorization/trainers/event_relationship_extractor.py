@@ -1,8 +1,8 @@
 from collections import defaultdict
-from eventvec.server.data_handlers.data_handler import PREP_LIST
+from eventvec.server.tasks.event_vectorization.datahandlers.data_handler import PREP_LIST
 
-from eventvec.server.entry_points.vectorizer.dep_parser_model import get_path
-from eventvec.server.model.event_models.event_relationship_model import EventRelationship
+from eventvec.server.tasks.event_vectorization.trainers.dep_parser_model import get_path
+from eventvec.server.tasks.event_vectorization.models.event_models.event_relationship_model import EventRelationship
 from eventvec.server.data.timebank.datahandlers.timebank_prepositions import (
     prep_to_relationships, prep_to_opposite_relationships,
     opposite_dict

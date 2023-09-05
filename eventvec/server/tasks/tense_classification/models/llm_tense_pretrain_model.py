@@ -5,7 +5,7 @@ from transformers import BertModel, RobertaModel
 
 
 from eventvec.server.config import Config
-from eventvec.server.model.llm_tense_pretraining_model.llm_input_model import LLMInput  # noqa
+from eventvec.server.tasks.tense_classification.models.llm_input_model import LLMInput  # noqa
 
 LLM_INPUT = 768
 

@@ -6,8 +6,8 @@ from transformers import BertTokenizer, RobertaTokenizer
 import pprint
 
 
-from eventvec.server.data_handlers.timebank_data_handler import TimeBankBertDataHandler  # noqa
-from eventvec.server.data_handlers.bert_featurizer import BERTLinguisticFeaturizer  # noqa
+from eventvec.server.data.timebank.datahandlers.timebank_data_handler import TimeBankBertDataHandler  # noqa
+from eventvec.server.tasks.relationship_classification.featurizers.bert_featurizer import BERTLinguisticFeaturizer  # noqa
 
 
 labels = {
@@ -61,44 +61,6 @@ aspect = {
     None: 2,
 }
 
-pos = {
-    'VERB': 0,
-    'X': 1,
-    'AUX': 2,
-    'ADJ': 3,
-    'ADP': 4,
-    'NOUN': 5,
-    'ADV': 6,
-    None: 7,
-    'PROPN': 8,
-    'CCONJ': 9,
-    'PRON': 10,
-    'NUM': 11,
-    'PUNCT': 12,
-    'PART': 13,
-    'SCONJ': 14,
-    'DET': 15,
-    'INTJ': 16,
-}
-
-tag = {
-    'VBD': 0,
-    'VBN': 2,
-    'VBP': 3,
-    'PRP': 4,
-    'VB': 5,
-    'VBG': 6,
-    'VBZ': 7,
-    'JJ': 8,
-    'NN': 9,
-    'IN': 10,
-    'NNS': 11,
-    'NNP': 12,
-    'DT': 13,
-    'RB': 14,
-    None: 15,
-}
-
 tenses_hot_encoding = {i: [0] * 7 for i in tenses}
 for i in tenses_hot_encoding:
     tenses_hot_encoding[i][tenses[i]] = 1
@@ -106,17 +68,6 @@ for i in tenses_hot_encoding:
 aspect_hot_encoding = {i: [0] * 4 for i in aspect}
 for i in aspect_hot_encoding:
     aspect_hot_encoding[i][aspect[i]] = 1
-
-pos_hot_encoding = {i: [0] * 17 for i in pos}
-for i in pos_hot_encoding:
-    pos_hot_encoding[i][pos[i]] = 1
-
-tag_hot_encoding = {i: [0] * 16 for i in tag}
-for i in tag_hot_encoding:
-    tag_hot_encoding[i][tag[i]] = 1
-
-noun_pos = ['NOUN', 'PROPN', 'PRON']
-verb_pos = ['VERB', 'AUX']
 
 
 class BertDataHandler():
@@ -144,7 +95,6 @@ class BertDataHandler():
         timebank_test_data = self._model_input_data.test_data()
         for datumi, datum in enumerate(timebank_test_data):
             self.process_timebank_data(datum, 'test')
-        pprint.pprint(self._nouns)
         train_set = set(self._nouns['train'].keys())
         test_set = set(self._nouns['test'].keys())
         num = 0
@@ -208,7 +158,7 @@ class BertDataHandler():
         if any(i >= 200 for i in [from_to_from_token_i, from_to_to_token_i, to_from_from_token_i, to_from_to_token_i]):
             return
         label = labels_simpler[model_input_datum.relationship()]
-        model_input_datum.set_is_trainable(False)
+        model_input_datum.set_is_trainable(True)
         model_input_datum.set_from_entity_token_i(from_to_from_token_i)
         model_input_datum.set_to_entity_token_i(from_to_to_token_i)
         model_input_datum.set_from_sentence_encoded(bert_encoding_from_sentence)  # noqa
