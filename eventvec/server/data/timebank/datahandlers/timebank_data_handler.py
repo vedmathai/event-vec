@@ -1,14 +1,12 @@
 import numpy as np
 from collections import defaultdict
-import pprint
-
-from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_document import TimebankDocument  # noqa
-from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_timex import TimebankTimex  # noqa
-from eventvec.server.data_readers.timebank_reader.timebank_reader import TimeMLDataReader  # noqa
-from eventvec.server.data_readers.timebank_reader.timebank_dense_reader import TimeBankDenseDataReader  # noqa
-from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_event import TimebankEvent  # noqa
-from eventvec.server.data_handlers.model_input.model_input_data import ModelInputData  # noqa
-from eventvec.server.data_handlers.model_input.model_input_datum import ModelInputDatum  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_document import TimebankDocument  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_timex import TimebankTimex  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_reader import TimeMLDataReader  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_dense_reader import TimeBankDenseDataReader  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_event import TimebankEvent  # noqa
+from eventvec.server.tasks.relationship_classification.datahandlers.model_input.model_input_data import ModelInputData  # noqa
+from eventvec.server.tasks.relationship_classification.datahandlers.model_input.model_input_datum import ModelInputDatum  # noqa
 
 DATANAME = "timebank_dense"
 
@@ -158,12 +156,6 @@ class TimeBankBertDataHandler:
                 )
                 model_input_datum.set_token_order(token_order)
                 data.append(model_input_datum)
-        print(' ' * 4)
-        for pos in pos2rel:
-            print(pos, pos2rel[pos])
-            print('-' * 32)
-            for itemi, item in enumerate(sorted(pos2rel[pos].items(), key=lambda x: x[1])):
-                print(pos, itemi, item)
         return data, nouns
 
     def event_instance_id2sentence(self, document, eiid, event_point):
@@ -204,7 +196,7 @@ class TimeBankBertDataHandler:
             for s in from_sentence.sequence():
                 if isinstance(s, TimebankTimex):
                     if s.tid() == time_id:
-                        sseq.extend(['[ENTITY_2]', s.text(), '[/ENTITY_2]'])
+                        sseq.extend(['[ENTITY_2]', s.text(), '[.ENTITY_2]'])
                 else:
                     sseq.append(s.text())
         return sseq

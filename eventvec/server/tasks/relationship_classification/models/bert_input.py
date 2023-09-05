@@ -89,7 +89,7 @@ class BertInput:
         whole_sentence_input_ids = whole_sentence_input_ids.squeeze(1).to(device)  # noqa
 
         feature_encoding = torch.from_numpy(np.array(datum.feature_encoding()))
-
+        
         bi._from_input_ids = from_input_ids
         bi._from_attention_mask = from_attention_mask
         bi._from_token_type_ids = from_token_type_ids

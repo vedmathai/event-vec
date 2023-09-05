@@ -12,6 +12,9 @@ class Config:
         self._experiment_type = None
         self._book_corpus_data_location = None
         self._heatmaps_location = None
+        self._timebank_dense_data_location = None
+        self._te3_silver_data_location = None
+        self._te3_gold_data_location = None
         self._tsqa_data_location = None
         self._tsqa_file_names = None
         self._tsqa_file2annotation_map = {}
@@ -105,6 +108,18 @@ class Config:
     def set_timebank_dense_data_location(self, timebank_dense_data_location):
         self._timebank_dense_data_location = timebank_dense_data_location
 
+    def te3_silver_data_location(self):
+        return self._te3_silver_data_location
+    
+    def set_te3_silver_data_location(self, te3_silver_data_location):
+        self._te3_silver_data_location = te3_silver_data_location
+
+    def te3_gold_data_location(self):
+        return self._te3_gold_data_location
+    
+    def set_te3_gold_data_location(self, te3_gold_data_location):
+        self._te3_gold_data_location = te3_gold_data_location
+
     def set_run_configs_file(self, run_configs_file):
         self._run_configs_file = run_configs_file
 
@@ -153,6 +168,8 @@ class Config:
         config.set_matres_data_location(val.get('matres_data_location'))
         config.set_timebank_data_location(val.get('timebank_data_location'))
         config.set_timebank_dense_data_location(val.get('timebank_dense_data_location'))
+        config.set_te3_silver_data_location(val.get('te3_silver_data_location'))
+        config.set_te3_gold_data_location(val.get('te3_gold_data_location'))
         config.set_book_corpus_data_location(val.get('book_corpus_data_location'))
         config.set_experiment_type(val.get('experiment_type'))
         config.set_run_configs_file(val.get('run_configs_file'))

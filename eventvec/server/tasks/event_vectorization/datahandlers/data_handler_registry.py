@@ -1,5 +1,5 @@
-from eventvec.server.data_handlers.bert_datahandler import BertDataHandler
-from eventvec.server.data_handlers.book_corpus_datahandlers.book_corpus_llm_datahandler import BookCorpusLLMDatahandler  # noqa
+from eventvec.server.tasks.relationship_classification.datahandlers.model_datahandler import BertDataHandler
+from eventvec.server.data.book_corpus.book_corpus_datahandlers.book_corpus_llm_datahandler import BookCorpusLLMDatahandler  # noqa
 
 
 class DataHandlerRegistry:

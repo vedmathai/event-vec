@@ -8,11 +8,11 @@ from transformers import RobertaTokenizer, RobertaModel
 
 
 from eventvec.server.featurizers.lingusitic_featurizer import LinguisticFeaturizer
-from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_document import TimebankDocument  # noqa
-from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_timex import TimebankTimex  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_document import TimebankDocument  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_timex import TimebankTimex  # noqa
 
-from eventvec.server.data_readers.timebank_reader.timebank_dense_reader import TimeBankDenseDataReader  # noqa
-from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_event import TimebankEvent  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_dense_reader import TimeBankDenseDataReader  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_event import TimebankEvent  # noqa
 
 
 

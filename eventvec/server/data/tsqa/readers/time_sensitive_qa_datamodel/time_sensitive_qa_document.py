@@ -1,6 +1,5 @@
-
-from eventvec.server.data_readers.time_sensitive_qa_reader.time_sensitive_qa_datamodel.time_sensitive_qa_paragraph import TSQAParagraph
-from eventvec.server.data_readers.time_sensitive_qa_reader.time_sensitive_qa_datamodel.time_sensitive_qa_datum import TSQADatum
+from eventvec.server.data.tsqa.readers.time_sensitive_qa_datamodel.time_sensitive_qa_paragraph import TSQAParagraph
+from eventvec.server.data.tsqa.readers.time_sensitive_qa_datamodel.time_sensitive_qa_datum import TSQADatum
 
 
 class TSQADocument:

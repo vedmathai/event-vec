@@ -2,10 +2,10 @@ import json
 import os
 from typing import List
 
-from eventvec.server.data_readers.abstract import AbstractDataReader
-from eventvec.server.data_readers.time_sensitive_qa_reader.time_sensitive_qa_datamodel.time_sensitive_qa_document import TSQADocument  # noqa
-from eventvec.server.data_readers.time_sensitive_qa_reader.time_sensitive_qa_datamodel.time_sensitive_qa_datum import TSQADatum  # noqa
-from eventvec.server.data_readers.time_sensitive_qa_reader.time_sensitive_qa_datamodel.time_sensitive_qa_annotation_document import TSQAAnnotationDocument  # noqa
+from eventvec.server.data.abstract import AbstractDataReader
+from eventvec.server.data.tsqa.readers.time_sensitive_qa_datamodel.time_sensitive_qa_document import TSQADocument  # noqa
+from eventvec.server.data.tsqa.readers.time_sensitive_qa_datamodel.time_sensitive_qa_datum import TSQADatum  # noqa
+from eventvec.server.data.tsqa.readers.time_sensitive_qa_datamodel.time_sensitive_qa_annotation_document import TSQAAnnotationDocument  # noqa
 
 
 class TSQADataReader(AbstractDataReader):

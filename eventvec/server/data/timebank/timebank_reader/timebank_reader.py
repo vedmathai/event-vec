@@ -1,15 +1,15 @@
 import os
 from typing import List
 
-from eventvec.server.data_readers.abstract import AbstractDataReader
-from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_document import TimebankDocument  # noqa
-from eventvec.server.data_readers.timebank_reader.timebank_model.timebank_event import TimebankEvent  # noqa
+from eventvec.server.data.abstract import AbstractDatareader
+from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_document import TimebankDocument  # noqa
+from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_event import TimebankEvent  # noqa
 
 
-class TimeMLDataReader(AbstractDataReader):
+class TimeMLDataReader(AbstractDatareader):
     def __init__(self):
         super().__init__()
-        self.folder = self.config.timebank_data_location()
+        self.folder = self._config.timebank_data_location()
 
     def list_extra(self):
         """
