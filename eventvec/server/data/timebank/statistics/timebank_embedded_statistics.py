@@ -6,12 +6,26 @@ import numpy as np
 from eventvec.server.featurizers.lingusitic_featurizer import LinguisticFeaturizer
 from eventvec.server.common.lists.said_verbs import said_verbs
 from eventvec.server.data.timebank.timebank_reader.timebank_dense_reader import TimeBankDenseDataReader  # noqa
+from eventvec.server.data.timebank.timebank_reader.aquaint_reader import AquaintDatareader  # noqa
 from eventvec.server.data.timebank.timebank_reader.te3_gold_reader import TE3GoldDatareader  # noqa
 from eventvec.server.data.matres.matres_readers.matres_reader import MatresDataReader  # noqa
 from eventvec.server.data.timebank.timebank_reader.te3_silver_reader import TE3SilverDatareader  # noqa
 from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_event import TimebankEvent  # noqa
+from eventvec.server.common.lists.said_verbs import said_verbs, future_said_verbs
+from eventvec.server.utils.general import token2parent, token2tense
 
+said_verbs = said_verbs | future_said_verbs
 
+interested_tenses = [
+    'Past_None_Past_None',
+    'Past_None_Pres_None',
+    'Past_None_Pres_Prog',
+    'Past_None_Future_None',
+    'Pres_None_Past_None',
+    'Pres_None_Future_None',
+    'Pres_None_Pres_None',
+
+]
 
 rel2rel = {
     'IS_INCLUDED': 'is_included',
@@ -56,6 +70,7 @@ rel2rel_simpler = {
     'factive': 'factive',
     'neg_evidential': 'neg_evidential',
     'conditional': 'conditional',
+    None: 'none',
 }
 
 rel2opposite = {
@@ -69,22 +84,13 @@ rel2opposite = {
     'factive': 'factive',
     'neg_evidential': 'neg_evidential',
     'conditional': 'conditional',
-    'vague': 'vague'
+    'vague': 'vague',
+    'none': 'none'
 }
 
 past_perf_aux = ['had']
 pres_perf_aux = ['has', 'have']
 
-future_modals = [
-    'will',
-    'going to',
-    'would',
-    'could',
-    'might',
-    'may',
-    'can',
-    'going to',
-]
 
 noun_counters = defaultdict(int)
 
@@ -92,15 +98,25 @@ noun_counters = defaultdict(int)
 class TimeBankStatistics:
 
     def print_counts(self):
-        tmdr = TE3SilverDatareader()
+        tmdr = TE3GoldDatareader()
+        aquaint = AquaintDatareader()
         self._lf = LinguisticFeaturizer()
         self._matres_data_reader = MatresDataReader()
-        timebank_documents = tmdr.timebank_documents('train')
+        aquaint_documents = aquaint.timebank_documents('train')
+        timebank_documents = tmdr.timebank_documents('train') + aquaint_documents
         self._instance = 0
         self._tense_count = defaultdict(int)
+        self._dct_count = defaultdict(int)
         self._matres_dict = self._matres_data_reader.matres_dict('timebank')
+        self._matres_dict.update(self._matres_data_reader.matres_dict('aquaint'))
 
         for documenti, document in enumerate(timebank_documents):
+            t0_dict = {}
+            for tlink in document.tlinks():
+                tlink_type = tlink.tlink_type()
+                if tlink_type == 'e2t':
+                    if tlink.related_to_time() == 't0':
+                        t0_dict[tlink.event_instance_id()] = tlink.rel_type()
             print(document.file_name())
             for tlink in document.tlinks():
                 if 't' in tlink.tlink_type():
@@ -112,20 +128,25 @@ class TimeBankStatistics:
                 if tlink_type[1:] == '2e':
                     to_event = tlink.related_to_event_instance()
                 rel_type = tlink.rel_type()
-                self._process_link(document, from_event, to_event, rel_type)
+                self._process_link(document, from_event, to_event, rel_type, t0_dict)
 
                     
             for slink in document.slinks():
                 from_event = slink.event_instance_id()
                 to_event = slink.subordinated_event_instance()
                 rel_type = slink.rel_type()
-                self._process_link(document, from_event, to_event, rel_type)
+                self._process_link(document, from_event, to_event, rel_type, t0_dict)
 
         for i in sorted(self._tense_count.items(), key=lambda x: (x[0][0], x[1])):
-            print(i)
+            if i[0][1] in ['after', 'before', 'during']:
+                print(i)
+        print('----')
+        for i in sorted(self._dct_count.items(), key=lambda x: (x[0])):
+            if 'none' not in i[0]:
+                print(i)
 
 
-    def _process_link(self, document, from_event, to_event, rel_type):
+    def _process_link(self, document, from_event, to_event, rel_type, t0_dict):
 
         matres_key = (document.file_name(), from_event.strip('ei'), to_event.strip('ei'))
         matres_key_opp = (document.file_name(), to_event.strip('ei'), from_event.strip('ei'))
@@ -163,50 +184,68 @@ class TimeBankStatistics:
                 to_token_spacy = token
         
         
-        if from_token_spacy is not None and from_token_spacy.text() in said_verbs:
+        if from_token_spacy is not None:# and from_token_spacy.text() in said_verbs:
             use = False
             parent = to_token_spacy
-            seen = False
+            seen = True
+
             while parent is not None:
-                if parent.dep() == 'relcl':
+                if parent.dep() in ['ccomp', 'xcomp']:
                     seen = True
                 if from_token_spacy.i() == parent.i() and seen is True:
                     use = True
                 parent = parent.parent()
-            from_tense, from_aspect = self.token2tense(from_sentence, from_token_spacy)
-            to_tense, to_aspect = self.token2tense(from_sentence, to_token_spacy)
+            from_sentence = ' '.join(from_sentence)
+            is_direct_quote = False
+            for dep, tokens in from_token_spacy.children().items():
+                for t in tokens:
+                    if t.text() == '"' or t.text() == "'":
+                        is_direct_quote = True
+            from_tense, from_aspect = token2tense(from_sentence, from_token_spacy)
+            to_tense, to_aspect = token2tense(from_sentence, to_token_spacy)
             rel_type = rel2rel_simpler[rel_type.lower()]
-            tense = ('{}_{}_{}_{}'.format(str(from_tense), str(from_aspect), str(to_tense), str(to_aspect)), str(rel_type))
-            
+            dct_rel = t0_dict.get(to_event)
+            dct_rel = rel2rel_simpler[str(dct_rel).lower()]
+            tense = ('{}_{}_{}_{}_{}'.format(str(from_tense), str(from_aspect), str(to_tense), str(to_aspect), str(is_direct_quote)), str(rel_type))
+            #tense = ('{}_{}_{}_{}_{}'.format(str(from_tense), str(''), str(to_tense), str(''), str(is_direct_quote)), str(rel_type))
+            dct_tense = ('{}_{}_{}_{}_{}_{}'.format(str(from_tense), str(from_aspect), str(to_tense), str(to_aspect), str(is_direct_quote), dct_rel))
             if use is True and to_token_spacy is not None and from_token_spacy is not None:
-                if tense == 'Past_None_Past_None_before':
-                    print(' '.join(to_sentence))
-                    print(from_token, to_token, from_tense, from_aspect, to_tense, to_aspect, rel_type)
                 self._instance += 1
                 self._tense_count[tense] += 1
+                self._dct_count[dct_tense] += 1
 
         
-        if to_token_spacy is not None and to_token_spacy.text() in said_verbs:
-            use = False
-            seen = False
+        if to_token_spacy is not None :#and to_token_spacy.text() in said_verbs:
+            use = True
+            seen = True
             parent = from_token_spacy
+
             while parent is not None:
-                if parent.dep() == 'ccomp':
-                    seen = True
+                if parent.dep() in ['ccomp', 'xcomp']:
+                    seen = False
                 if to_token_spacy.i() == parent.i() and seen is True:
                     use = True
                 parent = parent.parent()
-            from_tense, from_aspect = self.token2tense(from_sentence, from_token_spacy)
-            to_tense, to_aspect = self.token2tense(from_sentence, to_token_spacy)
+            from_sentence = ' '.join(from_sentence)
+            is_direct_quote = False
+            for dep, tokens in to_token_spacy.children().items():
+                for t in tokens:
+                    if t.text() == '"' or t.text() == "'":
+                        is_direct_quote = True
+            dct_rel = t0_dict.get(from_event)
+            dct_rel = rel2rel_simpler[str(dct_rel).lower()]
+            from_tense, from_aspect = token2tense(from_sentence, from_token_spacy)
+            to_tense, to_aspect = token2tense(from_sentence, to_token_spacy)
             rel_type = rel2rel_simpler[rel_type.lower()]
             rel_type = rel2opposite[rel_type]
-            tense = ('{}_{}_{}_{}'.format(str(to_tense), str(to_aspect), str(from_tense), str(from_aspect)), str(rel_type))
+            tense = ('{}_{}_{}_{}_{}'.format(str(to_tense), str(to_aspect), str(from_tense), str(from_aspect), str(is_direct_quote)), str(rel_type))
+            #tense = ('{}_{}_{}_{}_{}'.format(str(to_tense), str(''), str(from_tense), str(''), str(is_direct_quote)), str(rel_type))
+            dct_tense = ('{}_{}_{}_{}_{}_{}'.format(str(to_tense), str(to_aspect), str(from_tense), str(from_aspect), str(is_direct_quote), dct_rel))
+            
             if use is True and to_token_spacy is not None and from_token_spacy is not None:
-                #print(from_token, to_token, from_tense, from_aspect, to_tense, to_aspect, rel_type)
-                # print(' '.join(to_sentence))
-                #print()
                 self._instance += 1
                 self._tense_count[tense] += 1
+                self._dct_count[dct_tense] += 1
 
 
     def event_instance_id2sentence(self, document, eiid, event_point):
@@ -254,49 +293,6 @@ class TimeBankStatistics:
                 return 0
             else:
                 return 1
-
-
-    def token2tense(self, sentence, token):
-        context = ' '.join(sentence)
-        tense = None
-        aspect = None
-        if token is None:
-            return tense, aspect
-        if token.pos() in ['VERB', 'ROOT', 'AUX']:
-            tense = 'Pres'
-            if token.tense() is not None:
-                tense = token.tense()
-            aspect = token.aspect()
-            aux_there = False
-            if 'aux' in token.children():
-                for child in token.children()['aux']:
-                    if child.tense() is not None:
-                        tense = child.tense()
-                        if child.text() in past_perf_aux + pres_perf_aux:
-                            aux_there = True
-                            aspect = 'Perf'
-                        if child.text() in pres_perf_aux:
-                            tense = 'Pres'
-            if aux_there is False and aspect == 'Perf':
-                aspect = None
-        
-            if any(future_modal in context[max(0, token.idx() - 20): token.idx()].lower() for future_modal in future_modals):
-                tense = 'Future'
-        return tense, aspect
-
-    def token2parent(self, qa_datum, token):
-        deps = ['ccomp', 'xcomp', "parataxis", '-relcl', 'conj']
-        parent = None
-        use = False
-        if token.dep() in deps:
-            parent = token.parent()
-            while not (parent is None or parent.text() in said_verbs or parent.dep() == 'ROOT'):
-                if (token.dep() in deps and token.pos() in ['VERB']) or parent.dep() in ['ccomp', 'xcomp']:
-                    use = True
-                parent = parent.parent()
-        if use is False or (parent is not None and parent.text() not in said_verbs):
-            parent = None
-        return parent
 
 
 if __name__ == '__main__':

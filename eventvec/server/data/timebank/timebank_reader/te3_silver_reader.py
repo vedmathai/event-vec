@@ -10,7 +10,7 @@ class TE3SilverDatareader(AbstractDatareader):
         super().__init__()
         self._silver_folder = self._config.te3_silver_data_location()
 
-    def list_folder(self, run_name):
+    def list_folder(self, run_name=None):
         """
             Lists the files in extra
         """
@@ -40,3 +40,12 @@ class TE3SilverDatareader(AbstractDatareader):
             timebank_document = self.xml2timebank_document(content)
             timebank_documents.append(timebank_document)
         return timebank_documents
+
+    def timebank_documents_contents(self, filename):
+        files = self.list_folder('train')
+        contents = []
+        for file in files:
+            content = self.read_file(file)
+            timebank_document = self.xml2timebank_document(content)
+            contents.append(timebank_document.text())
+        return contents

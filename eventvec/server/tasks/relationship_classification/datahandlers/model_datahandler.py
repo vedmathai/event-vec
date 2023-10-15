@@ -31,9 +31,17 @@ labels_simpler = {
     'before': 0,
     'includes': 1,
     'is_included': 2,
-    'simultaneous': 3,
+    'during': 3,
     'after': 4,
     'none': 5,
+    'modal': 5,
+    'counter_factive': 5,
+    'vague': 5,
+    'factive': 5,
+    'evidential': 5,
+    'conditional': 5,
+    'neg_evidential': 5,
+    'factual': 5,
 }
 
 labels_simpler_reverse = {
@@ -42,32 +50,26 @@ labels_simpler_reverse = {
     'before': 2,
 }
 
-tenses = {
-    'PRESPART': 0,
-    'PASTPART': 1,
-    'Pres': 2,
-    'FUTURE': 3,
-    'NONE': 4,
-    'INFINITIVE': 5,
-    'Past': 6,
-    None: 4,
+tense_mapping = {
+    "Pres": 0,
+    "Past": 1,
+    'Future': 2,
+    None: 3,
 }
 
-aspect = {
+aspect_mapping = {
     'Perf': 0,
     'Prog': 1,
-    'NONE': 2,
-    'PERFECTIVE_PROGRESSIVE': 3,
     None: 2,
 }
 
-tenses_hot_encoding = {i: [0] * 7 for i in tenses}
+tenses_hot_encoding = {i: [0] * len(tense_mapping) for i in tense_mapping}
 for i in tenses_hot_encoding:
-    tenses_hot_encoding[i][tenses[i]] = 1
+    tenses_hot_encoding[i][tense_mapping[i]] = 1
 
-aspect_hot_encoding = {i: [0] * 4 for i in aspect}
+aspect_hot_encoding = {i: [0] * len(aspect_mapping) for i in aspect_mapping}
 for i in aspect_hot_encoding:
-    aspect_hot_encoding[i][aspect[i]] = 1
+    aspect_hot_encoding[i][aspect_mapping[i]] = 1
 
 
 class BertDataHandler():
@@ -133,8 +135,8 @@ class BertDataHandler():
             return_tensors='pt',
             return_token_type_ids=True
         )
-        switched_from_sentence = re.sub('ENTITY1',  'ENTITY2', from_sentence)
-        switched_to_sentence = re.sub('ENTITY2',  'ENTITY1', to_sentence)
+        switched_from_sentence = re.sub('entity1',  'entity2', from_sentence)
+        switched_to_sentence = re.sub('entity2',  'entity1', to_sentence)
         whole_sentence_to_from = self._tokenizer(
             [switched_to_sentence], [switched_from_sentence],
             padding='max_length',
@@ -155,8 +157,8 @@ class BertDataHandler():
         to_from_from_token_i = decoded_sentence[0].split().index('entity1') + 1
         to_from_to_token_i = decoded_sentence[0].split().index('entity2') + 1
         model_input_datum.set_to_decoded_sentence(decoded_sentence)
-        if any(i >= 200 for i in [from_to_from_token_i, from_to_to_token_i, to_from_from_token_i, to_from_to_token_i]):
-            return
+        #if any(i >= 200 for i in [from_to_from_token_i, from_to_to_token_i, to_from_from_token_i, to_from_to_token_i]):
+        #    return
         label = labels_simpler[model_input_datum.relationship()]
         model_input_datum.set_is_trainable(True)
         model_input_datum.set_from_entity_token_i(from_to_from_token_i)
@@ -170,40 +172,37 @@ class BertDataHandler():
         to_tense_encoding = tenses_hot_encoding[model_input_datum.to_tense()]
         from_aspect_encoding = aspect_hot_encoding[model_input_datum.from_aspect()]
         to_aspect_encoding = aspect_hot_encoding[model_input_datum.to_aspect()]
-        from_tag_encoding = tag_hot_encoding[model_input_datum.from_tag()]
-        to_tag_encoding = tag_hot_encoding[model_input_datum.to_tag()]
-        from_pos_encoding = pos_hot_encoding[model_input_datum.from_pos()]
-        to_pos_encoding = pos_hot_encoding[model_input_datum.to_pos()]
-        if model_input_datum.marked_up_parent_from_sentence() is not None and model_input_datum.marked_up_parent_to_sentence() is not None:
-            from_sentence = ' '.join(model_input_datum.marked_up_parent_from_sentence())
-            to_sentence = ' '.join(model_input_datum.marked_up_parent_to_sentence())
-            whole_sentence_from_to = self._tokenizer(
-                [from_sentence], [to_sentence],
-                padding='max_length',
-                max_length=200,
-                truncation=True,
-                return_tensors='pt',
-                return_token_type_ids=True
-            )
-            decoded_sentence = self._tokenizer.batch_decode(whole_sentence_from_to['input_ids'])
-            if 'entity1' not in decoded_sentence[0].split() or 'entity2' not in decoded_sentence[0].split():
-                return
-            from_to_from_token_i = decoded_sentence[0].split().index('entity1') + 1
-            from_to_to_token_i = decoded_sentence[0].split().index('entity2') + 1
-            model_input_datum.set_from_entity_token_i(from_to_from_token_i)
-            model_input_datum.set_to_entity_token_i(from_to_to_token_i)
-            model_input_datum.set_sentence_pair_encoded(whole_sentence_from_to)
-            feature_encoding = [from_tag_encoding + to_tag_encoding + from_tense_encoding + to_tense_encoding + from_aspect_encoding + to_aspect_encoding + from_pos_encoding + to_pos_encoding]
-            model_input_datum.set_feature_encoding(feature_encoding)
-            from_token = decoded_sentence[0].split()[from_to_from_token_i]
-            to_token = decoded_sentence[0].split()[from_to_to_token_i]
-            from_to_tokens = '{}|{}'.format(from_token, to_token) + str(label)
-            if is_train_or_test == 'train' and (model_input_datum.from_pos() in verb_pos) and (model_input_datum.to_pos() in verb_pos):
-                model_input_datum.set_is_trainable(True)
-            if is_train_or_test == 'test' and (model_input_datum.from_pos() in verb_pos and model_input_datum.to_pos() in verb_pos):
-                model_input_datum.set_is_trainable(True)
-            self._model_input_data.add_class(label)
-            self._labels.add(label)
+        """
+        from_sentence = ' '.join(model_input_datum.marked_up_parent_from_sentence())
+        to_sentence = ' '.join(model_input_datum.marked_up_parent_to_sentence())
+        whole_sentence_from_to = self._tokenizer(
+            [from_sentence], [to_sentence],
+            padding='max_length',
+            max_length=200,
+            truncation=True,
+            return_tensors='pt',
+            return_token_type_ids=True
+        )
+        decoded_sentence = self._tokenizer.batch_decode(whole_sentence_from_to['input_ids'])
+        #if 'entity1' not in decoded_sentence[0].split() or 'entity2' not in decoded_sentence[0].split():
+        #    return
+        from_to_from_token_i = decoded_sentence[0].split().index('entity1') + 1
+        from_to_to_token_i = decoded_sentence[0].split().index('entity2') + 1
+        model_input_datum.set_from_entity_token_i(from_to_from_token_i)
+        model_input_datum.set_to_entity_token_i(from_to_to_token_i)
+        model_input_datum.set_sentence_pair_encoded(whole_sentence_from_to)
+        """
+        feature_encoding = [from_tense_encoding + from_aspect_encoding + to_tense_encoding + to_aspect_encoding]
+        model_input_datum.set_feature_encoding(feature_encoding)
+        from_token = decoded_sentence[0].split()[from_to_from_token_i]
+        to_token = decoded_sentence[0].split()[from_to_to_token_i]
+        from_to_tokens = '{}|{}'.format(from_token, to_token) + str(label)
+        if is_train_or_test == 'train':
+            model_input_datum.set_is_trainable(True)
+        if is_train_or_test == 'test':
+            model_input_datum.set_is_trainable(True)
+        self._model_input_data.add_class(label)
+        self._labels.add(label)
 
 
     def model_input_data(self):

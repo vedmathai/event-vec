@@ -46,6 +46,7 @@ class ModelInputDatum:
         self._parent_from_pos = None
         self._parent_to_pos = None
         self._is_trainable = False
+        self._is_interested = False
 
     def from_sentence_encoded(self):
         return self._from_sentence_encoded
@@ -166,6 +167,9 @@ class ModelInputDatum:
 
     def is_trainable(self):
         return self._is_trainable
+    
+    def is_interested(self):
+        return self._is_interested
 
     def set_from_sentence_encoded(self, from_sentence_encoded):
         self._from_sentence_encoded = from_sentence_encoded
@@ -280,3 +284,6 @@ class ModelInputDatum:
 
     def set_is_trainable(self, is_trainable):
         self._is_trainable = is_trainable
+
+    def set_is_interested(self, is_interested):
+        self._is_interested = is_interested

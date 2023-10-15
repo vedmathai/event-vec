@@ -5,10 +5,10 @@ from eventvec.server.data.abstract import AbstractDatareader
 from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_document import TimebankDocument  # noqa
 
 
-class TE3GoldDatareader(AbstractDatareader):
+class AquaintDatareader(AbstractDatareader):
     def __init__(self):
         super().__init__()
-        self._gold_folder = self._config.te3_gold_data_location()
+        self._gold_folder = self._config.aquaint_data_location()
 
     def list_folder(self, run_name=None):
         filelist = [os.path.join(self._gold_folder, i)

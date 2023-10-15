@@ -29,3 +29,28 @@ future_said_verbs = set([
     "speculate", "speculates", "speculated", "suppose", "supposes", "supposed", "conjecture", "conjectures", "conjectured", "envisioned", "envision", "envisions", "forecasts", 'foresee', 'forecast', 'forecasted',
     'foresaw', 'estimate', 'estimated', 'estimates'
 ])
+
+past_perf_aux = [
+    'had',
+]
+
+pres_perf_aux = [
+    'has',
+    'have',
+]
+
+future_modals = [
+    'will',
+    'going to',
+    'would',
+    'could',
+    'might',
+    'may',
+    'can',
+    'going to',
+    'to be',
+    'shall',
+    'should',
+    'ca',
+    'wo',
+]
