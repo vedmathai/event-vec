@@ -15,6 +15,8 @@ class Config:
         self._timebank_dense_data_location = None
         self._te3_silver_data_location = None
         self._te3_gold_data_location = None
+        self._te3_platinum_data_location = None
+        self._aquaint_data_location = None
         self._tsqa_data_location = None
         self._tsqa_file_names = None
         self._tsqa_file2annotation_map = {}
@@ -23,6 +25,7 @@ class Config:
         self._wiki_data_location = None
         self._nyt_data_location = None
         self._hansard_data_location = None
+        self._politosphere_data_location = None
         self._mnli_data_location = None
         self._jade_logger = JadeLogger()
 
@@ -41,7 +44,8 @@ class Config:
         return self._pythonpath
 
     def matres_data_location(self):
-        return self._matres_data_location
+        location = self._jade_logger.file_manager.data_filepath(self._matres_data_location)
+        return location
 
     def set_matres_data_location(self, matres_data_location):
         self._matres_data_location = matres_data_location
@@ -71,6 +75,12 @@ class Config:
     def hansard_data_location(self):
         return self._hansard_data_location
     
+    def maec_data_location(self):
+        return self._maec_data_location
+    
+    def politosphere_data_location(self):
+        return self._politosphere_data_location
+
     def mnli_data_location(self):
         return self._mnli_data_location
 
@@ -103,19 +113,39 @@ class Config:
         self._timebank_data_location = timebank_data_location
 
     def timebank_dense_data_location(self):
-        return self._timebank_dense_data_location
+        if os.environ.get('ENV') == 'JADE':
+            location = self._jade_logger.file_manager.data_filepath(self._timebank_dense_data_location)
+        else:
+            location = self._timebank_dense_data_location
+        return location
 
     def set_timebank_dense_data_location(self, timebank_dense_data_location):
         self._timebank_dense_data_location = timebank_dense_data_location
 
+    def aquaint_data_location(self):
+        location = self._jade_logger.file_manager.data_filepath(self._aquaint_data_location)
+        return location
+    
+    def set_aquaint_data_location(self, aquaint_data_location):
+        self._aquaint_data_location = aquaint_data_location
+
     def te3_silver_data_location(self):
-        return self._te3_silver_data_location
+        location = self._jade_logger.file_manager.data_filepath(self._te3_silver_data_location)
+        return location
     
     def set_te3_silver_data_location(self, te3_silver_data_location):
         self._te3_silver_data_location = te3_silver_data_location
 
+    def te3_platinum_data_location(self):
+        location = self._jade_logger.file_manager.data_filepath(self._te3_platinum_data_location)
+        return location
+    
+    def set_te3_platinum_data_location(self, te3_platinum_data_location):
+        self._te3_platinum_data_location = te3_platinum_data_location
+
     def te3_gold_data_location(self):
-        return self._te3_gold_data_location
+        location = self._jade_logger.file_manager.data_filepath(self._te3_gold_data_location)
+        return location
     
     def set_te3_gold_data_location(self, te3_gold_data_location):
         self._te3_gold_data_location = te3_gold_data_location
@@ -137,6 +167,12 @@ class Config:
 
     def set_hansard_data_location(self, hansard_data_location):
         self._hansard_data_location = hansard_data_location
+
+    def set_maec_data_location(self, maec_data_location):
+        self._maec_data_location = maec_data_location
+
+    def set_politosphere_data_location(self, politosphere_data_location):
+        self._politosphere_data_location = politosphere_data_location
 
     def set_mnli_data_location(self, mnli_data_location):
         self._mnli_data_location = mnli_data_location
@@ -170,6 +206,8 @@ class Config:
         config.set_timebank_dense_data_location(val.get('timebank_dense_data_location'))
         config.set_te3_silver_data_location(val.get('te3_silver_data_location'))
         config.set_te3_gold_data_location(val.get('te3_gold_data_location'))
+        config.set_te3_platinum_data_location(val.get('te3_platinum_data_location'))
+        config.set_aquaint_data_location(val.get('te3_aquaint_location'))
         config.set_book_corpus_data_location(val.get('book_corpus_data_location'))
         config.set_experiment_type(val.get('experiment_type'))
         config.set_run_configs_file(val.get('run_configs_file'))
@@ -183,5 +221,7 @@ class Config:
         config.set_wiki_data_location(val.get('wiki_data_location'))
         config.set_nyt_data_location(val.get('nyt_data_location'))
         config.set_hansard_data_location(val.get('hansard_data_location'))
+        config.set_maec_data_location(val.get('maec_data_location'))
+        config.set_politosphere_data_location(val.get('politosphere_data_location'))
         config.set_mnli_data_location(val.get('mnli_data_location'))
         return config

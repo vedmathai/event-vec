@@ -30,6 +30,7 @@ class TimebankDocument:
         self._time_id2slink = {}
         self._event_id2alink = {}
         self._time_id2alink = {}
+        self._text = None
 
     def file_name(self):
         return self._file_name
@@ -162,6 +163,12 @@ class TimebankDocument:
 
     def time_id2alink(self, time_id):
         return self._time_id2alink[time_id]
+    
+    def text(self):
+        return self._text
+    
+    def set_text(self, text):
+        self._text = text
 
     @staticmethod
     def from_xml(document):
@@ -171,6 +178,8 @@ class TimebankDocument:
         docno = soup.find('docid')
 
         timebank_document.set_file_name(docno.text)
+        text = soup.find('text')
+        timebank_document.set_text(text.text)
 
         sentences = list(soup.find_all('s'))
         if len(sentences) == 0:

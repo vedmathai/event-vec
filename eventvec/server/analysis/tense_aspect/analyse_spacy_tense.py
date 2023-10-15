@@ -6,87 +6,14 @@ from eventvec.server.datamodels.qa_datamodels.qa_datum import QADatum
 from eventvec.server.featurizers.lingusitic_featurizer import LinguisticFeaturizer
 from eventvec.server.tasks.question_answering.datahandlers.datahanders_registry import DatahandlersRegistry
 
+from eventvec.server.common.lists.said_verbs import said_verbs, future_said_verbs
+from eventvec.server.utils.general import token2parent, token2tense
+
+said_verbs = said_verbs | future_said_verbs
+
 past_perf_aux = ['had']
 pres_perf_aux = ['has', 'have']
 
-said_verbs = set(["observe", "observes", "observed", "describe", "describes", "described", "discuss", "discusses", "discussed",
-					  "report", "reports", "reported", "outline", "outlines", "outlined", "remark", "remarks", "remarked", 	
-					  "state", "states", "stated", "go on to say that", "goes on to say that", "went on to say that", 	
-					  "quote that", "quotes that", "quoted that", "say", "says", "said", "mention", "mentions", "mentioned",
-					  "articulate", "articulates", "articulated", "write", "writes", "wrote", "relate", "relates", "related",
-					  "convey", "conveys", "conveyed", "recognise", "recognises", "recognised", "clarify", "clarifies", "clarified",
-					  "acknowledge", "acknowledges", "acknowledged", "concede", "concedes", "conceded", "accept", "accepts", "accepted",
-					  "refute", "refutes", "refuted", "uncover", "uncovers", "uncovered", "admit", "admits", "admitted",
-					  "demonstrate", "demonstrates", "demonstrated", "highlight", "highlights", "highlighted", "illuminate", "illuminates", "illuminated", 							  
-                      "support", "supports", "supported", "conclude", "concludes", "concluded", "elucidate", "elucidates", "elucidated",
-					  "reveal", "reveals", "revealed", "verify", "verifies", "verified", "argue", "argues", "argued", "reason", "reasons", "reasoned",
-					  "maintain", "maintains", "maintained", "contend", "contends", "contended", 
-					    "feel", "feels", "felt", "consider", "considers", "considered", 						  
-                      "assert", "asserts", "asserted", "dispute", "disputes", "disputed", "advocate", "advocates", "advocated",
-					  "opine", "opines", "opined", "think", "thinks", "thought", "imply", "implies", "implied", "posit", "posits", "posited",
-					  "show", "shows", "showed", "illustrate", "illustrates", "illustrated", "point out", "points out", "pointed out",
-					  "prove", "proves", "proved", "find", "finds", "found", "explain", "explains", "explained", "agree", "agrees", "agreed",
-					  "confirm", "confirms", "confirmed", "identify", "identifies", "identified", "evidence", "evidences", "evidenced",
-					  "attest", "attests", "attested", "believe", "believes", "believed", "claim", "claims", "claimed", "justify", "justifies", "justified", 							  
-                      "insist", "insists", "insisted", "assume", "assumes", "assumed", "allege", "alleges", "alleged", "deny", "denies", "denied",
-					   "disregard", "disregards", "disregarded", 
-					   "surmise", "surmises", "surmised", "note", "notes", "noted",
-					  "suggest", "suggests", "suggested", "challenge", "challenges", "challenged", "critique", "critiques", "critiqued",
-					  "emphasise", "emphasises", "emphasised", "declare", "declares", "declared", "indicate", "indicates", "indicated",
-					  "comment", "comments", "commented", "uphold", "upholds", "upheld", "rule", "ruled", "ruling", "look", "looked", "looking",
-                      "announced", "cited", "quoted", "telling", "continued", "replied", "derided", "declined", "estimates", "urges", "quipped",
-                      "recommends", "denounced", "recalled", "recommended"
-                      'rule', 'ruled', 'ruling', 'look', 'looked', 'looking',
-                      'continue', 'continued', 'continuing',
-                      'lies', 'lying', 'lied',
-                      'replied', 'replies', 'replied',
-                      'heard', 'hears', 'hearing',
-                      'adds', 'added', 'adding',
-                       'estimates', 'estimated', 'estimating',
-                      'promised', 'promise', 'promising',
-                      'hoped', 'hoping', 'hopes', 'hope',
-                      'accused', 'accusing', 'accuses', 
-                      'urges', 'urged', 'urging', 
-                      'stipulates', 'stipulated', 'stipulating',
-                      'speculated', 'speculates', 'speculating', 
-                      'assured', 'assuring', 'assures',
-                      'predicted', 'predicts', 'predicting',
-                      'announced', 'announces', 'announcing',
-                      'cited', 'citing', 'cites',
-                      'portends', 'portending', 'portended',
-                      'recommends', 'recommending', 'recommended',
-                      'quipped', 'quipping', 'quips',
-                      'criticised', 'criticising', 'critises',
-                      'reassured', 'reassuring', 'reassures',
-                      'quoted', 'quotes', 'quoting', 
-                      'demands', 'demanded', 'demanding', 
-                      'replied', 'replies', 'replying',
-                      'denounced', 'denouncing', 'denounces',
-                      'knowing', 'knowed', 'knows',
-                      'reiterated', 'reiterates', 'reiterating', 
-                      'reading', 'read',
-                      'questions', 'questioning', 'questioned',
-                      'arguing', 'argued', 'argues',
-                      'signalled', 'signals', 'signalling',
-                      'accuse', 'accusing', 'accused', 
-                      'hinted', 'hints', 'hinting',
-                      'questioned', 'questioning', 'questions',
-                      'asked', 'asking', 'asks',
-                      'tells', 'told', 'telling',
-                      'vowed', 'vows', 
-                      'urged', 'urging', 'urges',
-])
-                      
-future_modals = [
-    'will',
-    'going to',
-    'would',
-    'could',
-    'might',
-    'may',
-    'can',
-    'going to',
-]
 
 class SpacyTenseAspectAnalyser:
     def __init__(self):
@@ -109,8 +36,9 @@ class SpacyTenseAspectAnalyser:
 
     def analyze(self):
         self._analyze_train_data()
-        for key, value in self._counter.items():
+        for key, value in sorted(self._counter.items(), key = lambda x: str(x[0])):
             print(key, value)
+        print(sum(self._counter.values()))
 
     def _analyze_train_data(self):
         train_data = self._train_data
@@ -149,32 +77,44 @@ class SpacyTenseAspectAnalyser:
                 tense = None
                 aspect = None
                 context_i2token[token.idx()] = token
-                tense, aspect = self.token2tense(qa_datum, token)
-                parent_token = self.token2parent(qa_datum, token)
-                parent_tense, parent_aspect = self.token2tense(qa_datum, parent_token)
+                tense, aspect = token2tense(sentence.text(), token)
+                parent_token = token2parent(sentence.text(), token)
+                parent_tense, parent_aspect = token2tense(sentence.text(), parent_token)
 
                 if parent_token is not None and parent_token.text() in said_verbs:
+                    is_direct_quote = False
+                    for dep, tokens in parent_token.children().items():
+                        for t in tokens:
+                            if t.text() == '"' or t.text() == "'":
+                                is_direct_quote = True
                     if token.text() in qa_datum.question_events() and parent_token.text() in [i.text() for i in qa_datum.answers()]:
                         altered_required.append(parent_token.text())
-                        print(qa_datum.question())
-                        print(context)
-                        print('token', token.text(), tense, aspect, 'parent', parent_token.text(), parent_tense, parent_aspect)
-                        print(qa_datum.question_events(), [i.text() for i in qa_datum.answers()])
-                        print(' ')
+                        if 'after' in qa_datum.question():
+                            self._counter[(parent_tense, parent_aspect, tense, aspect, is_direct_quote, 'after')] += 1
+                        if 'before' in qa_datum.question():
+                            self._counter[(parent_tense, parent_aspect, tense, aspect, is_direct_quote, 'before')] += 1  
+                        if any(i in qa_datum.question() for i in ['during', 'while']):
+                            self._counter[(parent_tense, parent_aspect, tense, aspect, is_direct_quote, 'during')] += 1  
                     if token.text() in qa_datum.question_events():
                         possible_answers.append(parent_token.text())
+                        self._counter['possible'] += 1
 
                     if parent_token.text() in qa_datum.question_events() and token.text() in [i.text() for i in qa_datum.answers()]:
                         altered_required.append(token.text())
+                        if 'after' in qa_datum.question():
+                            self._counter[(parent_tense, parent_aspect, tense, aspect, is_direct_quote, 'before')] += 1
+                        if 'before' in qa_datum.question():
+                            self._counter[(parent_tense, parent_aspect, tense, aspect, is_direct_quote, 'after')] += 1  
+                        if any(i in qa_datum.question() for i in ['during', 'while']):
+                            self._counter[(parent_tense, parent_aspect, tense, aspect, is_direct_quote, 'during')] += 1                           
                     if parent_token.text() in qa_datum.question_events():
                         possible_answers.append(token.text())
+                        self._counter['possible'] += 1
 
                 #if parent_tense is not None and (parent_token.text() in qa_datum.question_events() or token.text() in qa_datum.question_events()):
                 #    print('\n'  *3)
                 #    print(qa_datum.context(), qa_datum.question(), 'parent:', parent_token.text(), 'token:', token.text(), qa_datum.question_events())
                 #    
-                if tense is not None and parent_tense is not None:
-                    self._counter[(parent_tense, tense)] += 1
                 if tense is not None:
                     annotated_context.append('{} ({} {})'.format(token.text(), tense, aspect))
                 else:
@@ -185,48 +125,6 @@ class SpacyTenseAspectAnalyser:
 
         self._example_counter += 1
             
-
-    def token2tense(self, qa_datum, token):
-        context = qa_datum.context()
-        tense = None
-        aspect = None
-        if token is None:
-            return tense, aspect
-        if token.pos() in ['VERB', 'ROOT', 'AUX']:
-            tense = 'Pres'
-            if token.tense() is not None:
-                tense = token.tense()
-            aspect = token.aspect()
-            aux_there = False
-            if 'aux' in token.children():
-                for child in token.children()['aux']:
-                    if child.tense() is not None:
-                        tense = child.tense()
-                        if child.text() in past_perf_aux + pres_perf_aux:
-                            aux_there = True
-                            aspect = 'Perf'
-            if aux_there is False and aspect == 'Perf':
-                aspect = None
-        
-            paragraph = context[0]
-            if any(future_modal in paragraph[max(0, token.idx() - 20): token.idx()].lower() for future_modal in future_modals):
-                tense = 'Future'
-        return tense, aspect
-
-    def token2parent(self, qa_datum, token):
-        deps = ['ccomp', 'xcomp', "parataxis", '-relcl', 'conj']
-        parent = None
-        use = False
-        if token.dep() in deps:
-            parent = token.parent()
-            while not (parent is None or parent.text() in said_verbs or parent.dep() == 'ROOT'):
-                if (token.dep() in deps and token.pos() in ['VERB']) or parent.dep() in ['ccomp', 'xcomp']:
-                    use = True
-                parent = parent.parent()
-        if use is False or (parent is not None and parent.text() not in said_verbs):
-            parent = None
-        return parent
-
 
 if __name__ == '__main__':
     qa_train = SpacyTenseAspectAnalyser()

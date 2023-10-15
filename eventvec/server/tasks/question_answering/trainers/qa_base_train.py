@@ -386,14 +386,15 @@ class QATrainBase:
             parent_tense, parent_aspect = self.token2tense(qa_datum, parent_token)
 
             if parent_token is not None and parent_token.text() in said_verbs:
-                if token.text() in qa_datum.question().split() and parent_token.text() in [i.text() for i in qa_datum.answers()]:
+                question_condition = qa_datum.question() in ['What event has already finished?', 'What events have begun but has not finished?',  'What will happen in the future?']
+                if (token.text() in qa_datum.question_events()) and parent_token.text() in [i.text() for i in qa_datum.answers()]:
                     altered_required.append(parent_token.text())
-                if token.text() in qa_datum.question().split():
+                if (token.text() in qa_datum.question_events()):
                     possible_answers.append(parent_token.text())
 
-                if parent_token.text() in qa_datum.question().split() and token.text() in [i.text() for i in qa_datum.answers()]:
+                if (parent_token.text() in qa_datum.question_events() or question_condition) and token.text() in [i.text() for i in qa_datum.answers()]:
                     altered_required.append(token.text())
-                if parent_token.text() in qa_datum.question().split():
+                if (parent_token.text() in qa_datum.question_events() or question_condition):
                     possible_answers.append(token.text())
 
             tokeni2tense[token.idx()] = (tense, aspect) 

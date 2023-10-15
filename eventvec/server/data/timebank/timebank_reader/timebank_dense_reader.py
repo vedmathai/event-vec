@@ -34,7 +34,7 @@ class TimeBankDenseDataReader(AbstractDatareader):
         timebank_document = TimebankDocument.from_xml(filecontents)
         return timebank_document
 
-    def timebank_documents(self, run_name) -> List[TimebankDocument]:
+    def timebank_documents(self, run_name=None) -> List[TimebankDocument]:
         files = self.list_folder(run_name)
         timebank_documents = []
         for file in files:

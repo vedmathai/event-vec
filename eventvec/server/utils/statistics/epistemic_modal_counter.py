@@ -1,93 +1,24 @@
 import json
+from collections import defaultdict
 
 from eventvec.server.featurizers.lingusitic_featurizer import LinguisticFeaturizer  # noqa
 from eventvec.server.data.book_corpus.book_corpus_datahandlers.book_corpus_llm_datahandler import BookCorpusDatahandler  # noqa
 from eventvec.server.data.wikipedia.datahandlers.wiki_datahandler import WikiDatahandler
 from eventvec.server.data.nyt.nyt_datahandlers.nyt_datahandler import NYTDatahandler
 from eventvec.server.data.hansard.hansard_datahandlers.hansard_datahandler import HansardDatahandler
+from eventvec.server.data.maec.maec_datahandlers.maec_datahandler import MAECDatahandler
+from eventvec.server.data.politosphere.politosphere_datahandlers.politosphere_datahandler import PolitosphereDatahandler
+from eventvec.server.data.timebank.timebank_reader.timebank_reader import TimeMLDataReader 
 from eventvec.server.data.mnli.mnli_datahandlers.mnli_datahandler import MNLIDatahandler
-
-
-auxs = {'can', 'could', 'would', 'will', 'wo', 'must', 'll', 'should', 'shall', 'might', 'may', "'d"}
-                
-said_verbs = set(["observe", "observes", "observed", "describe", "describes", "described", "discuss", "discusses", "discussed",
-					  "report", "reports", "reported", "outline", "outlines", "outlined", "remark", "remarks", "remarked", 	
-					  "state", "states", "stated", "go on to say that", "goes on to say that", "went on to say that", 	
-					  "quote that", "quotes that", "quoted that", "say", "says", "said", "mention", "mentions", "mentioned",
-					  "articulate", "articulates", "articulated", "write", "writes", "wrote", "relate", "relates", "related",
-					  "convey", "conveys", "conveyed", "recognise", "recognises", "recognised", "clarify", "clarifies", "clarified",
-					  "acknowledge", "acknowledges", "acknowledged", "concede", "concedes", "conceded", "accept", "accepts", "accepted",
-					  "refute", "refutes", "refuted", "uncover", "uncovers", "uncovered", "admit", "admits", "admitted",
-					  "demonstrate", "demonstrates", "demonstrated", "highlight", "highlights", "highlighted", "illuminate", "illuminates", "illuminated", 							  
-                      "support", "supports", "supported", "conclude", "concludes", "concluded", "elucidate", "elucidates", "elucidated",
-					  "reveal", "reveals", "revealed", "verify", "verifies", "verified", "argue", "argues", "argued", "reason", "reasons", "reasoned",
-					  "maintain", "maintains", "maintained", "contend", "contends", "contended", 
-					    "feel", "feels", "felt", "consider", "considers", "considered", 						  
-                      "assert", "asserts", "asserted", "dispute", "disputes", "disputed", "advocate", "advocates", "advocated",
-					  "opine", "opines", "opined", "think", "thinks", "thought", "imply", "implies", "implied", "posit", "posits", "posited",
-					  "show", "shows", "showed", "illustrate", "illustrates", "illustrated", "point out", "points out", "pointed out",
-					  "prove", "proves", "proved", "find", "finds", "found", "explain", "explains", "explained", "agree", "agrees", "agreed",
-					  "confirm", "confirms", "confirmed", "identify", "identifies", "identified", "evidence", "evidences", "evidenced",
-					  "attest", "attests", "attested", "believe", "believes", "believed", "claim", "claims", "claimed", "justify", "justifies", "justified", 							  
-                      "insist", "insists", "insisted", "assume", "assumes", "assumed", "allege", "alleges", "alleged", "deny", "denies", "denied",
-					   "disregard", "disregards", "disregarded", 
-					   "surmise", "surmises", "surmised", "note", "notes", "noted",
-					  "suggest", "suggests", "suggested", "challenge", "challenges", "challenged", "critique", "critiques", "critiqued",
-					  "emphasise", "emphasises", "emphasised", "declare", "declares", "declared", "indicate", "indicates", "indicated",
-					  "comment", "comments", "commented", "uphold", "upholds", "upheld", "rule", "ruled", "ruling", "look", "looked", "looking",
-                      "announced", "cited", "quoted", "telling", "continued", "replied", "derided", "declined", "estimates", "urges", "quipped",
-                      "recommends", "denounced", "recalled", "recommended"
-                      'rule', 'ruled', 'ruling', 'look', 'looked', 'looking',
-                      'continue', 'continued', 'continuing',
-                      'lies', 'lying', 'lied',
-                      'replied', 'replies', 'replied',
-                      'heard', 'hears', 'hearing',
-                      'adds', 'added', 'adding',
-                       'estimates', 'estimated', 'estimating',
-                      'promised', 'promise', 'promising',
-                      'hoped', 'hoping', 'hopes', 'hope',
-                      'accused', 'accusing', 'accuses', 
-                      'urges', 'urged', 'urging', 
-                      'stipulates', 'stipulated', 'stipulating',
-                      'speculated', 'speculates', 'speculating', 
-                      'assured', 'assuring', 'assures',
-                      'predicted', 'predicts', 'predicting',
-                      'announced', 'announces', 'announcing',
-                      'cited', 'citing', 'cites',
-                      'portends', 'portending', 'portended',
-                      'recommends', 'recommending', 'recommended',
-                      'quipped', 'quipping', 'quips',
-                      'criticised', 'criticising', 'critises',
-                      'reassured', 'reassuring', 'reassures',
-                      'quoted', 'quotes', 'quoting', 
-                      'demands', 'demanded', 'demanding', 
-                      'replied', 'replies', 'replying',
-                      'denounced', 'denouncing', 'denounces',
-                      'knowing', 'knowed', 'knows',
-                      'reiterated', 'reiterates', 'reiterating', 
-                      'reading', 'read',
-                      'questions', 'questioning', 'questioned',
-                      'arguing', 'argued', 'argues',
-                      'signalled', 'signals', 'signalling',
-                      'accuse', 'accusing', 'accused', 
-                      'hinted', 'hints', 'hinting',
-                      'questioned', 'questioning', 'questions',
-                      'asked', 'asking', 'asks',
-                      'tells', 'told', 'telling',
-                      'vowed', 'vows', 
-                      'urged', 'urging', 'urges',
-])
-
-future_said_verbs = set([
-    'anticipate', 'anticipates', 'anticipated',
-    "hypothesise", "hypothesises", "hypothesised",
-    "propose", "proposes", "proposed", "theorise", "theorises", "theorised", "posit", "posits", "posited",
-    "speculate", "speculates", "speculated", "suppose", "supposes", "supposed", "conjecture", "conjectures", "conjectured", "envisioned", "envision", "envisions", "forecasts", 'foresee', 'forecast', 'forecasted',
-    'foresaw', 'estimate', 'estimated', 'estimates'
-])
+from eventvec.server.data.torque.readers.torque_datareader import TorqueDataReader
+from eventvec.server.data.timebank.timebank_reader.te3_silver_reader import TE3SilverDatareader
+from eventvec.server.data.timebank.timebank_reader.te3_gold_reader import TE3GoldDatareader
+from eventvec.server.common.lists.said_verbs import said_verbs, future_said_verbs
+from eventvec.server.utils.general import token2parent, token2tense
 
 said_verbs = said_verbs | future_said_verbs
-
+auxs = {'can', 'could', 'would', 'will', 'wo', 'must', 'll', 'should', 'shall', 'might', 'may', "'d"}
+                
 adverbs = set(["probably", "possibly", "clearly", "obviously",
                "presumably", "evidently", "apparently", "supposedly",
                "conceivably", "undoubtedly", "allegedly", "reportedly",
@@ -120,34 +51,47 @@ class EpistemicModalCounter():
         self._linguistic_featurizer = LinguisticFeaturizer()
         self._nyt_corpus_handler = NYTDatahandler()
         self._hansard_handler = HansardDatahandler()
+        self._maec_handler = MAECDatahandler()
+        self._politosphere_handler = PolitosphereDatahandler()
         self._mnli_handler = MNLIDatahandler()
-        self._corpus = 'mnli'
+        self._time_ml_handler = TimeMLDataReader()
+        self._torque_handler = TorqueDataReader()
+        self._te3_silver_handler = TE3SilverDatareader()
+        self._te3_gold_handler = TE3GoldDatareader()
+        self._corpus = 'politosphere'
 
     def filenames(self):
-        if self._corpus == 'wikidata':
-            filenames = self._wiki_data_handler.wiki_file_list()
-        if self._corpus == 'bookcorpus':
-            filenames = self._book_corpus_data_handler.book_corpus_file_list()
-        if self._corpus == 'nytcorpus':
-            filenames = self._nyt_corpus_handler.nyt_file_list()
-        if self._corpus == 'hansard':
-            filenames = self._hansard_handler.hansard_file_list()
-        if self._corpus == 'mnli':
-            filenames = self._mnli_handler.mnli_file_list()
-        return filenames
+        filename2list = {
+            'wikidata': self._wiki_data_handler.wiki_file_list,
+            'bookcorpus': self._book_corpus_data_handler.book_corpus_file_list,
+            'nytcorpus': self._nyt_corpus_handler.nyt_file_list,
+            'hansard': self._hansard_handler.hansard_file_list,
+            'mnli': self._mnli_handler.mnli_file_list,
+            'timebank': self._time_ml_handler.list_extra,
+            'torque': self._torque_handler.file_list,
+            'te3_silver': self._te3_silver_handler.list_folder,
+            'te3_gold': self._te3_gold_handler.list_folder,
+            'maec': self._maec_handler.maec_file_list,
+            'politosphere': self._politosphere_handler.politosphere_file_list,
+        }
+        return filename2list[self._corpus]()
     
     def read_file(self, filename):
-        if self._corpus == 'wikidata':
-            f = self._wiki_data_handler.read_file(filename)
-        if self._corpus == 'bookcorpus':
-            f = self._book_corpus_data_handler.read_file(filename)
-        if self._corpus == 'nytcorpus':
-            f = self._nyt_corpus_handler.read_file(filename)
-        if self._corpus == 'hansard':
-            f = self._hansard_handler.read_file(filename)
-        if self._corpus == 'mnli':
-            f = self._mnli_handler.read_file(filename)
-        return f
+        filename2file = {
+            'wikidata': self._wiki_data_handler.read_file,
+            'bookcorpus': self._book_corpus_data_handler.read_file,
+            'nytcorpus': self._nyt_corpus_handler.read_file,
+            'hansard': self._hansard_handler.read_file,
+            'mnli': self._mnli_handler.read_file,
+            'timebank': self._time_ml_handler.read_file_text,
+            'torque': self._torque_handler.torque_sentences,
+            'te3_silver': self._te3_silver_handler.timebank_documents_contents,
+            'te3_gold': self._te3_gold_handler.timebank_documents_contents,
+            'maec': self._maec_handler.read_file,
+            'politosphere': self._politosphere_handler.read_file
+        }
+        fn = filename2file[self._corpus]
+        return fn(filename)
     
     def load(self):
         filenames = self.filenames()
@@ -161,9 +105,10 @@ class EpistemicModalCounter():
         adverb_counter = 0
         adverb_in_said = 0
         sentence_counter = 0
+        verb_in_said_quotes = 0
+        tense_counter = defaultdict(int)
 
         for filenamei, filename in enumerate(filenames[:end]):
-            print(filenamei)
             file_contents_list = self.read_file(filename)  # noqa
             for file_contentsi, file_contents in enumerate(file_contents_list):
                 if sentence_counter > 100000:
@@ -173,7 +118,7 @@ class EpistemicModalCounter():
                 for fsent in fdoc.sentences():
                     sentence_counter += 1
                     for token in fsent.tokens():
-                        if token.pos() in ['VERB', 'AUX']:
+                        if token.pos() in ['VERB', 'AUX'] and token.dep() != 'aux':
                             if token.text() in said_verbs:
                                 said_counter += 1
                             verb_counter += 1
@@ -209,9 +154,17 @@ class EpistemicModalCounter():
                             parent = token.parent()
                             while parent is not None:
                                 if parent.dep() in ['ccomp', 'xcomp'] and parent.parent().text() in said_verbs:
+                                    for dep, tokens in parent.parent().children().items():
+                                        for t in tokens:
+                                            if t.text() == '"' or t.text() == "'":
+                                                verb_in_said_quotes += 1
                                     verb_in_said += 1
+                                    parent_tense, parent_aspect = token2tense(fsent.text(), parent.parent())
+                                    token_tense, token_aspect = token2tense(fsent.text(), token)
+                                    tense_tuple = (parent_tense, parent_aspect, token_tense, token_aspect)
+                                    tense_counter[tense_tuple] += 1
                                 parent = parent.parent()
-                if file_contentsi % 100 == 0 or sentence_counter > 100000:
+                if file_contentsi % 1000 == 0 or sentence_counter > 1000:
                     try:
                         print(
                             'aux_counter', aux_counter,
@@ -227,8 +180,11 @@ class EpistemicModalCounter():
                             'adverb_in_said/verb_in_said', adverb_in_said/verb_in_said,
                             'said_counter/verb_counter', said_counter/verb_counter,
                             'verb_in_said/verb_counter', verb_in_said/verb_counter,
+                            'verb_in_said_quotes/verb_in_said', verb_in_said_quotes/verb_in_said,
                         )
-                    
+                        for k, v in sorted(tense_counter.items(), key=lambda x: x[1]):
+                            print(k, v / verb_in_said)
+                        print(sum([i[1]/verb_in_said for i in tense_counter.items()]))
                     except:
                         pass
 

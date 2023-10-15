@@ -1,5 +1,6 @@
 import os
 from typing import List
+from bs4 import BeautifulSoup
 
 from eventvec.server.data.abstract import AbstractDatareader
 from eventvec.server.data.timebank.timebank_reader.timebank_model.timebank_document import TimebankDocument  # noqa
@@ -25,6 +26,12 @@ class TimeMLDataReader(AbstractDatareader):
     def read_file(self, filepath):
         with open(filepath) as f:
             return f.read()
+        
+    def read_file_text(self, filepath):
+        contents = self.read_file(filepath)
+        soup = BeautifulSoup(contents, 'lxml')
+        text_contents = soup.find('text').text
+        return [text_contents]
 
     def xml2timebank_document(self, filecontents):
         timebank_document = TimebankDocument.from_xml(filecontents)

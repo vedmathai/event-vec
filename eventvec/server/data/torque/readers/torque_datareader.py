@@ -15,6 +15,9 @@ class TorqueDataReader(AbstractDatareader):
     def read_file(self, filepath):
         with open(filepath) as f:
             return f.read()
+        
+    def file_list(self):
+        return [None]
 
     def torque_train_dataset(self) -> TorqueDataset:
         datasets = []
@@ -36,3 +39,15 @@ class TorqueDataReader(AbstractDatareader):
 
     def torque_eval_dataset(self):
         return self.torque_test_eval_dataset('eval')
+    
+    def torque_test_dataset(self):
+        return self.torque_test_eval_dataset('test')
+    
+    def torque_sentences(self, filename):
+        sentences = []
+        train_dataset = self.torque_train_dataset()
+        eval_dataset = self.torque_eval_dataset()
+        for dataset in train_dataset + eval_dataset:
+            for datum in dataset.data():
+                sentences.append(datum.passage())
+        return sentences
