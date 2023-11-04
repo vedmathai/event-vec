@@ -379,6 +379,25 @@
             "use_root_verb": false,
             "use_question_classification": false,
             "use_best_of_annotators": false
+        },
+        {
+            "id": "20",
+            "is_train": true,
+            "trainer": "factuality_trainer",
+            "llm": "roberta",
+            "use_tense": true,
+            "use_aspect": true,
+            "forward_type": "llm+features",
+            "use_attention_forward": false,
+            "use_pos": false,
+            "epochs": 40,
+            "dataset": "factuality",
+            "use_negation": false,
+            "use_question_event": false,
+            "use_question_event_features": true,
+            "use_root_verb": false,
+            "use_question_classification": false,
+            "use_best_of_annotators": false
         }
     ]
 }

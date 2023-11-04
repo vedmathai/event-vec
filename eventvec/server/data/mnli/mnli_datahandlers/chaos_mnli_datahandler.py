@@ -3,7 +3,7 @@ import json
 from eventvec.server.config import Config
 
 
-class MNLIDatahandler:
+class ChaosMNLIDatahandler:
     def __init__(self):
         config = Config.instance()
         self._mnli_file = config.mnli_data_location()
@@ -18,7 +18,6 @@ class MNLIDatahandler:
             for line in f:
                 jsonl = json.loads(line)
                 element = []
-                element.append(jsonl['annotator_labels'])
                 element.append(jsonl['gold_label'])
                 element.append(jsonl['sentence1'])
                 element.append(jsonl['sentence2'])

@@ -5,7 +5,7 @@ from eventvec.server.data.book_corpus.book_corpus_datahandlers.book_corpus_llm_d
 class DataHandlerRegistry:
     registry = {
         'bert_data_handler': BertDataHandler,
-        'book_corpus_llm_datahandler': BookCorpusLLMDatahandler
+        'book_corpus_llm_datahandler': BookCorpusLLMDatahandler,
     }
 
     def get_data_handler(self, data_handler_name):

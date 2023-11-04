@@ -27,6 +27,8 @@ class Config:
         self._hansard_data_location = None
         self._politosphere_data_location = None
         self._mnli_data_location = None
+        self._factuality_data_location = None
+        self._chaos_mnli_data_location = None
         self._jade_logger = JadeLogger()
 
 
@@ -85,7 +87,8 @@ class Config:
         return self._mnli_data_location
 
     def model_save_location(self):
-        return self._model_save_location
+        location = self._jade_logger.file_manager.data_filepath(self._model_save_location)
+        return location
 
     def heatmaps_location(self):
         return self._heatmaps_location
@@ -147,6 +150,14 @@ class Config:
         location = self._jade_logger.file_manager.data_filepath(self._te3_gold_data_location)
         return location
     
+    def factuality_data_location(self):
+        location = self._jade_logger.file_manager.data_filepath(self._factuality_data_location)
+        return location
+    
+    def chaos_mnli_data_location(self):
+        location = self._jade_logger.file_manager.data_filepath(self._chaos_mnli_data_location)
+        return location
+    
     def set_te3_gold_data_location(self, te3_gold_data_location):
         self._te3_gold_data_location = te3_gold_data_location
 
@@ -198,6 +209,12 @@ class Config:
     def set_torque_data_file_names(self, torque_data_file_names):
         self._torque_data_file_names = torque_data_file_names
 
+    def set_factuality_data_location(self, factuality_data_location):
+        self._factuality_data_location = factuality_data_location
+
+    def set_chaos_mnli_data_location(self, chaos_mnli_data_location):
+        self._chaos_mnli_data_location = chaos_mnli_data_location
+
     @staticmethod
     def from_dict(val):
         config = Config()
@@ -224,4 +241,6 @@ class Config:
         config.set_maec_data_location(val.get('maec_data_location'))
         config.set_politosphere_data_location(val.get('politosphere_data_location'))
         config.set_mnli_data_location(val.get('mnli_data_location'))
+        config.set_factuality_data_location(val.get('factuality_data_location'))
+        config.set_chaos_mnli_data_location(val.get('chaos_mnli_data_location'))
         return config
