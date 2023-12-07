@@ -1,0 +1,14 @@
+{
+    "run_configs": [
+        {
+            "id": 0,
+            "llm": "roberta",
+            "model_type": "features_only"
+        },
+        {
+            "id": 1,
+            "llm": "deberta",
+            "model_type": "features_only"
+        }
+    ]
+}

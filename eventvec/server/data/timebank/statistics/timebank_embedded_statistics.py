@@ -109,6 +109,8 @@ class TimeBankStatistics:
         self._dct_count = defaultdict(int)
         self._matres_dict = self._matres_data_reader.matres_dict('timebank')
         self._matres_dict.update(self._matres_data_reader.matres_dict('aquaint'))
+        self._no_problem = 0
+        self._problem = 0
 
         for documenti, document in enumerate(timebank_documents):
             t0_dict = {}
@@ -141,6 +143,8 @@ class TimeBankStatistics:
             if i[0][1] in ['after', 'before', 'during']:
                 print(i)
         print('----')
+        print('no_problem', self._no_problem)
+        print('problem', self._problem)
         for i in sorted(self._dct_count.items(), key=lambda x: (x[0])):
             if 'none' not in i[0]:
                 print(i)
@@ -151,11 +155,15 @@ class TimeBankStatistics:
         matres_key = (document.file_name(), from_event.strip('ei'), to_event.strip('ei'))
         matres_key_opp = (document.file_name(), to_event.strip('ei'), from_event.strip('ei'))
 
-        if rel_type in ['EVIDENTIAL', 'MODAL', 'FACTUAL']:
+        if rel_type in ['EVIDENTIAL', 'FACTIVE']:
             if matres_key in self._matres_dict:
                 rel_type = self._matres_dict[matres_key][-1]
+                self._no_problem += 1
             elif matres_key_opp in self._matres_dict:
                 rel_type = self._matres_dict[matres_key_opp][-1]
+                self._no_problem += 1
+            else:
+                self._problem += 1
 
         from_sentence, from_sentence_i, from_token_i, from_start_token_i, from_end_token_i, from_token, from_token_global_i = self.event_instance_id2sentence(
             document, from_event, 'from',

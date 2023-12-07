@@ -111,8 +111,6 @@ class Trainer:
         self._loss = None
         print(np.mean(self._all_losses[-100:]), self._iteration)
 
-        
-
     def create_checkpoint(self):
         torch.save({
             'iteration': self._iteration,

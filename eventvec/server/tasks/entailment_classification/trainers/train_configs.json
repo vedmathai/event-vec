@@ -1,0 +1,8 @@
+{
+    "train_configs": [
+        {
+            "llm": "roberta",
+            "model_type": "features_only"
+        }
+    ]
+}

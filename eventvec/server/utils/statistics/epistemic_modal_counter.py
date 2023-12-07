@@ -9,7 +9,7 @@ from eventvec.server.data.hansard.hansard_datahandlers.hansard_datahandler impor
 from eventvec.server.data.maec.maec_datahandlers.maec_datahandler import MAECDatahandler
 from eventvec.server.data.politosphere.politosphere_datahandlers.politosphere_datahandler import PolitosphereDatahandler
 from eventvec.server.data.timebank.timebank_reader.timebank_reader import TimeMLDataReader 
-from eventvec.server.data.mnli.mnli_datahandlers.mnli_datahandler import MNLIDatahandler
+from eventvec.server.data.mnli.mnli_datahandlers.mnli_data_reader import MNLIDataReader
 from eventvec.server.data.torque.readers.torque_datareader import TorqueDataReader
 from eventvec.server.data.timebank.timebank_reader.te3_silver_reader import TE3SilverDatareader
 from eventvec.server.data.timebank.timebank_reader.te3_gold_reader import TE3GoldDatareader
@@ -53,12 +53,12 @@ class EpistemicModalCounter():
         self._hansard_handler = HansardDatahandler()
         self._maec_handler = MAECDatahandler()
         self._politosphere_handler = PolitosphereDatahandler()
-        self._mnli_handler = MNLIDatahandler()
+        self._mnli_handler = MNLIDataReader()
         self._time_ml_handler = TimeMLDataReader()
         self._torque_handler = TorqueDataReader()
         self._te3_silver_handler = TE3SilverDatareader()
         self._te3_gold_handler = TE3GoldDatareader()
-        self._corpus = 'politosphere'
+        self._corpus = 'mnli'
 
     def filenames(self):
         filename2list = {
@@ -170,17 +170,18 @@ class EpistemicModalCounter():
                             'aux_counter', aux_counter,
                             'verb_counter', verb_counter,
                             'sentence_counter', sentence_counter,
-                            'aux_counter/verb_counter', aux_counter/verb_counter,
-                            'aux_in_said/aux_counter', aux_in_said/aux_counter, 
-                            'aux_in_said/verb_counter', aux_in_said/verb_counter,
-                            'aux_in_said/verb_in_said', aux_in_said/(verb_in_said - aux_in_said),
-                            'adverb_counter/verb_counter', adverb_counter/verb_counter,
-                            'adverb_in_said/adverb_counter', adverb_in_said/adverb_counter,
-                            'adverb_in_said/verb_counter', adverb_in_said/verb_counter,
-                            'adverb_in_said/verb_in_said', adverb_in_said/verb_in_said,
-                            'said_counter/verb_counter', said_counter/verb_counter,
-                            'verb_in_said/verb_counter', verb_in_said/verb_counter,
-                            'verb_in_said_quotes/verb_in_said', verb_in_said_quotes/verb_in_said,
+                            'aux_counter/sentence_counter', aux_counter/sentence_counter,
+                            'aux_in_said/sentence_counter', aux_in_said/sentence_counter, 
+                            'verb_in_said/sentence_counter', verb_in_said/sentence_counter,
+                            #'aux_in_said/verb_counter', aux_in_said/verb_counter,
+                            #'aux_in_said/verb_in_said', aux_in_said/(verb_in_said - aux_in_said),
+                            'adverb_counter/sentence_counter', adverb_counter/sentence_counter,
+                            #'adverb_in_said/adverb_counter', adverb_in_said/adverb_counter,
+                            #'adverb_in_said/verb_counter', adverb_in_said/verb_counter,
+                            #'adverb_in_said/verb_in_said', adverb_in_said/verb_in_said,
+                            #'said_counter/verb_counter', said_counter/verb_counter,
+                            #'verb_in_said/verb_counter', verb_in_said/verb_counter,
+                            #'verb_in_said_quotes/verb_in_said', verb_in_said_quotes/verb_in_said,
                         )
                         for k, v in sorted(tense_counter.items(), key=lambda x: x[1]):
                             print(k, v / verb_in_said)
