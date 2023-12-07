@@ -84,10 +84,15 @@ class Config:
         return self._politosphere_data_location
 
     def mnli_data_location(self):
-        return self._mnli_data_location
+        location = self._jade_logger.file_manager.data_filepath(self._mnli_data_location)
+        return location
 
     def model_save_location(self):
         location = self._jade_logger.file_manager.data_filepath(self._model_save_location)
+        return location
+    
+    def factuality_model_save_location(self):
+        location = self._jade_logger.file_manager.data_filepath(self._factuality_model_save_location)
         return location
 
     def heatmaps_location(self):

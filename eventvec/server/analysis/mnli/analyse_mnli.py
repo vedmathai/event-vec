@@ -2,14 +2,14 @@ from collections import defaultdict
 from math import log
 
 
-from eventvec.server.data.mnli.mnli_datahandlers.mnli_datahandler import MNLIDatahandler
+from eventvec.server.data.mnli.mnli_datahandlers.mnli_data_reader import MNLIDataReader
 
 from eventvec.server.common.lists.said_verbs import said_verbs, future_said_verbs, future_modals
 
 
 class AnalyseMNLI():
     def __init__(self):
-        self._datahandler = MNLIDatahandler()
+        self._datahandler = MNLIDataReader()
         
     def entropy(self, d):
         total = sum(d.values())

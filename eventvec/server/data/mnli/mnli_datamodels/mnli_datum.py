@@ -1,0 +1,47 @@
+class MNLIDatum():
+    def __init__(self):
+        self._sentence_1 = None
+        self._sentence_2 = None
+        self._label = None
+        self._entropy = None
+
+    def set_sentence_1(self, sentence_1):
+        self._sentence_1 = sentence_1
+
+    def set_sentence_2(self, sentence_2):
+        self._sentence_2 = sentence_2
+
+    def set_label(self, label):
+        self._label = label
+
+    def set_entropy(self, entropy):
+        self._entropy = entropy
+
+    def sentence_1(self):
+        return self._sentence_1
+    
+    def sentence_2(self):
+        return self._sentence_2
+    
+    def label(self):
+        return self._label
+    
+    def entropy(self):
+        return self._entropy
+    
+    def to_dict(self):
+        return {
+            'sentence_1': self._sentence_1,
+            'sentence_2': self._sentence_2,
+            'label': self._label,
+            'entropy': self._entropy,
+        }
+    
+    @staticmethod
+    def from_dict(datum_dict):
+        datum = MNLIDatum()
+        datum.set_sentence_1(datum_dict['sentence_1'])
+        datum.set_sentence_2(datum_dict['sentence_2'])
+        datum.set_label(datum_dict['label'])
+        datum.set_entropy(datum_dict['entropy'])
+        return datum

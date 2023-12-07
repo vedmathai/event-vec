@@ -48,7 +48,7 @@ For this to be useful, one can
 To quickly see the project and what it is trying to achieve. There will be a demo which can take two events and output the similarity. Take an event and output the similar events from the trained data.
 
 # Running on Jade
-PYTHONPATH=REMOTE_CODE_FOLDER_PATH/event-vec RUNCONFIGID=0 python REMOTE_CODE_FOLDER_PATH/event-vec/eventvec/server/entry_points/main.py
+PYTHONPATH=REMOTE_CODE_FOLDER_PATH/event-vec ENV=JADE RUNCONFIGID=28 python REMOTE_CODE_FOLDER_PATH/event-vec/eventvec/server/entry_points/main.py
 
 # Running Locally
-REQUEST_ID=1234 PROJECT_ID=event-vec RUNCONFIGID=16 PYTHONPATH=jade_front/event-vec/code/event-vec python jade_front/event-vec/code/event-vec/eventvec/server/entry_points/main.py 
+REQUEST_ID=1234 PROJECT_ID=event-vec RUNCONFIGID=24 ENV=JADE PYTHONPATH=jade_front/event-vec/code/event-vec python jade_front/event-vec/code/event-vec/eventvec/server/entry_points/main.py
