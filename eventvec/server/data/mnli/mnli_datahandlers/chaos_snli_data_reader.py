@@ -11,16 +11,16 @@ label_dict = {
     'e': 'entailment',
 }
 
-class ChaosMNLIDatareader:
+class ChaosSNLIDatareader:
     def __init__(self):
         config = Config.instance()
-        self._mnli_file = config.chaos_mnli_data_location()
+        self._snli_file = config.chaos_snli_data_location()
 
-    def mnli_file_list(self):
-        return [self._mnli_file]
+    def snli_file_list(self):
+        return [self._snli_file]
 
     def read_file(self, filename):
-        fullpath = self._mnli_file
+        fullpath = self._snli_file
         data = MNLIData()
         with open(fullpath) as f:
             for line in f:

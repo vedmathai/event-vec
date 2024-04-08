@@ -30,6 +30,45 @@ future_said_verbs = set([
     'foresaw', 'estimate', 'estimated', 'estimates'
 ])
 
+confident_said_verbs = set([
+    "observe", "observes", "observed", "describe", "describes", "described", "discuss", "discusses", "discussed",
+    "report", "reports", "reported", "outline", "outlines", "outlined", "remark", "remarks", "remarked", 	
+    "state", "states", "stated", 	
+    "quote", "quotes", "quoted", "say", "says", "said", "mention", "mentions", "mentioned",
+    "articulate", "articulates", "articulated", "write", "writes", "wrote", "relate", "relates", 
+    "convey", "conveys", "conveyed", "recognise", "recognises", "recognised", "clarify", "clarifies", "clarified",
+    "acknowledge", "acknowledges", "acknowledged", "concede", "concedes", "conceded", "accept", "accepts", "accepted",
+     "uncover", "uncovers", "uncovered", "admit", "admits", "admitted",
+    "demonstrate", "demonstrates", "demonstrated", "highlight", "highlights", "highlighted", "illuminate", "illuminates", "illuminated", 							  
+    "support", "supports", "supported", "conclude", "concludes", "concluded", "elucidate", "elucidates", "elucidated",
+    "reveal", "reveals", "revealed", "verify", "verifies", "verified", 
+    "maintain", "maintains", "maintained", "contend", "contends", "contended", 
+    "show", "shows", "showed", "illustrate", "illustrates", "illustrated", "point out", "points out", "pointed out",
+    "prove", "proves", "proved", "find", "finds", "found", "explain", "explains", "explained", "agree", "agrees", "agreed",
+    "confirm", "confirms", "confirmed", "identify", "identifies", "identified", "evidence", "evidences", "evidenced",
+    "attest", "attests", "attested", 							  
+     "note", "notes", "noted",
+    "emphasise", "emphasises", "emphasised", "declare", "declares", "declared", "indicate", "indicates", "indicated",
+    "uphold", "upholds", "upheld"
+ ])
+
+believe_verbs = set([
+    "argue", "argues", "argued", "reason", "reasons", "reasoned",  "feel", "feels", "felt", "refute", "refutes", "refuted",  "consider", "considers", "considered", 	
+    "dispute", "disputes", "disputed", "advocate", "advocates", "advocated", "insist", "insists", "insisted", "assume", "assumes", "assumed", "allege", "alleges", "alleged", "deny", "denies", "denied",
+    "disregard", "disregards", "disregarded", "challenge", "challenges", "challenged", "critique", "critiques", "critiqued", "comment", "comments", "commented",
+    "surmise", "surmises", "surmised", "suggest", "suggests", "suggested", 
+    "assert", "asserts", "asserted", "believe", "believes", "believed", "claim", "claims", "claimed", "justify", "justifies", "justified", 
+    "opine", "opines", "opined", "think", "thinks", "thought", "imply", "implies", "implied", "posit", "posits", "posited",
+    'anticipate', 'anticipates', 'anticipated', "hypothesise", "hypothesises", "hypothesised", "propose", "proposes", "proposed", "theorise", "theorises", "theorised", "posit", "posits", "posited",
+    "speculate", "speculates", "speculated", "suppose", "supposes", "supposed", "conjecture", "conjectures", "conjectured", "envisioned", "envision", "envisions", "forecasts", 'foresee', 'forecast', 'forecasted',
+    'foresaw', 'estimate', 'estimated', 'estimates'
+])
+
+expect_verbs = set([
+    'expect', 'expects', 'expected', 'expecting', 'hope', 'hoped', 'hopes', 'hoping', 'looks', 'looked', 'look', 'looking', 'due',
+    'try', 'tried', 'tries', 'trying', 'threatening', 'threatened'
+])
+
 past_perf_aux = [
     'had',
 ]
@@ -54,3 +93,32 @@ future_modals = [
     'ca',
     'wo',
 ]
+
+negation_words = [
+    'none', 'unsuccesful', 'unknown', 'unlike', 'not', 'never', 'lack', 'except', 'rarely',
+    'without', 'prevent', 'nobody', 'cannot', 'unable', 'no', 'exception', 'refused',
+    'illegal', 'unusual', 'absense', 'no longer', 'oppose', 'nothing', 'could not',
+    'unpopular', 'unclear', 'unformal', 'neither', 'uncommon', 'dislike', 'unofficial',
+    'stop', 'avoid', 'unarmed', 'absent'
+]
+
+modal_adverbs = list(set([
+    'probably', 'possibly', 'clearly', 'obviously', 'presumably', 'evidently', 'apparently', 'supposedly',
+    'conceivably', 'undoubtedly', 'allegedly', 'reportedly', 'arguably', 'unquestionably', 'seemingly',
+    'certainly', 'definitely', 'surely', 'undoubtedly', 'indeed', 'truly', 'honestly', 'frankly',
+    'honestly', 'truthfully', 'sincerely', 'genuinely', 'actually', 'really', 'virtually',
+    'practically', 'effectively', 'essentially', 'fundamentally',
+    'roughly', 'nearly', 'virtually', 'basically',
+    'approximately', 'roughly', 'almost', 'undoubtedly', 'doubtfully', 'doubtlessly', 'dubiously',
+]))
+
+modal_adjectives = list(set([
+    'possible', 'impossible', 'probable', 'improbable', 'likely', 'unlikely', 'certain', 'uncertain',
+    'clear', 'unclear', 'obvious', 'presumed', 'evident', 'apparent', 'supposed', 'conceivable', 'unconceivable',
+    'unquestionable', 'questionable', 
+    'arguable', 'seeming', 'reported', 'alleged', 'undoubted', 'doubtful', 'doubtless', 'dubious', 'indubitable', 'indubious',
+    'indefinite', 'untrue', 'false', 'impractical', 'ineffective', 'unessential', 'fundamental',
+    'definite', 'sure', 'undoubted', 'indeed', 'true', 'honest', 'frank', 'truthful',
+    'sincere', 'genuine', 'actual', 'real', 'virtual', 'practical', 'effective', 'essential',
+    'fundamental', 'rough', 'nearly', 'virtual', 'basic', 'approximate', 'rough', 'almost',
+]))

@@ -9,6 +9,8 @@ from jadelogs import JadeLogger
 from eventvec.server.tasks.factuality_estimator.models.factuality_estimator_model import FactualityEstimatorModel  # noqa
 from eventvec.server.tasks.event_vectorization.datahandlers.data_handler_registry import DataHandlerRegistry
 from eventvec.server.tasks.factuality_estimator.datahandlers.model_datahandler import FactualityRoBERTaDataHandler  # noqa
+from eventvec.server.featurizers.factuality_categorizer.factuality_categorizer import FactualityCategorizer
+
 
 
 TRAIN_SAMPLE_SIZE = int(8000 / 5)
@@ -30,6 +32,7 @@ class FactualityEstimationTrain:
         self._iteration = 0
         self._last_iteration = 0
         self._loss = None
+        self._factuality_categorizer = FactualityCategorizer()
 
     def load(self, run_config):
         self._data_handler = FactualityRoBERTaDataHandler()
@@ -107,6 +110,10 @@ class FactualityEstimationTrain:
             test_sample = self._data_handler.test_data()
             self._jade_logger.new_evaluate_batch()
             for datumi, datum in enumerate(test_sample):
+                sentence = datum.text()
+                event_string = datum.event_string()
+
+                features_array = self._factuality_categorizer.categorize(sentence, event_string)
                 event_predicted_vector = self.estimate(datum)
                 relationship_target, org_target = self.relationship_target(datum)
                 batch_loss = self._criterion(
@@ -114,4 +121,4 @@ class FactualityEstimationTrain:
                     relationship_target
                 )
                 loss = batch_loss.item()
-                self._jade_logger.new_evaluate_datapoint(org_target, event_predicted_vector.item(), loss, {})
+                self._jade_logger.new_evaluate_datapoint(org_target, event_predicted_vector.item(), loss, {'features_array': features_array.to_dict()})

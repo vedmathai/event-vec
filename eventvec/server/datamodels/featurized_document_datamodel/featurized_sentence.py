@@ -30,7 +30,7 @@ class FeaturizedSentence:
             i2token[token.i] = ft
             fsent.add_token(ft)
             if token.dep_ == 'ROOT':
-                fsent.set_root(token)
+                fsent.set_root(ft)
         for parent in sentence:
             for child in parent.children:
                 child_token = i2token[child.i]

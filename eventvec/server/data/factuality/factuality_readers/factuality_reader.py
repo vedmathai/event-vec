@@ -29,9 +29,11 @@ class FactualityReader(AbstractDatareader):
         data = []
         data = BeliefData()
         for filepath in filepaths:  
+            print('start', len(data.data()))
             with open(filepath) as f:
                 for line in f:
                     json_data = json.loads(line)
                     belief_datum = BeliefDatum.parse_raw_data(json_data)
                     data.add_datum(belief_datum)
+            print('finish', len(data.data()))
         return data

@@ -3,12 +3,14 @@ from eventvec.server.tasks.question_answering.trainers.qa_reinforce_train import
 from eventvec.server.tasks.relationship_classification.trainers.train import RelationshipClassificationTrain
 from eventvec.server.tasks.factuality_estimator.trainers.train import FactualityEstimationTrain
 from eventvec.server.tasks.entailment_classification.trainers.train import NLIClassificationTrain
+from eventvec.server.tasks.factuality_estimator.trainers.train_ml import FactualityEstimationTrainML
 
 
 class TrainerRegistry:
     _registry = {
         "relationship_trainer": RelationshipClassificationTrain,
         "factuality_trainer": FactualityEstimationTrain,
+        "factuality_trainer_ml": FactualityEstimationTrainML,
         'nli_trainer': NLIClassificationTrain,
         "qa_trainer": QATrainBase,
         "qa_reinforce_trainer": QAReinforceTrain,

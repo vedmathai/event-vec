@@ -10,12 +10,12 @@ from jadelogs import JadeLogger
 from eventvec.server.tasks.entailment_classification.models.nli_classifier_model import NLIClassifierModel  # noqa
 from eventvec.server.tasks.tense_classification.models.llm_tense_pretrain_model import LLMTensePretrainer  # noqa
 from eventvec.server.tasks.event_vectorization.datahandlers.data_handler_registry import DataHandlerRegistry
-from eventvec.server.tasks.entailment_classification.datahandlers.nli_datahandler import NLIDataHandler  # noqa
+from eventvec.server.featurizers.factuality_categorizer.factuality_categorizer import FactualityCategorizer
 
 
 TRAIN_SAMPLE_SIZE = int(8000 / 5)
 TEST_SAMPLE_SIZE = 2000
-EPOCHS = 40
+EPOCHS = 60
 LEARNING_RATE = 1e-5  # 1e-2
 MOMENTUM = 0.9
 WEIGHT_DECAY = 1e-5
@@ -41,11 +41,12 @@ class NLIClassificationTrain:
         self._iteration = 0
         self._last_iteration = 0
         self._loss = None
+        self._factuality_categorizer = FactualityCategorizer()
 
     def load(self, run_config):
         data_handler = 'nli_datahandler'
         self._data_handler = self._data_handler_registry.get_data_handler(data_handler)
-        self._data_handler.load()
+        self._data_handler.load(run_config)
         self._model = NLIClassifierModel(run_config)
         self._model_optimizer = Adam(
             self._model.parameters(),
@@ -60,7 +61,7 @@ class NLIClassificationTrain:
         self._model_optimizer.step()
 
     def train_step(self, datum):
-        event_predicted_vector = self.classify(datum)
+        event_predicted_vector, event_string, entropy = self.classify(datum, 'train')
         relationship_target = self.relationship_target(datum)
         event_prediction_loss = self._criterion(
             event_predicted_vector, relationship_target
@@ -71,7 +72,7 @@ class NLIClassificationTrain:
             self._loss = event_prediction_loss
         else:
             self._loss += event_prediction_loss
-        return event_prediction_loss, predicted_label
+        return event_prediction_loss, predicted_label, entropy
 
     def relationship_target(self, datum):
         relationship_target = np.array([0 for i in range(3)]).astype(float)
@@ -82,9 +83,9 @@ class NLIClassificationTrain:
         relationship_target = relationship_target.unsqueeze(0)
         return relationship_target
 
-    def classify(self, datum):
-        output = self._model(datum)
-        return output
+    def classify(self, datum, train_test):
+        output, event_string, entropy = self._model(datum, train_test)
+        return output, event_string, entropy
 
     def train_epoch(self):
         self.zero_grad()
@@ -93,7 +94,7 @@ class NLIClassificationTrain:
         for datum in tqdm(train_sample):
             if datum.label() not in labels2idx:
                 continue
-            loss, predicted_label = self.train_step(datum)
+            loss, predicted_label, entropy = self.train_step(datum)
             self._all_losses += [loss.item()]
             self._iteration += 1
             if self._loss is not None and self._iteration % 10 == 0:
@@ -120,7 +121,9 @@ class NLIClassificationTrain:
             test_sample = self._data_handler.test_data()
             self._jade_logger.new_evaluate_batch()
             for datumi, datum in enumerate(test_sample):
-                event_predicted_vector = self.classify(datum)
+                event_predicted_vector, event_string, entropy = self.classify(datum, 'test')
+                features_array = self._factuality_categorizer.categorize(datum.sentence_2(), event_string)
+
                 relationship_target = self.relationship_target(datum)
                 batch_loss = self._criterion(
                     event_predicted_vector,
@@ -129,4 +132,10 @@ class NLIClassificationTrain:
                 loss = batch_loss.item()
                 predicted = event_predicted_vector.argmax(dim=1).item()
                 predicted_label = idx2label[predicted]
-                self._jade_logger.new_evaluate_datapoint(datum.label(), predicted_label, loss, {'entropy': datum.entropy()})
+
+                self._jade_logger.new_evaluate_datapoint(
+                    datum.label(),
+                    predicted_label,
+                    loss,
+                    {'entropy': datum.entropy(),'predicted_distribution': event_predicted_vector.tolist()[0], 'distribution': datum.label_dist(), 'features_array': features_array.to_dict(), 'model_attention_entropy': float(entropy)}
+                )

@@ -8,21 +8,21 @@ from eventvec.server.data.mnli.mnli_datamodels.mnli_datum import MNLIDatum
 from eventvec.server.data.mnli.mnli_datamodels.mnli_data import MNLIData
 
 filenames = {
-    'train': 'multinli_1.0_train.jsonl',
-    'test': 'multinli_1.0_dev_matched.jsonl',
+    'train': 'snli_1.0_train.jsonl',
+    'test': 'snli_1.0_test.jsonl',
 }
 
-class MNLIDataReader:
+class SNLIDataReader:
     def __init__(self):
         config = Config.instance()
-        self._mnli_folder = config.mnli_data_location()
+        self._snli_folder = config.snli_data_location()
 
-    def mnli_file_list(self):
+    def snli_file_list(self):
         return ['train']
 
     def read_file(self, train_test='train'):
         filename = filenames[train_test]
-        fullpath = os.path.join(self._mnli_folder, filename)
+        fullpath = os.path.join(self._snli_folder, filename)
         data = MNLIData()
         with open(fullpath) as f:
             for line in f:

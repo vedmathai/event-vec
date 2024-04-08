@@ -25,6 +25,12 @@ model = RobertaModel.from_pretrained('roberta-large')
 tokenizer.save_pretrained("transformers_cache/roberta-large")
 model.save_pretrained("transformers_cache/roberta-large")
 
+from transformers import RobertaTokenizer, RobertaModel
+tokenizer = RobertaTokenizer.from_pretrained('roberta-base')
+model = RobertaModel.from_pretrained('roberta-base')
+tokenizer.save_pretrained("transformers_cache/roberta-base")
+model.save_pretrained("transformers_cache/roberta-base")
+
 from transformers import XLNetTokenizer, XLNetModel
 tokenizer = XLNetTokenizer.from_pretrained('xlnet-large-cased')
 model = XLNetModel.from_pretrained('xlnet-large-cased')

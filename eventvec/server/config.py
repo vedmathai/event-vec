@@ -27,8 +27,12 @@ class Config:
         self._hansard_data_location = None
         self._politosphere_data_location = None
         self._mnli_data_location = None
+        self._snli_data_location = None
+        self._anli_data_location = None
         self._factuality_data_location = None
         self._chaos_mnli_data_location = None
+        self._chaos_snli_data_location = None
+        self._chaos_anli_data_location = None
         self._jade_logger = JadeLogger()
 
 
@@ -85,6 +89,14 @@ class Config:
 
     def mnli_data_location(self):
         location = self._jade_logger.file_manager.data_filepath(self._mnli_data_location)
+        return location
+    
+    def snli_data_location(self):
+        location = self._jade_logger.file_manager.data_filepath(self._snli_data_location)
+        return location
+    
+    def anli_data_location(self):
+        location = self._jade_logger.file_manager.data_filepath(self._anli_data_location)
         return location
 
     def model_save_location(self):
@@ -163,6 +175,14 @@ class Config:
         location = self._jade_logger.file_manager.data_filepath(self._chaos_mnli_data_location)
         return location
     
+    def chaos_snli_data_location(self):
+        location = self._jade_logger.file_manager.data_filepath(self._chaos_snli_data_location)
+        return location
+    
+    def chaos_anli_data_location(self):
+        location = self._jade_logger.file_manager.data_filepath(self._chaos_anli_data_location)
+        return location
+    
     def set_te3_gold_data_location(self, te3_gold_data_location):
         self._te3_gold_data_location = te3_gold_data_location
 
@@ -193,6 +213,12 @@ class Config:
     def set_mnli_data_location(self, mnli_data_location):
         self._mnli_data_location = mnli_data_location
 
+    def set_snli_data_location(self, snli_data_location):
+        self._snli_data_location = snli_data_location
+
+    def set_anli_data_location(self, anli_data_location):
+        self._anli_data_location = anli_data_location
+
     def set_model_save_location(self, model_save_location):
         self._model_save_location = model_save_location
 
@@ -219,6 +245,12 @@ class Config:
 
     def set_chaos_mnli_data_location(self, chaos_mnli_data_location):
         self._chaos_mnli_data_location = chaos_mnli_data_location
+    
+    def set_chaos_snli_data_location(self, chaos_snli_data_location):
+        self._chaos_snli_data_location = chaos_snli_data_location
+
+    def set_chaos_anli_data_location(self, chaos_anli_data_location):
+        self._chaos_anli_data_location = chaos_anli_data_location
 
     @staticmethod
     def from_dict(val):
@@ -246,6 +278,10 @@ class Config:
         config.set_maec_data_location(val.get('maec_data_location'))
         config.set_politosphere_data_location(val.get('politosphere_data_location'))
         config.set_mnli_data_location(val.get('mnli_data_location'))
+        config.set_snli_data_location(val.get('snli_data_location'))
+        config.set_anli_data_location(val.get('anli_data_location'))
         config.set_factuality_data_location(val.get('factuality_data_location'))
         config.set_chaos_mnli_data_location(val.get('chaos_mnli_data_location'))
+        config.set_chaos_snli_data_location(val.get('chaos_snli_data_location'))
+        config.set_chaos_anli_data_location(val.get('chaos_anli_data_location'))
         return config

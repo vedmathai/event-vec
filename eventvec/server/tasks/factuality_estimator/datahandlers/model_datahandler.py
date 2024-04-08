@@ -18,6 +18,10 @@ class FactualityRoBERTaDataHandler():
     def train_data(self):
         train_data = self._data_handler.train_data()
         return train_data
+    
+    def dev_data(self):
+        dev_data = self._data_handler.dev_data()
+        return dev_data
 
     def test_data(self):
         test_data = self._data_handler.test_data()

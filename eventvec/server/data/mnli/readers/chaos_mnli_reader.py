@@ -49,10 +49,8 @@ if __name__ == '__main__':
     non_factuality_entropies = defaultdict(int)
     check = set(future_modals) | set(future_said_verbs) | set(said_verbs)
     check = set(future_modals)
-    total = 0
     for datum in sorted(data, key=lambda x: x.entropy(), reverse=True):
-        total += 1
-        if (any (i in datum.premise().split() for i in set(check)) and any (i in datum.hypothesis().split() for i in set(check))):
+        if (any (i in datum.premise().split() for i in set(check)) or any (i in datum.hypothesis().split() for i in set(check))):
             for di, d in enumerate(divisions):
                 if d[0] <= datum.entropy() < d[1]:
                     factuality_entropies[di] += 1
@@ -65,16 +63,18 @@ if __name__ == '__main__':
                     non_factuality_examples[di].append('{}|{}|{}'.format(datum.premise(), datum.hypothesis(), datum.majority_label()))
                     break
     total = sum(factuality_entropies.values())
-    print([(k, i/total) for k, i in factuality_entropies.items()], total)
+    print([(i, factuality_entropies[i]/total) for i in range(0, 5)], total)
     for k in factuality_examples:
         for i in factuality_examples[k][0:5]:
-            print('factuality', k, i)
-            print()
+            #print('factuality', k, i)
+            #print()
+            pass
     total = sum(non_factuality_entropies.values())
-    print([(k, i/total) for k, i in non_factuality_entropies.items()], total)
+    print([(i, non_factuality_entropies[i]/total) for i in range(0, 5)], total)
     for k in non_factuality_examples:
         for i in non_factuality_examples[k][0:5]:
-            print('factuality', k, i)
-            print()
+            # print('factuality', k, i)
+            # print()
+            pass
     print(total)
     print(len(data))

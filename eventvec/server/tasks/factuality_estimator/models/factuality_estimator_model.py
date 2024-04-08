@@ -20,6 +20,7 @@ from eventvec.server.tasks.relationship_classification.models.bert_input import 
 LLM_INPUT = 768
 LLM_INPUT_DICT = {
     'roberta': 768,
+    'roberta_large': 1024,
     'electra': 1024,
     'distilbert': 768,
     'deberta': 1024,
@@ -35,9 +36,11 @@ SENTENCE_BREAK = '</s>',
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 tokenizer_dict = {
-    #'roberta': RobertaTokenizer.from_pretrained("transformers_cache/roberta-large"),
-    #'distilbert': DistilBertTokenizer.from_pretrained("transformers_cache/distilbert-base-uncased"),
-    'xlm_roberta': XLMRobertaTokenizer.from_pretrained("transformers_cache/xlm-roberta-large"),
+    #'roberta': RobertaTokenizer.from_pretrained("transformers_cache/roberta-base"),
+    #'roberta_large': RobertaTokenizer.from_pretrained("transformers_cache/roberta-large"),
+
+    'distilbert': DistilBertTokenizer.from_pretrained("transformers_cache/distilbert-base-uncased"),
+    #'xlm_roberta': XLMRobertaTokenizer.from_pretrained("transformers_cache/xlm-roberta-large"),
     #'deberta': DebertaTokenizer.from_pretrained("transformers_cache/deberta-large"),
     #'t5': T5Tokenizer.from_pretrained("transformers_cache/t5-large"),
     #'bart': BartTokenizer.from_pretrained("transformers_cache/bart-large"),
@@ -46,9 +49,10 @@ tokenizer_dict = {
 }
 
 model_dict = {
-    #'roberta': RobertaModel.from_pretrained("transformers_cache/roberta-large"),
-    #'distilbert': DistilBertModel.from_pretrained("transformers_cache/distilbert-base-uncased"),
-    'xlm_roberta': XLMRobertaModel.from_pretrained("transformers_cache/xlm-roberta-large"),
+    #'roberta': RobertaModel.from_pretrained("transformers_cache/roberta-base"),
+    #'roberta_large': RobertaModel.from_pretrained("transformers_cache/roberta-large"),
+    'distilbert': DistilBertModel.from_pretrained("transformers_cache/distilbert-base-uncased"),
+    #'xlm_roberta': XLMRobertaModel.from_pretrained("transformers_cache/xlm-roberta-large"),
     #'deberta': DebertaModel.from_pretrained("transformers_cache/deberta-large"),
     #'t5': T5Model.from_pretrained("transformers_cache/t5-large"),
     #'bart': BartModel.from_pretrained("transformers_cache/bart-large"),
@@ -66,7 +70,7 @@ class FactualityEstimatorModel(nn.Module):
         self._save_location = '{}_{}.pkl'.format(config.model_save_location(), self._llm_name)
         self.llm = model_dict[run_config.llm()].to(device)
         modules = []
-        if self._llm_name in ['roberta', 'xlm_roberta', 'deberta', 'electra']:
+        if self._llm_name in ['roberta', 'xlm_roberta', 'deberta', 'electra', 'roberta_large']:
             modules = [self.llm.embeddings, *self.llm.encoder.layer[:-1]]
         if self._llm_name in ['bart']:
             modules = [*self.llm.encoder.layers[:], *self.llm.decoder.layers[:]]
@@ -74,7 +78,7 @@ class FactualityEstimatorModel(nn.Module):
             modules = [self.llm.embeddings, *self.llm.transformer.layer[:-1]]
         for module in modules:
             for param in module.parameters():
-                param.requires_grad = True
+                param.requires_grad = False
         self.dropout = nn.Dropout(dropout).to(device)
         self._pooler = nn.MaxPool1d(1, stride=1).to(device)
         self.linear1 = nn.Linear(LLM_INPUT_DICT[self._llm_name], 352).to(device)
@@ -87,7 +91,7 @@ class FactualityEstimatorModel(nn.Module):
         sentence = datum.text()
         token = datum.event_string()
 
-        if self._llm_name in ['roberta', 'deberta']:
+        if self._llm_name in ['roberta', 'deberta', 'roberta_large']:
             encoded_sentence = self._tokenizer(
                 [sentence],
                 padding='max_length',
