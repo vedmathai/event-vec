@@ -18,6 +18,7 @@ class RunConfig():
         self._use_root_verb = None
         self._use_question_classification = None
         self._use_best_of_annotators = None
+        self._factuality_inference_model = None
 
     def id(self):
         return self._id
@@ -66,6 +67,9 @@ class RunConfig():
     
     def use_best_of_annotators(self):
         return self._use_best_of_annotators
+    
+    def factuality_inference_model(self):
+        return self._factuality_inference_model
     
     def set_id(self, id):
         self._id = id
@@ -118,6 +122,9 @@ class RunConfig():
     def set_use_best_of_annotators(self, use_best_of_annotators):
         self._use_best_of_annotators = use_best_of_annotators
 
+    def set_factuality_inference_model(self, factuality_inference_model):
+        self._factuality_inference_model = factuality_inference_model
+
     @staticmethod
     def from_dict(run_config_dict):
         run_config = RunConfig()
@@ -137,6 +144,7 @@ class RunConfig():
         run_config.set_use_question_classification(run_config_dict['use_question_classification'])
         run_config.set_forward_type(run_config_dict['forward_type'])
         run_config.set_use_best_of_annotators(run_config_dict['use_best_of_annotators'])
+        run_config.set_factuality_inference_model(run_config_dict.get('factuality_inference_model'))
         return run_config
 
     def to_dict(self):
@@ -157,4 +165,5 @@ class RunConfig():
             'use_question_classification': self.use_question_classification(),
             "forward_type": self.forward_type(),
             "use_best_of_annotators": self.use_best_of_annotators(),
+            "factuality_inference_model": self.factuality_inference_model(),
         }

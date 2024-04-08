@@ -1,0 +1,27 @@
+Given a sentence and an event string in that sentence provide an estimate for the confidence on a scale of -3 to 3 that the given event happened, happens, or will happen, and the negative sign is to signify that the event is negated.
+
+Here are three examples:
+Example 1:
+Sentence: It hasn't made merger overtures to the board.
+Event String: made
+Confidence: -2.54
+
+Example 2:
+Sentence 2: Details of the restructuring won't be made final until regulators approve the regulations mandated by the new federal act , the company said.
+Event String: said
+Confidence: 3.0
+
+Example 3:
+Sentence 3: And it stresses that every nation "has the duty to refrain from organizing, instigating, assisting or participating in terrorist acts in another state."
+Event String: refrain 
+Confidence: 1.11
+
+A set of important features are to see if the event is a speech event, whether it is in the subclause of the speech event, whether it has negation and whether it has a modal.
+
+Given the following sentence and event string, provide the confidence value.
+
+Sentence: The president and his top aides tentatively decided on Feb. 11 that a ground war would be necessary.
+Event String: war 
+
+
+
