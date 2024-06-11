@@ -1,6 +1,7 @@
 import csv
 import json
 from eventvec.server.config import Config
+from jadelogs import JadeLogger
 
 from eventvec.server.data.mnli.mnli_datamodels.mnli_datum import MNLIDatum
 from eventvec.server.data.mnli.mnli_datamodels.mnli_data import MNLIData
@@ -11,16 +12,17 @@ label_dict = {
     'e': 'entailment',
 }
 
-class ChaosMNLIDatareader:
+class ChaosMNLISyntaxDataReader:
     def __init__(self):
         config = Config.instance()
-        self._mnli_file = config.chaos_mnli_data_location()
+        self._mnli_file = 'chaos_mnli_syntax.jsonl'
+        self._jade_logger = JadeLogger()
 
     def mnli_file_list(self):
         return [self._mnli_file]
 
     def read_file(self, filename):
-        fullpath = self._mnli_file
+        fullpath = self._jade_logger.file_manager.data_filepath(self._mnli_file)
         data = MNLIData()
         with open(fullpath) as f:
             for line in f:

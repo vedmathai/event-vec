@@ -18,3 +18,5 @@ plt.ylabel("Number of MNLI pairs")
 plt.title("Comparing MNLI pairs with and without modals, speech/belief verbs") 
 plt.legend() 
 plt.show() 
+
+

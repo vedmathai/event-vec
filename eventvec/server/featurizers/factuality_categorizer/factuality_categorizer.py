@@ -1,5 +1,5 @@
 from eventvec.server.featurizers.lingusitic_featurizer import LinguisticFeaturizer
-from eventvec.server.common.lists.said_verbs import future_modals, confident_said_verbs, believe_verbs, expect_verbs, modal_adverbs, modal_adjectives, negation_words, past_perf_aux, pres_perf_aux
+from eventvec.server.common.lists.said_verbs import future_modals, confident_said_verbs, believe_verbs, expect_verbs, expect_neg, modal_adverbs, modal_adjectives, negation_words, past_perf_aux, pres_perf_aux
 
 complement_deps = ['ccomp', 'xcomp']
 
@@ -22,6 +22,7 @@ class FeaturesArray:
         self._is_future_tense = False
         self._is_continuous_aspect = False
         self._is_perfect_aspect = False
+        self._is_infinitive_sub_neg = False
 
     def is_negated(self):
         return self._is_negated
@@ -67,6 +68,9 @@ class FeaturesArray:
 
     def set_is_present_tense(self, is_present_tense):
         self._is_present_tense = is_present_tense
+
+    def set_is_infinitive_sub_neg(self, _is_infinitive_sub_neg):
+        self._is_infinitive_sub_neg = _is_infinitive_sub_neg
 
     def is_subordinate_of_expects(self):
         return self._is_subordinate_of_expects
@@ -127,6 +131,9 @@ class FeaturesArray:
     
     def is_future_tense(self):
         return self._is_future_tense
+    
+    def is_infinitive_sub_neg(self):
+        return self._is_infinitive_sub_neg
 
     def to_dict(self):
         return {
@@ -142,6 +149,7 @@ class FeaturesArray:
             'has_modal_adverb': self._has_modal_adverb,
             'has_modal_adjective': self._has_modal_adjective,
             'has_negation_words': self._has_negation_words,
+            'is_infinive_sub_neg': self._is_infinitive_sub_neg,
             #'is_past_tense': self._is_past_tense,
             #'is_present_tense': self._is_present_tense,
             #'is_future_tense': self._is_future_tense,
@@ -166,6 +174,7 @@ class FactualityCategorizer:
             self._has_modal_adjective,
             self._has_negation_words,
             self._tense,
+            self._is_infinitive_sub_neg
         ]
 
     def categorize(self, sentence, verb, required_count=0):
@@ -281,6 +290,13 @@ class FactualityCategorizer:
         while parent is not None and parent.dep() in ['xcomp']:
             if parent.parent().text().lower() in expect_verbs:
                 features_array.set_is_subordinate_of_expects(True)
+            parent = parent.parent()
+
+    def _is_infinitive_sub_neg(self, token, features_array, sentence):
+        parent = token
+        while parent is not None and parent.dep() in ['xcomp']:
+            if parent.parent().text().lower() in expect_neg:
+                features_array.set_is_infinitive_sub_neg(True)
             parent = parent.parent()
 
     def _is_belief_act(self, token, features_array, sentence):

@@ -1,11 +1,15 @@
 class MNLIDatum():
     def __init__(self):
+        self._uid = None
         self._sentence_1 = None
         self._sentence_2 = None
         self._label = None
         self._entropy = None
         self._label_dist = None
         self._annotator_labels = []
+
+    def set_uid(self, uid):
+        self._uid = uid
 
     def set_sentence_1(self, sentence_1):
         self._sentence_1 = sentence_1
@@ -24,6 +28,9 @@ class MNLIDatum():
 
     def set_annotator_labels(self, annotator_labels):
         self._annotator_labels = annotator_labels
+
+    def uid(self):
+        return self._uid
 
     def sentence_1(self):
         return self._sentence_1
@@ -45,6 +52,7 @@ class MNLIDatum():
     
     def to_dict(self):
         return {
+            'uid': self.uid(),
             'sentence_1': self._sentence_1,
             'sentence_2': self._sentence_2,
             'label': self._label,
@@ -56,6 +64,7 @@ class MNLIDatum():
     @staticmethod
     def from_dict(datum_dict):
         datum = MNLIDatum()
+        datum.set_uid(datum_dict['uid'])
         datum.set_sentence_1(datum_dict['sentence_1'])
         datum.set_sentence_2(datum_dict['sentence_2'])
         datum.set_label(datum_dict['label'])

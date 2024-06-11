@@ -39,10 +39,11 @@ class Config:
     @staticmethod
     def instance():
         if Config._instance is None:
-            pythonpath = os.environ['PYTHONPATH']
-            config_filepath = os.path.join(pythonpath, 'eventvec/server/config.json')
+            jade_logger = JadeLogger()
+            config_filepath = jade_logger.file_manager.code_filepath('event-vec/eventvec/server/config.json')
             with open(config_filepath) as f:
                 Config._instance = Config.from_dict(json.load(f))
+            pythonpath = os.environ['PYTHONPATH']
             Config._instance.set_pythonpath(pythonpath)
         return Config._instance
     

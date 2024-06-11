@@ -14,6 +14,7 @@ class FactualityRegressionInferML:
 
         self._model_location = self._jade_logger.file_manager.data_filepath('ml_factuality_model.pkl')
         self._regr = pickle.load(open(self._model_location, 'rb'))
+        self._cache = {}
 
     def load(self, run_config={}):
         pass
@@ -29,8 +30,11 @@ class FactualityRegressionInferML:
         return x, category
     
     def infer(self, sentence, event_string):
+        if (sentence, event_string) in self._cache:
+            return self._cache[(sentence, event_string)]
         x, category = self._fix_datum(sentence, event_string)
         prediction = self._regr.predict([x])
+        self._cache[(sentence, event_string)] = float(prediction[0])
         return float(prediction[0])
 
 

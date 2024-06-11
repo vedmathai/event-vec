@@ -26,7 +26,7 @@ facuality_infer_dict = {
     "factuality_infer_ml": FactualityRegressionInferML,
 }
 
-llm = 'llama2'
+llm = 'roberta'
 class NLIClassifierModel(nn.Module):
 
     def __init__(self, run_config, dropout=0.5):
@@ -42,8 +42,8 @@ class NLIClassifierModel(nn.Module):
         self._factuality_infer.load(run_config)
         self._save_location = config.model_save_location()
         if llm == 'roberta':
-            self._tokenizer = RobertaTokenizer.from_pretrained("roberta-large")
-            self.llm = RobertaModel.from_pretrained('roberta-large', output_attentions=True).to(device) # noqa
+            self._tokenizer = RobertaTokenizer.from_pretrained("transformers_cache/roberta-large")
+            self.llm = RobertaModel.from_pretrained('transformers_cache/roberta-large', output_attentions=True).to(device) # noqa
         if llm == 'distilbert':
             self._tokenizer = DistilBertTokenizer.from_pretrained("transformers_cache/distilbert-base-uncased")
             self.llm = DistilBertModel.from_pretrained("transformers_cache/distilbert-base-uncased").to(device) # noqa
@@ -144,9 +144,13 @@ class NLIClassifierModel(nn.Module):
         linear_output1 = self.linear1(input)
 
         relu_output = self.relu(linear_output1)
+        if train_test == 'test':
+            self.dropout.eval()
+        if train_test == 'train':
+            self.dropout.train()
         dropout_output2 = self.dropout(relu_output)
         output = self.relationship_classifier(dropout_output2)
-        return output, event_string_2, average_entropy
+        return output, event_string, event_string_2, average_entropy
 
     def save(self):
         state_dict = self.state_dict()

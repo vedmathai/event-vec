@@ -12,6 +12,12 @@ filenames = {
     'test': 'R3/test.jsonl',
 }
 
+labels2label = {
+    'e': 'entailment',
+    'n': 'neutral',
+    'c': 'contradiction',
+}
+
 class ANLIDataReader:
     def __init__(self):
         config = Config.instance()
@@ -28,7 +34,10 @@ class ANLIDataReader:
             for line in f:
                 datum = MNLIDatum()
                 jsonl = json.loads(line)
-                datum.set_label(jsonl['label'])
+                datum.set_label(labels2label[jsonl['label']])
                 datum.set_sentence_1(jsonl['context'])
                 datum.set_sentence_2(jsonl['hypothesis'])
+                datum.set_uid(jsonl['uid'])
+                data.add_datum(datum)
+                
         return data

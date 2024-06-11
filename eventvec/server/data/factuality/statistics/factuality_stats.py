@@ -16,38 +16,23 @@ class FactualityStats():
         data = self._factuality_reader.belief_data().data()
         counter = defaultdict(list)
         worker2score = defaultdict(list)
-        for datum in data:
+        for datumi, datum in enumerate(data):
+            print(datumi)
             annotations = []
             for annotation in datum.annotations():
                 worker2score[annotation.worker_id()] += [annotation.value()]
                 annotations.append(annotation.value())
             mean = np.mean(annotations)
+            std = np.std(annotations)
             features_array = self._factuality_categorizer.categorize(datum.text(), datum.event_string())
-            total = 0
-            for k, v in  features_array.to_dict().items():
-                if v is True:
-                    total += 1
-            for k, v in  features_array.to_dict().items():
-                if v is True and total == 1:
-                    counter[k] += [mean]
-                if total == 0:
-                    counter['no_feature'] += [mean]
-        print({k: np.mean(v) for k, v in counter.items()})
-        print(worker2score)
-
-        worker2set = defaultdict(int)
-        for k, v in worker2score.items():
-            if len(set(v)) == 4:
-                print(worker2score[k])
-            worker2set[k] = len(set(v))
-
-
-        score2number = defaultdict(int)
-        for k, v in worker2set.items():
-            score2number[v] += 1
-        
-        print(score2number)
-
+            features_array = features_array.to_dict()
+            for feature in features_array:
+                if features_array[feature] is True:
+                    counter[feature].append(mean)
+            if all(i is False for i in features_array.values()):
+                counter['no_feature'].append(mean)
+        for key in counter:
+            print(key, np.mean(counter[key]), np.std(counter[key]))
 
 if __name__ == '__main__':
     stats = FactualityStats()

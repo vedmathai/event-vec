@@ -16,7 +16,7 @@ from eventvec.server.featurizers.factuality_categorizer.factuality_categorizer i
 TRAIN_SAMPLE_SIZE = int(8000 / 5)
 TEST_SAMPLE_SIZE = 2000
 EPOCHS = 60
-LEARNING_RATE = 1e-5  # 1e-2
+LEARNING_RATE = 1e-6  # 1e-2
 MOMENTUM = 0.9
 WEIGHT_DECAY = 1e-5
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -61,7 +61,7 @@ class NLIClassificationTrain:
         self._model_optimizer.step()
 
     def train_step(self, datum):
-        event_predicted_vector, event_string, entropy = self.classify(datum, 'train')
+        event_predicted_vector, event_string_1, event_string_2, entropy = self.classify(datum, 'train')
         relationship_target = self.relationship_target(datum)
         event_prediction_loss = self._criterion(
             event_predicted_vector, relationship_target
@@ -84,8 +84,8 @@ class NLIClassificationTrain:
         return relationship_target
 
     def classify(self, datum, train_test):
-        output, event_string, entropy = self._model(datum, train_test)
-        return output, event_string, entropy
+        output, event_string_1, event_string_2, entropy = self._model(datum, train_test)
+        return output, event_string_1, event_string_2, entropy
 
     def train_epoch(self):
         self.zero_grad()
@@ -121,8 +121,9 @@ class NLIClassificationTrain:
             test_sample = self._data_handler.test_data()
             self._jade_logger.new_evaluate_batch()
             for datumi, datum in enumerate(test_sample):
-                event_predicted_vector, event_string, entropy = self.classify(datum, 'test')
-                features_array = self._factuality_categorizer.categorize(datum.sentence_2(), event_string)
+                event_predicted_vector, event_string_1, event_string_2, entropy = self.classify(datum, 'test')
+                features_array_1 = self._factuality_categorizer.categorize(datum.sentence_1(), event_string_1)
+                features_array_2 = self._factuality_categorizer.categorize(datum.sentence_2(), event_string_2)
 
                 relationship_target = self.relationship_target(datum)
                 batch_loss = self._criterion(
@@ -137,5 +138,13 @@ class NLIClassificationTrain:
                     datum.label(),
                     predicted_label,
                     loss,
-                    {'entropy': datum.entropy(),'predicted_distribution': event_predicted_vector.tolist()[0], 'distribution': datum.label_dist(), 'features_array': features_array.to_dict(), 'model_attention_entropy': float(entropy)}
+                    {
+                        'entropy': datum.entropy(),
+                        'predicted_distribution': event_predicted_vector.tolist()[0],
+                        'distribution': datum.label_dist(),
+                        'features_array': features_array_1.to_dict(),
+                        'features_array_2': features_array_2.to_dict(),
+                        'model_attention_entropy': float(entropy),
+                        'uid': datum.uid(),
+                    }
                 )
