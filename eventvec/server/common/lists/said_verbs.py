@@ -64,9 +64,53 @@ believe_verbs = set([
     'foresaw', 'estimate', 'estimated', 'estimates'
 ])
 
+expect_neg = set([
+    "fail", "fails", "failed", "failing",
+    "struggle", "struggles", "struggled", "struggling",
+    "neglect", "neglects", "neglected", "neglecting",
+    "refuse", "refuses", "refused", "refusing",
+    "attempt", "attempts", "attempted", "attempting",
+    "decline", "declines", "declined", "declining",
+    "prohibit", "prohibits", "prohibited", "prohibiting",
+    "hinder", "hinders", "hindered", "hindering",
+    "forbid", "forbids", "forbade", "forbidden", "forbidding",
+    "discourage", "discourages", "discouraged", "discouraging",
+    "deny", "denies", "denied", "denying",
+    "forget", "forgets", "forgot", "forgetting",
+])
+
 expect_verbs = set([
     'expect', 'expects', 'expected', 'expecting', 'hope', 'hoped', 'hopes', 'hoping', 'looks', 'looked', 'look', 'looking', 'due',
-    'try', 'tried', 'tries', 'trying', 'threatening', 'threatened'
+    'try', 'tried', 'tries', 'trying', 'threatening', 'threatened',
+    "plan", "plans", "planned", "planning",
+    "intend", "intends", "intended", "intending",
+    "promise", "promises", "promised", "promising",
+    "manage", "manages", "managed", "managing",
+    "agree", "agrees", "agreed", "agreeing",
+    "offer", "offers", "offered", "offering",
+    "prepare", "prepares", "prepared", "preparing",
+    "arrange", "arranges", "arranged", "arranging",
+    "desire", "desires", "desired", "desiring",
+    "aim", "aims", "aimed", "aiming",
+    "pretend", "pretends", "pretended", "pretending",
+    "threaten", "threatens", "threatening",
+    "claim", "claims", "claimed", "claiming",
+    "assure", "assures", "assured", "assuring",
+    "guarantee", "guarantees", "guaranteed", "guaranteeing",
+    "advise", "advises", "advised", "advising",
+    "warn", "warns", "warned", "warning",
+    "encourage", "encourages", "encouraged", "encouraging",
+    "instruct", "instructs", "instructed", "instructing",
+    "permit", "permits", "permitted", "permitting",
+    "oblige", "obliges", "obliged", "obliging",
+    "urge", "urges", "urged", "urging",
+    "enable", "enables", "enabled", "enabling",
+    "allow", "allows", "allowed", "allowing",
+    "compel", "compels", "compelled", "compelling",
+    "convince", "convinces", "convinced", "convincing",
+    "persuade", "persuades", "persuaded", "persuading",
+    "require", "requires", "required", "requiring",
+
 ])
 
 past_perf_aux = [

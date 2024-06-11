@@ -64,7 +64,6 @@ class ChaosMNLIDatum:
 
     @staticmethod
     def from_json(jsonl):
-        print(jsonl)
         datum = ChaosMNLIDatum()
         datum.set_uid(jsonl['uid'])
         datum.set_premise(jsonl['example']['premise'])

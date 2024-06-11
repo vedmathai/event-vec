@@ -5,6 +5,7 @@ import torch
 from tqdm import tqdm
 from torch.optim import Adam
 from jadelogs import JadeLogger
+from sklearn.metrics import mean_squared_error
 
 from eventvec.server.tasks.factuality_estimator.models.factuality_estimator_model import FactualityEstimatorModel  # noqa
 from eventvec.server.tasks.event_vectorization.datahandlers.data_handler_registry import DataHandlerRegistry
@@ -120,5 +121,6 @@ class FactualityEstimationTrain:
                     event_predicted_vector,
                     relationship_target
                 )
+                mae = mean_squared_error(relationship_target.detach().cpu().numpy(), event_predicted_vector.detach().cpu().numpy())
                 loss = batch_loss.item()
-                self._jade_logger.new_evaluate_datapoint(org_target, event_predicted_vector.item(), loss, {'features_array': features_array.to_dict()})
+                self._jade_logger.new_evaluate_datapoint(org_target, event_predicted_vector.item(), loss, {'mae': float(mae), 'features_array': features_array.to_dict()})

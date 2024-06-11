@@ -15,6 +15,20 @@ from eventvec.server.tasks.event_vectorization.datahandlers.data_handler_registr
 from eventvec.server.tasks.factuality_estimator.datahandlers.model_datahandler import FactualityRoBERTaDataHandler  # noqa
 from eventvec.server.featurizers.factuality_categorizer.factuality_categorizer import FactualityCategorizer
 
+categories = [
+    'is_negated',
+    'has_modal',
+    'is_subordinate_of_said',
+    'is_subordinate_of_believe',
+    'is_subordinate_of_if',
+    'is_speech_act',
+    'is_belief_act',
+    'is_subordinate_of_expects',
+    'is_subordinate_of_then',
+    'has_modal_adjective',
+    'has_negation_words',
+    'is_infinive_sub_neg',
+]
 
 class FactualityEstimationTrainML:
     def __init__(self):
@@ -117,20 +131,23 @@ class FactualityEstimationTrainML:
     def evaluate(self, run_config):
         test_sample = self._data_handler.dev_data() + self._data_handler.test_data()
         self._jade_logger.new_evaluate_batch()
-        X = []
-        Y = []
+
         counter = 0
-        for datum in tqdm(test_sample):
-            x, category = self.fix_datum(datum)
-            y = self.relationship_target(datum)
-            #if category._is_speech_act is True:
-            X.append(x)
-            Y.append(y)
-            counter += 1
-        print(counter)
-        x = self._regr.predict(X)
-        mae = mean_absolute_error(Y, x)
-        mse = mean_squared_error(Y, x)
-        print('dev_test_mse', mse)
-        print('dev_test_mae', mae)
-        print(counter)
+        for category in categories:
+            X = []
+            Y = []
+            print(category)
+            for datum in tqdm(test_sample):
+                x, category_obj = self.fix_datum(datum)
+                y = self.relationship_target(datum)
+                if category_obj.to_dict()[category] is True:
+                    X.append(x)
+                    Y.append(y)
+                counter += 1
+            print(counter)
+            x = self._regr.predict(X)
+            mae = mean_absolute_error(Y, x)
+            mse = mean_squared_error(Y, x)
+            print('dev_test_mse', mse)
+            print('dev_test_mae', mae)
+            print(counter)

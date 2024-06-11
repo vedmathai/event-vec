@@ -730,6 +730,26 @@
             "use_question_classification": false,
             "use_best_of_annotators": false,
             "factuality_inference_model": "factuality_infer_ml"
+        },
+        {
+            "id": "38",
+            "is_train": true,
+            "trainer": "nli_trainer",
+            "llm": "roberta",
+            "use_tense": true,
+            "use_aspect": true,
+            "forward_type": "llm_only",
+            "use_attention_forward": false,
+            "use_pos": false,
+            "epochs": 10,
+            "dataset": "mnli_syntax",
+            "use_negation": false,
+            "use_question_event": false,
+            "use_question_event_features": true,
+            "use_root_verb": false,
+            "use_question_classification": false,
+            "use_best_of_annotators": false,
+            "factuality_inference_model": "factuality_infer_ml"
         }
     ]
 }

@@ -4,9 +4,13 @@ import json
 from collections import defaultdict
 import numpy as np
 import csv
+import numpy
+
 
 from eventvec.server.data.mnli.chaos_mnli_data.chaos_mnli_datum import ChaosMNLIDatum
 from eventvec.server.data.mnli.chaos_mnli_data.chaos_mnli_data import ChaosMNLIData
+from eventvec.server.tasks.entailment_classification.featurizers.clause_matcher import ClauseMatcher
+from eventvec.server.featurizers.factuality_categorizer.factuality_categorizer import FactualityCategorizer
 
 from eventvec.server.common.lists.said_verbs import said_verbs, future_said_verbs, future_modals
 from eventvec.server.data.abstract import AbstractDatareader
@@ -36,45 +40,40 @@ if __name__ == '__main__':
     fr = ChaosMNLIDatareader()
     data = fr.chaos_data()
     divisions = [
-        (0, 0.663),
-        (0.663, 0.912),
-        (0.912, 1.045),
-        (1.045, 1.206),
-        (1.206, 1.584),
+        (0, 0.749),
+        (0.749, 0.934),
+        (0.934, 1.058),
+        (1.058, 1.58),
     ]
+    counter = defaultdict(int)
+    fc = FactualityCategorizer()
     factuality_examples = defaultdict(list)
     non_factuality_examples = defaultdict(list)
     entropies = []
-    factuality_entropies = defaultdict(int)
-    non_factuality_entropies = defaultdict(int)
-    check = set(future_modals) | set(future_said_verbs) | set(said_verbs)
-    check = set(future_modals)
+    cm = ClauseMatcher()
+    all_entropies = []
+    data = fr.chaos_data()
+    examples = []
     for datum in sorted(data, key=lambda x: x.entropy(), reverse=True):
-        if (any (i in datum.premise().split() for i in set(check)) or any (i in datum.hypothesis().split() for i in set(check))):
+        event_string, event_string_2 = cm.match(datum.premise(), datum.hypothesis())
+        features1 = fc.categorize(datum.premise(), event_string).to_dict()
+        features2 = fc.categorize(datum.hypothesis(), event_string_2).to_dict()
+        if datum.majority_label() == 'c' and datum.entropy() > 1.4 and features1['is_subordinate_of_said'] is True:
+            print(datum.premise(), '|', datum.hypothesis(), '|', datum.majority_label(), datum.entropy(), '\n' * 4)
+
+        if (any (v is True for v in features1.values()) or any (v is True for v in features2.values())):
             for di, d in enumerate(divisions):
                 if d[0] <= datum.entropy() < d[1]:
-                    factuality_entropies[di] += 1
                     factuality_examples[di].append('{}|{}|{}'.format(datum.premise(), datum.hypothesis(), datum.majority_label()))
                     break
         else:
             for di, d in enumerate(divisions):
                 if d[0] <= datum.entropy() < d[1]:
-                    non_factuality_entropies[di] += 1
                     non_factuality_examples[di].append('{}|{}|{}'.format(datum.premise(), datum.hypothesis(), datum.majority_label()))
                     break
-    total = sum(factuality_entropies.values())
-    print([(i, factuality_entropies[i]/total) for i in range(0, 5)], total)
-    for k in factuality_examples:
-        for i in factuality_examples[k][0:5]:
-            #print('factuality', k, i)
-            #print()
-            pass
-    total = sum(non_factuality_entropies.values())
-    print([(i, non_factuality_entropies[i]/total) for i in range(0, 5)], total)
-    for k in non_factuality_examples:
-        for i in non_factuality_examples[k][0:5]:
-            # print('factuality', k, i)
-            # print()
-            pass
-    print(total)
-    print(len(data))
+
+    total = len(data)
+    for division in sorted(factuality_examples.keys()):
+        print(division)
+        total = len(factuality_examples[division]) + len(non_factuality_examples[division])
+        print(division, len(factuality_examples[division]) / total, len(non_factuality_examples[division]) / total)
