@@ -18,6 +18,7 @@ from eventvec.server.tasks.entailment_classification.gpt_4.llama_3_api import ll
 from eventvec.server.data.mnli.mnli_datahandlers.mnli_data_reader import MNLIDataReader  # noqa
 from eventvec.server.data.mnli.mnli_datahandlers.snli_data_reader import SNLIDataReader  # noqa
 from eventvec.server.data.mnli.mnli_datahandlers.anli_data_reader import ANLIDataReader  # noqa
+from eventvec.server.data.mnli.mnli_datahandlers.connector_nli_data_reader import ConnectorNLIDatareader 
 
 from eventvec.server.data.mnli.mnli_datahandlers.chaos_mnli_data_reader import ChaosMNLIDatareader  # noqa
 from eventvec.server.data.mnli.mnli_datahandlers.chaos_snli_data_reader import ChaosSNLIDatareader  # noqa
@@ -71,7 +72,8 @@ prompt_preamble = """
     If the hypothesis can be inferred from the premise, you should select entailment.
     If the hypothesis is unrelated to the premise, you should select neutral.
     If the hypothesis contradicts the premise, you should select contradiction.
-
+ 
+    
     The first five are examples with the labels provided.
 
     Your task is to predict the label for the given examples. Do not provide reasoning and 
@@ -80,6 +82,142 @@ prompt_preamble = """
     Examples:    
     """
 
+prompt_preamble_connector = """
+[INST] <<SYS>>
+
+    Textual entailment is the task of determining whether a given hypothesis can be inferred from a given premise.
+    In this task, you will be given a premise and a hypothesis, and you will have to decide whether the hypothesis
+    may be inferred from the premise.
+
+    This is the task of natural language understanding, where given the premise and hypothesis, you would have to classify whether 
+    1. strict: The premise strictly entails the hypothesis, which means the individual clauses entail and the overall sentence entails.
+
+    2. non_strict: The premise non-strictly entails the hypothesis, which means the individual clauses entail but the overall sentence has some information loss such as causality.
+
+    3. contradicts: Premise contradicts the hypothesis: Even though the clauses individually entail, the overall sentences contradict each other.
+
+    Do not provide any explanation just provide the classification.
+    The first five are examples with the labels provided.
+
+    Your task is to predict the label for the given examples. Do not provide reasoning and 
+    provide in the format of 'answer: index: label'. 
+    
+    Examples:    
+    """
+
+prompt_preamble_connector_2 = """
+[INST] <<SYS>>
+
+    Textual entailment is the task of determining whether a given hypothesis can be inferred from a given premise.
+    In this task, you will be given a premise and a hypothesis, and you will have to decide whether the hypothesis
+    may be inferred from the premise.
+
+    This is the task of natural language understanding, where given the premise and hypothesis, you would have to classify whether 
+    1. strict: The premise strictly entails the hypothesis, which means the individual clauses entail and the overall sentence entails in both directions.
+
+    2. non_strict: The premise non-strictly entails the hypothesis, which means the individual clauses entail but the overall sentence has some information loss such as causality.
+
+    3. contradicts: Premise contradicts the hypothesis: Even though the clauses individually entail, the overall sentences contradict each other.
+
+    Do not provide any explanation just provide the classification.
+
+    The first five are examples with the labels provided.
+
+    Your task is to predict the label for the given examples. Do not provide reasoning and 
+    provide in the format of 'answer: index: label'. 
+
+    Hint: 
+    Use the logic of sentence connectors 'because', 'and', 'but' and 'so'
+    The combination of sentence connector and clause order determines the label.
+
+
+    'and' contradicts 'though' a and b contradicts a though b and contradicts b though a.
+    'and' contradicts 'so' a and b contradicts a so b and contradicts b so a.
+    'and' contradicts 'because' a and b contradicts a because b and contradicts b.
+    'and' contradicts 'but' a and b contradicts a but b and contradicts b but a.
+    'and' strictly entails 'and'. a and b strictly entails a and b and entails b and a.
+
+    'Because' is opposite of 'so'. a because b strictly entails b so a. a because b contradicts a so b.
+    'because' contradicts 'but'. a because b contradicts a but b. a because b contradicts b but a.
+    'because' non-strictly entails 'and'. a because b non-strictly entails a and b or b and a
+    'because' contradicts 'though'. a because b contradicts a though b.
+    'because' strictly entails 'because'. a because b strictly entails a because b.
+     a because b contradicts b because a.
+
+    'but' non-strictly entails 'and'. a but b non-strictly entails a and b. a but b non-strictly entails b and a.
+    'but' contradicts 'because'. a but b contradicts a because b. a but b contradicts b because a.
+    'but' contradicts 'so'. a but b contradicts a so b.
+    'but' contradicts 'though'. a but b contradicts a though b.
+    'but' strictly entails 'but' in one direction. a but b contradicts a but b.
+    a but b contradicts b but a.
+
+    'so' contradicts 'because'. a so b contradicts a because b. a so b contradicts b because a.
+    'so' contradicts 'but'. a so b contradicts a but b. a so b contradicts b but a.
+    'so' non-strictly entails 'and'. a so b non-strictly entails a and b. a so b non-strictly entails b and a.
+    'so' contradicts 'though'. a so b contradicts a though b. a so b contradicts b though a.
+    'so' strictly entails 'so' in one direction. a so b strictly entails a so b. a so b contradicts b so a.
+
+
+    'though' contradicts 'so'. a though b contradicts a so b. a though b contradicts b so a.
+    'though' contradicts 'because'. a though b contradicts a because b. a though b contradicts b because a.
+    'though' is the opposite of 'but'. a though b strictly entails b but a. a though b contradicts b but a.
+    'though' non-strictly entails 'and'. a though b non-strictly entails a and b. a though b non-strictly entails b and a.
+    'though' strictly entails 'though' in one direction. a though b strictly entails a though b. a though b contradicts b though a.
+
+
+    
+    Examples:    
+    """
+
+
+prompt_preamble_contrast = """
+[INST] <<SYS>>
+
+    Textual entailment is the task of determining whether a given hypothesis can be inferred from a given premise.
+    In this task, you will be given a premise and a hypothesis, and you will have to decide whether the hypothesis
+    may be inferred from the premise.
+
+    The label is one of three options: entailment, neutral, and contradiction. 
+    If the hypothesis can be inferred from the premise, you should select entailment.
+    If the hypothesis is unrelated to the premise, you should select neutral.
+    If the hypothesis contradicts the premise, you should select contradiction.
+
+    The use of 'but', 'though' etc. indicate constrast or contradiction.
+    Usually when phrase 1 CONTRASTS phrase 2, phrase 2 may be cancelled or negated.
+    Phrase 1 is just talking about a related topic as phrase 2 and not negating it.
+
+    Such as:
+    Original sentence: People say I am 5 feet tall but I am actually 5'2.
+    1: I am actually 5'2 CONTRASTS People say I am 5 feet tall. 
+    explanation: I am 5'2 directly cancels and clarifies the first proposition.
+
+    Original Sentence: They say there are no aliens however we don't really know that.
+    2: we don't really know that CONTRASTS They say there are no aliens. 
+    explanation 2: The truth value of aliens not being there is negated, because the first phrase directly contradicts the first.
+    
+    Original Sentence: We can go for a walk though it is raining.
+    3: it is raining CONTRASTS We can go for a walk.
+    explanation 3: It is implied you would not normally go for a walk during a rain
+
+    Sometimes the contrast is not explicit:
+    Original Sentence: However, I am making potato salad.
+    4: I am making potato salad CONTRASTS
+    explanation 4: making a potato salad is contrasting something that is not mentioned but implies that something is not a good idea.
+
+    Original Sentence: On the other hand, I am out of fuel.
+    5: I am out of fuel CONTRASTS
+    explanation 5: being out of fuel contrasts something that is not mentioned but implies I needed fuel.
+    
+
+    Use this in your reasoning to predict the label given the premise and hypothesis.
+    The first five are examples with the labels provided.
+
+    Your task is providing an explanation as to what is implied or negated by the contradition.
+    Use the explanation if applicable to predict the label for the given examples. 
+    provide in the format of 'answer: index: label'.
+    
+    Examples:    
+    """
 
 prompt_preamble_2 = """
 [INST] <<SYS>>
@@ -186,7 +324,7 @@ class NLIDataPreparer():
             'mnli': MNLIDataReader(),
             'snli': SNLIDataReader(),
             'anli': ANLIDataReader(),
-
+            'cnli': ConnectorNLIDatareader(),
         } 
 
         self._chaos_data_readers = {
@@ -198,20 +336,21 @@ class NLIDataPreparer():
 
     def load(self):
         k = 0
-        file_name = 'llama_3_anli_credence_5_full.json'
+        file_name = 'llama_3_connectors_70b_helped_5.json'
         window = 1
         jl = JadeLogger()
         gpt_answer = {}
         true_answers = {}
-        chaos_data_reader = self._data_readers['anli']
-        data = chaos_data_reader.read_file('test').data()[:1500]
-        print(len(data))
-        system_prompt = str(credence_prompt_preamble)
+        data_reader = self._data_readers['cnli']
+        data = data_reader.read_file('test').data()[:1800]
+        example_data = [data[0], data[43], data[124], data[630], data[173], data[250]]
+        data = [datum for datum in data if datum not in example_data]
+        system_prompt = str(prompt_preamble_connector_2)
         location = jl.file_manager.data_filepath(file_name)
         if os.path.exists(location):
             with open(location, 'rt') as f:
                 gpt_answer = json.load(f)
-        for datumi, datum in enumerate(data[:5], start=1):
+        for datumi, datum in enumerate(example_data, start=1):
 
             system_prompt += f'{datum.uid()} \n Premise: ' + datum.sentence_1() + '\n'
             system_prompt += 'Hypothesis: ' + datum.sentence_2() + '\n'
@@ -223,6 +362,7 @@ class NLIDataPreparer():
             #system_prompt += f'{datum.uid()} : 2.4 : 2.5 \n'
             #system_prompt += f'Answer: {datum.uid()} :  {datum.label()} \n\n'
             #system_prompt += f'Answer: {datum.uid()} : <premise credence> : <hypothesis credence> : {datum.label()} \n\n'
+            #system_prompt += f'Contrast Explanation: <replace with explanation for contrast>\n'
             system_prompt += f'Answer: {datum.uid()} :' + datum.label() +  '\n\n'
 
 
@@ -233,8 +373,8 @@ class NLIDataPreparer():
             user_prompt = ''
 
             for datumi, datum in enumerate(data[5 + (k*window): (k+1) * window + 5], start=6):
-                if datum.uid() in gpt_answer:# or datum.uid() not in all:
-                    continue
+                print('premise:', datum.sentence_1())
+                print('hypothesis:', datum.sentence_2())
                 user_prompt_credence += f"""
                     <</SYS>>
 
@@ -250,7 +390,7 @@ class NLIDataPreparer():
                 true_answers[datum.uid()] = datum.label()
                 user_prompt += f'{datum.uid()} Premise: ' + datum.sentence_1() + '\n'
                 user_prompt += 'Hypothesis: ' + datum.sentence_2() + '\n [/INST] \n'
-                print("prompting", datum.uid())
+                print("prompting", datum.uid(), datum.label())
             print('sending prompt')
             if len(user_prompt) == 0:
                 k += 1
@@ -283,7 +423,7 @@ class NLIDataPreparer():
         for uid, label in true_answers.items():
             if uid not in gpt_answers:
                 continue
-            if len(gpt_answers[uid][0]) > 0 and label[0] == gpt_answers[uid][0][0]:
+            if len(gpt_answers[uid][0]) > 0 and label[0:2] == gpt_answers[uid][0][0:2]:
                 tp += 1
             else:
                 fp += 1

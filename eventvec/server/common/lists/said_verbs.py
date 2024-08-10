@@ -166,3 +166,7 @@ modal_adjectives = list(set([
     'sincere', 'genuine', 'actual', 'real', 'virtual', 'practical', 'effective', 'essential',
     'fundamental', 'rough', 'nearly', 'virtual', 'basic', 'approximate', 'rough', 'almost',
 ]))
+
+contrasting_conjunctions = {
+    'but', 'however', 'though', 'all the same', 'be that as it may', 'despite', 'even so', 'in spite of', 'nevertheless', 'regardless', 'yet', 'on the other hand', 'instead', 'rather', 'in fact', 'in reality', 'in contrast', 'in comparison', 'on the contrary', 'conversly'
+}

@@ -25,18 +25,18 @@ llama_factuality = [.4786, .601, .5836, .5744, .613, .6288, .6238, .6174, .5938 
 
 X_axis = np.arange(len(X)) 
   
-plt.plot(X,  plain, 'r*', label = 'RM', markersize=10, linestyle='-')
-plt.plot(X, rules, 'r*', label = 'RC + RM', markersize=10, linestyle='-.')
-plt.plot(X, roberta_large,  'r*', label = 'DC + RM', markersize=10, linestyle='--')
-plt.plot(X, llama_plain,  'cD', label = 'LM', linestyle='-')
-plt.plot(X, llama_factuality,  'cD', label = 'LC + LM', linestyle='--')
+plt.plot(X,  plain, 'r*', label = 'RM', markersize=10, linestyle='dotted')
+plt.plot(X, rules, 'r*', label = 'RC + RM', markersize=10, linestyle='--')
+plt.plot(X, roberta_large,  'r*', label = 'DC + RM', markersize=10, linestyle='-')
+plt.plot(X, llama_plain,  'cD', label = 'LM', linestyle='dotted')
+plt.plot(X, llama_factuality,  'cD', label = 'LC + LM', linestyle='-')
 
 
 ax = plt.gca()
 ax.set_ylim([0.3, 0.7])
-plt.xticks(X_axis, X, rotation=45) 
-plt.xlabel("Linguistic Features") 
-plt.ylabel("F1 scores") 
+plt.xticks(X_axis, X, rotation=45, fontsize=11) 
+plt.xlabel("Linguistic Features",  fontsize=11) 
+plt.ylabel("F1 scores", fontsize=11) 
 #plt.title("Performance of ChaosNLI based on Linguistic Features")
-plt.legend() 
+plt.legend(prop={'size': 16}) 
 plt.savefig('/home/lalady6977/Downloads/nli-breakdown-features.png', bbox_inches='tight')

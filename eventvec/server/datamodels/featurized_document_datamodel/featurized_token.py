@@ -84,6 +84,16 @@ class FeaturizedToken:
             return True, token
         if len(tokens) == 0:
             return False, token
+        
+    def traverse_all_children(self, poses):
+        tokens = [self]
+        token = self
+        all_children = []
+        while len(tokens) > 0 and token.pos() not in poses:
+            token = tokens.pop(0)
+            tokens.extend(token.all_children())
+            all_children.extend(token.all_children())
+        return all_children
 
     def i(self):
         return self._i

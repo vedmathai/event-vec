@@ -20,7 +20,13 @@ from eventvec.server.data.mnli.mnli_datahandlers.chaos_mnli_syntax_data_reader i
 from eventvec.server.data.mnli.mnli_datahandlers.chaos_mnli_data_reader import ChaosMNLIDatareader  # noqa
 from eventvec.server.data.mnli.mnli_datahandlers.chaos_snli_data_reader import ChaosSNLIDatareader  # noqa
 from eventvec.server.data.mnli.mnli_datahandlers.chaos_anli_data_reader import ChaosANLIDatareader  # noqa
+from eventvec.server.data.mnli.mnli_datahandlers.connector_nli_data_reader import ConnectorNLIDatareader
 
+label_map = {
+    'contradiction': 'contradiction',
+    'non-strict': 'entailment',
+    'strict': 'entailment',
+}
 
 
 class NLIDataHandler():
@@ -30,6 +36,7 @@ class NLIDataHandler():
             'mnli_syntax': MNLISyntaxDataReader(),
             'snli': SNLIDataReader(),
             'anli': ANLIDataReader(),
+            'cnli': ConnectorNLIDatareader(),
         } 
 
         self._chaos_data_readers = {
@@ -46,13 +53,20 @@ class NLIDataHandler():
         random.seed(42)
         random.shuffle(data)
         train_size = 10000
+        train_data = []
+        connectors = ['and', 'though', 'but', 'because', 'so', 'therefore']
         self._train_data = data[:train_size]
-        #for i in ['contradiction' , 'neutral', 'entailment']:
-        #    self._train_data.extend(list(filter(lambda x: x.label() == i, data))[:int(train_size/3)])
+        for datum in self._train_data:
+            if (any(i in datum.sentence_1().split() for i in connectors) or any(i in datum.sentence_2().split() for i in connectors)):
+                train_data.append(datum)
+        self._train_data = train_data
         random.shuffle(self._train_data)
-        data = data_reader.read_file('test').data()[:4000]
+        data_reader = self._data_readers[run_config.test_dataset()]
+        data = data_reader.read_file('test').data()
         #data = chaos_data_reader.read_file('test').data()
         self._test_data = data
+        for datum in self._test_data:
+            datum.set_label(label_map[datum.label()])
 
     def train_data(self):
         return self._train_data

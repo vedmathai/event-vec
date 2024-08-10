@@ -17,6 +17,8 @@ from eventvec.server.config import Config
 from eventvec.server.data.mnli.mnli_datahandlers.mnli_data_reader import MNLIDataReader  # noqa
 from eventvec.server.data.mnli.mnli_datahandlers.snli_data_reader import SNLIDataReader  # noqa
 from eventvec.server.data.mnli.mnli_datahandlers.anli_data_reader import ANLIDataReader  # noqa
+from eventvec.server.data.mnli.mnli_datahandlers.connector_nli_data_reader import ConnectorNLIDatareader 
+
 
 from eventvec.server.data.mnli.mnli_datahandlers.chaos_mnli_data_reader import ChaosMNLIDatareader  # noqa
 from eventvec.server.data.mnli.mnli_datahandlers.mnli_syntax_data_reader import MNLISyntaxDataReader  # noqa
@@ -35,6 +37,9 @@ sub_said = {'117177n': 'neutral', '56634c': 'contradiction', '46063n': 'neutral'
 is_belief = {'106091e': 'entailment', '136360n': 'neutral', '117680c': 'contradiction', '12562n': 'entailment', '13387e': 'neutral', '118652e': 'neutral', '47877c': 'contradiction', '103354n': 'neutral', '1682n': 'neutral', '87332n': 'neutral', '141642n': 'neutral', '6105n': 'neutral', '43094c': 'neutral', '86008n': 'neutral', '808n': 'entailment', '111243n': 'entailment', '18991n': 'neutral', '71832n': 'neutral', '94241e': 'entailment', '50830n': 'neutral', '38784n': 'contradiction', '13531e': 'neutral', '15110n': 'neutral', '99791c': 'neutral', '88879n': 'contradiction', '91709c': 'neutral', '61767e': 'contradiction'}
 is_speech = {'105561e': 'entailment', '121910e': 'contradiction', '143751e': 'neutral', '95186n': 'neutral', '40710n': 'neutral', '111005e': 'contradiction', '13387e': 'neutral', '58331c': 'contradiction', '123038e': 'entailment', '99194e': 'neutral', '48557c': 'contradiction', '1408c': 'neutral', '137715c': 'contradiction', '62982n': 'neutral', '95953c': 'contradiction', '113280n': 'neutral', '118141n': 'neutral', '74768e': 'neutral', '128176n': 'entailment', '96516e': 'entailment', '77116e': 'neutral', '79007n': 'entailment', '90839n': 'neutral', '43225n': 'neutral', '4795n': 'entailment', '83298n': 'neutral', '82700c': 'neutral', '40710c': 'contradiction', '122197n': 'neutral', '14556n': 'neutral', '82069e': 'neutral', '121910c': 'entailment', '78105e': 'neutral', '23725n': 'neutral', '108243e': 'contradiction', '33764c': 'neutral', '5507n': 'contradiction', '3839c': 'contradiction', '47260n': 'neutral', '131910n': 'neutral', '31263n': 'entailment', '130482c': 'contradiction', '53211n': 'neutral', '54811n': 'entailment', '50480n': 'neutral', '43764n': 'neutral', '67938e': 'neutral', '23765e': 'entailment', '94674c': 'contradiction', '71957n': 'neutral'}
 has_modal = {'46198n': 'neutral', '86472e': 'neutral', '82161n': 'neutral', '58557e': 'entailment', '98445c': 'contradiction', '129492c': 'neutral', '15197n': 'neutral', '15727c': 'contradiction', '118403e': 'entailment', '18892n': 'contradiction', '95883n': 'neutral', '136360n': 'neutral', '134356n': 'neutral', '76947n': 'neutral', '144753c': 'contradiction', '40710n': 'neutral', '66225n': 'neutral', '36469e': 'entailment', '101809c': 'neutral', '92771n': 'entailment', '26495e': 'entailment', '140005c': 'contradiction', '30221c': 'contradiction', '13387e': 'neutral', '146070e': 'entailment', '111167n': 'neutral', '47714e': 'entailment', '62287n': 'neutral', '83247e': 'entailment', '126583n': 'neutral', '102857n': 'neutral', '77175n': 'neutral', '42745e': 'entailment', '46198c': 'contradiction', '66225e': 'entailment', '105790n': 'entailment', '101809n': 'entailment', '102817n': 'neutral', '123038e': 'entailment', '73751n': 'neutral', '16989e': 'entailment', '48376n': 'neutral', '86184c': 'contradiction', '67412n': 'neutral', '103354n': 'neutral', '128542e': 'neutral', '44834e': 'entailment', '73191n': 'entailment', '9393n': 'entailment', '13263n': 'neutral', '127490e': 'entailment', '1682n': 'neutral', '111011e': 'neutral', '113193n': 'neutral', '53074e': 'entailment', '130928n': 'neutral', '138500e': 'entailment', '110061n': 'neutral', '32754e': 'entailment', '114971n': 'neutral', '54822n': 'contradiction', '16996e': 'entailment', '109510n': 'neutral', '53074n': 'neutral', '9022e': 'entailment', '103616e': 'neutral', '117487e': 'entailment', '21671e': 'entailment', '53468n': 'neutral', '117487c': 'contradiction', '87332n': 'neutral', '76483n': 'entailment', '108847e': 'entailment', '35422c': 'neutral', '84055n': 'neutral', '16494c': 'contradiction', '143608n': 'neutral', '62982n': 'neutral', '62177n': 'entailment', '43168c': 'contradiction', '105911c': 'contradiction', '12815n': 'neutral', '101104n': 'neutral', '114971e': 'entailment', '65199e': 'neutral', '15488c': 'contradiction', '123675n': 'contradiction', '57151c': 'neutral', '100373c': 'contradiction', '27907e': 'contradiction', '113280n': 'neutral', '118141n': 'neutral', '70711c': 'neutral', '53953n': 'neutral', '79007n': 'entailment', '86008n': 'neutral', '65199n': 'neutral', '63013n': 'neutral', '129201n': 'neutral', '86429n': 'neutral', '95338n': 'contradiction', '95663n': 'neutral', '59208n': 'neutral', '16086n': 'contradiction', '42321n': 'neutral', '72389c': 'neutral', '8257n': 'neutral', '142604e': 'entailment', '57163n': 'entailment', '142630n': 'neutral', '96956c': 'contradiction', '83722c': 'contradiction', '117900n': 'neutral', '91797c': 'contradiction', '77175c': 'neutral', '56909n': 'neutral', '53027n': 'contradiction', '113668n': 'neutral', '11534n': 'neutral', '141321n': 'contradiction', '142964n': 'neutral', '6386n': 'neutral', '13221c': 'contradiction', '92422e': 'neutral', '3799n': 'neutral', '15537n': 'neutral', '133456n': 'neutral', '97367n': 'neutral', '13760n': 'neutral', '131235n': 'neutral', '80220n': 'neutral', '61429c': 'contradiction', '49462c': 'contradiction', '67063n': 'entailment', '70711n': 'neutral', '122197n': 'neutral', '136860c': 'contradiction', '137708c': 'contradiction', '82182e': 'neutral', '55241e': 'neutral', '82069e': 'neutral', '2262n': 'neutral', '119175n': 'neutral', '102817c': 'neutral', '125700n': 'neutral', '57345e': 'entailment', '23725n': 'neutral', '136752n': 'neutral', '98116c': 'neutral', '67610e': 'neutral', '108243e': 'contradiction', '837n': 'neutral', '36514n': 'entailment', '56759n': 'neutral', '81469n': 'contradiction', '75838n': 'neutral', '127073c': 'neutral', '138272n': 'neutral', '73278n': 'contradiction', '69806c': 'neutral', '130869c': 'entailment', '102708e': 'neutral', '2529c': 'contradiction', '43247n': 'neutral', '58557n': 'contradiction', '28387c': 'entailment', '47260n': 'neutral', '119901n': 'neutral', '96539c': 'neutral', '120896n': 'entailment', '105904c': 'neutral', '129081n': 'neutral', '35290n': 'neutral', '130482c': 'contradiction', '68946c': 'neutral', '1735n': 'neutral', '93839c': 'neutral', '102174e': 'entailment', '32197n': 'neutral', '134514n': 'entailment', '76957c': 'contradiction', '79265n': 'neutral', '117576c': 'neutral', '133842n': 'neutral', '54811n': 'entailment', '7091e': 'neutral', '84901n': 'neutral', '129464n': 'neutral', '127858c': 'contradiction', '115593c': 'neutral', '102817e': 'neutral', '129081e': 'neutral', '72870n': 'neutral', '46576e': 'contradiction', '56075n': 'neutral', '30450c': 'contradiction', '142238n': 'neutral', '50480n': 'neutral', '89995e': 'neutral', '8269e': 'neutral', '43764n': 'neutral', '43178e': 'entailment', '77152e': 'entailment', '4082e': 'entailment', '118403n': 'contradiction'}
+interested_ = {'120176c', '11362e', '77152e', '113280n', '82510c', '65130n', '109510n', '3103n', '98844n', '139635n', '13221c', '55561n', '91797c', '35138c', '91191n', '102817e', '8257n', '143760n', '38925n', '63469n', '99194c', '83298n', '82732n', '55241e', '144408n', '135251n', '61818n', '42745e', '120149c', '32754n', '132716n', '113193c', '97926n', '117576e', '88192n', '46059n', '72740c', '10724n', '73840c', '73751n', '66225e', '132934n', '65199n', '128542e', '34776c', '123891c', '55864e', '54822n', '73840n', '14126e', '54811c', '82510e', '116713c', '18142n', '69815n', '137399e', '76016c', '2133n', '49434n', '120245e', '53027n', '23319n', '65199e', '77690n', '4312n', '35238n', '2870n', '84901n', '67610e', '38527n', '120166e', '129980c', '74768e', '81356e', '105769e', '47756n', '49894n', '119065n', '77152c', '102817c', '23751e', '99194e', '120070n', '41975e', '47714e', '34920c', '12870c', '106091e', '62452e', '97926c', '9412e', '107302e', '44648e', '112293n', '78660n', '49227n', '118141n', '12789n', '17110n', '15197n', '61429c', '34573e', '21287n', '23751c', '145540n', '54822c', '96946n', '15771c', '47756e', '46059c', '99194n', '45319e', '142630n', '114492n', '117576c', '128360n', '15110n', '116713e', '34573n', '145410n', '113193n', '66225n', '13911n', '56582n', '117680c', '133038e', '49237c', '102817n', '84079n', '124590c', '63469c', '21671e', '54811n', '21912e', '119768n', '132716c'}
+
+
 
 features = {
     'modal_adjective': modal_adjective,
@@ -56,6 +61,7 @@ class GPTAnalyse():
             'snli': SNLIDataReader(),
             'anli': ANLIDataReader(),
             'mnli_syntax': MNLISyntaxDataReader(),
+            'cnli': ConnectorNLIDatareader(),
         } 
 
         self._chaos_data_readers = {
@@ -68,14 +74,15 @@ class GPTAnalyse():
     def load(self):
         k = 0
         self._jl = JadeLogger()
-        chaos_data_reader = self._chaos_data_readers['mnli']
-        data_reader = self._data_readers['anli']
-        data =  data_reader.read_file('test').data()[:]
+        #chaos_data_reader = self._chaos_data_readers['mnli_syntax']
+        data_reader = self._data_readers['cnli']
+        data =  data_reader.read_file('test').data()[:1600]
         fc = FactualityCategorizer()
         cm = ClauseMatcher()
         file2correct = defaultdict(lambda: set())
         gpt_answers = {}
         cache = {}
+        interested = set()
         files = [
             'llama_3_1.json',
             'llama_3_2.json',
@@ -142,6 +149,15 @@ class GPTAnalyse():
             'llama_3_mnli_credence_4_full.json',
             'llama_3_mnli_credence_5_full.json',
 
+            'llama_3_chaos_1_syntax_full.json',
+
+
+
+            #'llama_3_chaos_2_syntax_contrasts.json',
+            #'llama_3_chaos_3_syntax_contrasts.json',
+
+
+
 
             'llama_3_smaller_1.json',
             #'llama_3_smaller_2.json',
@@ -174,7 +190,50 @@ class GPTAnalyse():
             #'gpt_answers_few_shot_4.json',
             #'gpt_answers_with_cot.json'
         ]
+
         files = [
+            'llama_3_1_full.json',
+            'llama_3_2_full.json',
+            'llama_3_3_full.json',
+            'llama_3_4_full.json',
+            'llama_3_5_full.json',
+            'llama_3_chaos_1_syntax_contrasts_base.json',
+            'llama_3_chaos_2_syntax_contrasts_base.json',
+            'llama_3_chaos_3_syntax_contrasts_base.json',
+            'llama_3_chaos_4_syntax_contrasts_base.json',
+            'llama_3_chaos_5_syntax_contrasts_base.json',
+            'llama_3_chaos_1_syntax_contrasts.json',
+            'llama_3_chaos_2_syntax_contrasts.json',
+            'llama_3_chaos_3_syntax_contrasts.json',
+            'llama_3_chaos_4_syntax_contrasts.json',
+            'llama_3_chaos_5_syntax_contrasts.json',
+            'llama_3_chaos_4_syntax_contrasts_long.json',
+            'llama_3_chaos_1_syntax_contrasts_7b_base.json',
+            'llama_3_chaos_2_syntax_contrasts_7b_base.json',
+            'llama_3_chaos_3_syntax_contrasts_7b_base.json',
+            'llama_3_chaos_4_syntax_contrasts_7b_base.json',
+            'llama_3_chaos_1_syntax_contrasts_7b.json',
+            'llama_3_chaos_2_syntax_contrasts_7b.json',
+            'llama_3_chaos_3_syntax_contrasts_7b.json',
+            'llama_3_chaos_4_syntax_contrasts_7b.json',
+            'llama_3_chaos_5_syntax_contrasts_7b.json',
+
+        ]
+        files = [
+            
+            'llama_3_connectors_70b_base_1.json',
+            'llama_3_connectors_70b_base_2.json',
+            #'llama_3_connectors_70b_base_3.json',
+            #'llama_3_connectors_70b_base_4.json',
+            'llama_3_connectors_70b_helped_1.json',
+            'llama_3_connectors_70b_helped_2.json',
+            'llama_3_connectors_70b_helped_3.json',
+            'llama_3_connectors_70b_helped_4.json',
+            'llama_3_connectors_70b_helped_5.json',
+
+        ]
+
+        files_mnli = [
             'llama_3_mnli_1_full.json',
             'llama_3_mnli_2_full.json',
             'llama_3_mnli_3_full.json',
@@ -186,9 +245,12 @@ class GPTAnalyse():
             'llama_3_mnli_credence_3_full.json',
             'llama_3_mnli_credence_4_full.json',
             'llama_3_mnli_credence_5_full.json',
-        ]
 
-        files = [
+
+        ]
+        
+
+        files_anli= [
             'llama_3_anli_1_full.json',
             'llama_3_anli_2_full.json',
             'llama_3_anli_3_full.json',
@@ -199,7 +261,6 @@ class GPTAnalyse():
             'llama_3_anli_credence_3_full.json',
             'llama_3_anli_credence_4_full.json',
             'llama_3_anli_credence_5_full.json',
-
         ]
         uid2data = {}
         for filename in files:
@@ -225,7 +286,7 @@ class GPTAnalyse():
                         #dist = d.label_dist()
                         #dist = sorted(dist)
                         #if  not(0.25 < dist[-1] - dist[-2] or dist[-1] - dist[-2] < 0.02):
-                        if d.uid() not in cache:
+                        if False and d.uid() not in cache:
                             event_string, event_string_2 = cm.match(d.sentence_1(), d.sentence_2())
                             features1 = fc.categorize(d.sentence_1(), event_string).to_dict()
                             features2 = fc.categorize(d.sentence_2(), event_string_2).to_dict()
@@ -233,25 +294,27 @@ class GPTAnalyse():
                                 cache[d.uid()] = True
                             else:
                                 cache[d.uid()] = False
-                        if True or cache[d.uid()] is True:
-                            true_answers[d.uid()] = d.label()
+                        if True:
                             if d.uid() in gpt_answer:
                                 counter += 1
                                 if isinstance(gpt_answer[d.uid()], list) and len(gpt_answer[d.uid()][0]) > 0 :
                                     gpt_answer[d.uid()] = gpt_answer[d.uid()][0][0]
+                                    interested.add(d.uid())
+
                                 elif len(gpt_answer[d.uid()]) > 0:
                                     gpt_answer[d.uid()] = gpt_answer[d.uid()][0]
-                                if gpt_answer[d.uid()]== d.label()[0]:
+                                    interested.add(d.uid())
+
+                                if len(d.label()) > 0 and gpt_answer[d.uid()] == d.label()[0]:
                                     file2correct[filename].add(d.uid())
+                                if len(d.label()) > 0:
+                                    true_answers[d.uid()] = d.label()[0]
                     gpt_answers[filename] = gpt_answer
-                    print(' ' * 4, i, '{:.3f}'.format(self.f1_score(true_answers, gpt_answer)))
+                    print(' ' * 4, i, '{:.3f}'.format(self.f1_score(true_answers, gpt_answer, uid2data)))
                 print(counter)
         #self.print_confusion(file2correct, uid2data, gpt_answers)
         #print(all_uids)
         
-
-
-
     def print_confusion(self, file2correct, uid2data, gpt_answers):
         credence_only = file2correct['gpt_answers_credence_output_2.json'] & file2correct['gpt_answers_credence_output.json'] - (file2correct['gpt_answers_few_shot.json'] | file2correct['gpt_answers_few_shot_2.json'])
         non_credence_only = (file2correct['gpt_answers_few_shot.json'] & file2correct['gpt_answers_few_shot_2.json']) - (file2correct['gpt_answers_credence_output_2.json'] | file2correct['gpt_answers_credence_output.json'])
@@ -284,11 +347,12 @@ class GPTAnalyse():
                 writer.writerow(row)
 
 
-    def f1_score(self, true_answers, gpt_answers):
+    def f1_score(self, true_answers, gpt_answers, uid2data):
         tp = defaultdict(int)
         fp = defaultdict(int)
         fn = defaultdict(int)
         f1s = []
+        confusion = defaultdict(lambda: defaultdict(int))
         for uid, label in true_answers.items():
             if uid not in gpt_answers:
                 continue
@@ -296,12 +360,16 @@ class GPTAnalyse():
                 gpt_answer = gpt_answers[uid][0][0]
             elif len(gpt_answers[uid]) > 0:
                 gpt_answer = gpt_answers[uid][0]
+            else :
+                continue
             if label[0] == gpt_answer:
                 tp[gpt_answer] += 1
+                confusion[uid2data[uid].type()]['correct'] += 1
             else:
                 fp[label[0]] += 1
                 fn[gpt_answer] += 1
-        for key in ['e', 'n', 'c']:
+                confusion[uid2data[uid].type()]['wrong'] += 1
+        for key in ['e', 's', 'n', 'c']:
             f1 = 0
             precision = 0
             recall = 0
@@ -312,6 +380,13 @@ class GPTAnalyse():
             if precision + recall != 0:
                 f1 = 2 * (precision * recall) / (precision + recall)
             f1s.append(f1)
+        items = []
+        for key1 in confusion:
+            if confusion[key1]['correct'] + confusion[key1]['wrong'] > 1:
+                items += [(key1 ,confusion[key1]['wrong']/(confusion[key1]['correct'] + confusion[key1]['wrong']))]
+        items = sorted(items, key=lambda x: x[1])
+        for item in items:
+            print(item)
         return np.mean(f1s)
 
 if __name__ == '__main__':

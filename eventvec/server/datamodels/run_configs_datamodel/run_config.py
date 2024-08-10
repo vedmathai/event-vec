@@ -8,6 +8,7 @@ class RunConfig():
         self._llm = None
         self._epochs = None
         self._dataset = None
+        self._dataset = None
         self._use_question_event = None
         self._use_question_event_features = None
         self._use_question_event_aspect = None
@@ -43,6 +44,9 @@ class RunConfig():
     
     def dataset(self):
         return self._dataset
+    
+    def test_dataset(self):
+        return self._test_dataset
     
     def use_question_event(self):
         return self._use_question_event
@@ -101,6 +105,9 @@ class RunConfig():
     def set_dataset(self, dataset):
         self._dataset = dataset
 
+    def set_test_dataset(self, test_dataset):
+        self._test_dataset = test_dataset
+
     def set_use_question_event(self, use_question_event):
         self._use_question_event = use_question_event
     
@@ -138,6 +145,7 @@ class RunConfig():
         run_config.set_use_negation(run_config_dict['use_negation'])
         run_config.set_epochs(run_config_dict['epochs'])
         run_config.set_dataset(run_config_dict['dataset'])
+        run_config.set_test_dataset(run_config_dict.get('test_dataset', run_config_dict['dataset']))
         run_config.set_use_question_event(run_config_dict['use_question_event'])
         run_config.set_use_question_event_features(run_config_dict['use_question_event_features'])
         run_config.set_use_root_verb(run_config_dict['use_root_verb'])
@@ -159,6 +167,7 @@ class RunConfig():
             'use_negation': self.use_negation(),
             'epochs': self.epochs(),
             'dataset': self.dataset(),
+            'test_dataset': self.test_dataset(),
             'use_question_event': self.use_question_event(),
             'use_question_event_features': self.use_question_event_features(),
             'use_root_verb': self.use_root_verb(),

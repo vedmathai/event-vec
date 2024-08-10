@@ -29,10 +29,14 @@ class Config:
         self._mnli_data_location = None
         self._snli_data_location = None
         self._anli_data_location = None
+        self._alphanli_data_location = None
         self._factuality_data_location = None
         self._chaos_mnli_data_location = None
         self._chaos_snli_data_location = None
         self._chaos_anli_data_location = None
+        self._connectors_data_location = None
+        self._connector_nli_data_location = None
+        self._roc_stories_data_location = None
         self._jade_logger = JadeLogger()
 
 
@@ -76,6 +80,9 @@ class Config:
     def wiki_data_location(self):
         return self._wiki_data_location
     
+    def roc_stories_data_location(self):
+        return self._jade_logger.file_manager.data_filepath(self._roc_stories_data_location)
+    
     def nyt_data_location(self):
         return self._nyt_data_location
     
@@ -98,6 +105,14 @@ class Config:
     
     def anli_data_location(self):
         location = self._jade_logger.file_manager.data_filepath(self._anli_data_location)
+        return location
+    
+    def alphanli_data_location(self):
+        location = self._jade_logger.file_manager.data_filepath(self._alphanli_data_location)
+        return location
+    
+    def connector_nli_data_location(self):
+        location = self._jade_logger.file_manager.data_filepath(self._connector_nli_data_location)
         return location
 
     def model_save_location(self):
@@ -184,6 +199,10 @@ class Config:
         location = self._jade_logger.file_manager.data_filepath(self._chaos_anli_data_location)
         return location
     
+    def connectors_data_location(self):
+        location = self._jade_logger.file_manager.data_filepath(self._connectors_data_location)
+        return location
+    
     def set_te3_gold_data_location(self, te3_gold_data_location):
         self._te3_gold_data_location = te3_gold_data_location
 
@@ -198,6 +217,9 @@ class Config:
 
     def set_wiki_data_location(self, wiki_data_location):
         self._wiki_data_location = wiki_data_location
+
+    def set_roc_stories_data_location(self, roc_stories_data_location):
+        self._roc_stories_data_location = roc_stories_data_location
 
     def set_nyt_data_location(self, nyt_data_location):
         self._nyt_data_location = nyt_data_location
@@ -219,6 +241,9 @@ class Config:
 
     def set_anli_data_location(self, anli_data_location):
         self._anli_data_location = anli_data_location
+
+    def set_alphanli_data_location(self, alphanli_data_location):
+        self._alphanli_data_location = alphanli_data_location
 
     def set_model_save_location(self, model_save_location):
         self._model_save_location = model_save_location
@@ -253,6 +278,15 @@ class Config:
     def set_chaos_anli_data_location(self, chaos_anli_data_location):
         self._chaos_anli_data_location = chaos_anli_data_location
 
+    def set_connectors_data_location(self, connectors_data_location):
+        self._connectors_data_location = connectors_data_location
+
+    def set_connector_nli_data_location(self, connector_nli_data_location):
+        self._connector_nli_data_location = connector_nli_data_location
+
+    def set_connectors_data_location(self, connectors_data_location):
+        self._connectors_data_location = connectors_data_location
+
     @staticmethod
     def from_dict(val):
         config = Config()
@@ -274,6 +308,7 @@ class Config:
         config.set_torque_data_location(val.get('torque_data_location'))
         config.set_torque_data_file_names(val.get('torque_data_file_names'))
         config.set_wiki_data_location(val.get('wiki_data_location'))
+        config.set_roc_stories_data_location(val.get('roc_stories_data_location'))
         config.set_nyt_data_location(val.get('nyt_data_location'))
         config.set_hansard_data_location(val.get('hansard_data_location'))
         config.set_maec_data_location(val.get('maec_data_location'))
@@ -281,8 +316,11 @@ class Config:
         config.set_mnli_data_location(val.get('mnli_data_location'))
         config.set_snli_data_location(val.get('snli_data_location'))
         config.set_anli_data_location(val.get('anli_data_location'))
+        config.set_alphanli_data_location(val.get('alphanli_data_location'))
         config.set_factuality_data_location(val.get('factuality_data_location'))
         config.set_chaos_mnli_data_location(val.get('chaos_mnli_data_location'))
         config.set_chaos_snli_data_location(val.get('chaos_snli_data_location'))
         config.set_chaos_anli_data_location(val.get('chaos_anli_data_location'))
+        config.set_connector_nli_data_location(val.get('connector_nli_data_location'))
+        config.set_connectors_data_location(val.get('connectors_data_location'))
         return config
