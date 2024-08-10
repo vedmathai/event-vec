@@ -6,6 +6,7 @@ class MNLIDatum():
         self._label = None
         self._entropy = None
         self._label_dist = None
+        self._type = None
         self._annotator_labels = []
 
     def set_uid(self, uid):
@@ -29,6 +30,9 @@ class MNLIDatum():
     def set_annotator_labels(self, annotator_labels):
         self._annotator_labels = annotator_labels
 
+    def set_type(self, type):
+        self._type = type
+
     def uid(self):
         return self._uid
 
@@ -47,6 +51,9 @@ class MNLIDatum():
     def label_dist(self):
         return self._label_dist
     
+    def type(self):
+        return self._type
+    
     def annotator_labels(self):
         return self._annotator_labels
     
@@ -59,6 +66,7 @@ class MNLIDatum():
             'entropy': self._entropy,
             'label_dist': self._label_dist,
             'annotator_labels': self._annotator_labels,
+            'type': self._type,
         }
     
     @staticmethod
@@ -70,5 +78,6 @@ class MNLIDatum():
         datum.set_label(datum_dict['label'])
         datum.set_entropy(datum_dict['entropy'])
         datum.set_label_dist(datum_dict['label_dist'])
+        datum.set_type(datum_dict['type'])
         datum.set_annotator_labels(datum_dict['annotator_labels'])
         return datum

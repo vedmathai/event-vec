@@ -17,13 +17,14 @@ class FactualityStats():
         counter = defaultdict(list)
         worker2score = defaultdict(list)
         for datumi, datum in enumerate(data):
-            print(datumi)
             annotations = []
             for annotation in datum.annotations():
                 worker2score[annotation.worker_id()] += [annotation.value()]
                 annotations.append(annotation.value())
             mean = np.mean(annotations)
             std = np.std(annotations)
+            if datum.event_string() == 'cancellations':
+                print(datum.text())
             features_array = self._factuality_categorizer.categorize(datum.text(), datum.event_string())
             features_array = features_array.to_dict()
             for feature in features_array:

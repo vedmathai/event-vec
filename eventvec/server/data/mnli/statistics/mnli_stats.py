@@ -6,9 +6,13 @@ import numpy as np
 import csv
 
 
-from eventvec.server.common.lists.said_verbs import said_verbs, future_said_verbs, future_modals, negation_words, modal_adverbs, modal_adjectives
+from eventvec.server.common.lists.said_verbs import said_verbs, future_said_verbs, future_modals, negation_words, modal_adverbs, modal_adjectives, contrasting_conjunctions
 from eventvec.server.data.abstract import AbstractDatareader
 from eventvec.server.data.mnli.mnli_datahandlers.mnli_data_reader import MNLIDataReader
+from eventvec.server.data.mnli.mnli_datahandlers.chaos_mnli_data_reader import ChaosMNLIDatareader
+from eventvec.server.data.mnli.mnli_datahandlers.anli_data_reader import ANLIDataReader
+
+
 
 class FeatureStat:
     def __init__(self):
@@ -34,28 +38,14 @@ class FeatureStat:
 if __name__ == '__main__':
     fr = MNLIDataReader()
     data = fr.read_file('train')
-    feature_stats = {}
-    feature_set = modal_adjectives
-    for word in feature_set:
-        feature_stats[word] = FeatureStat()
-        feature_stats[word].set_name(word)
-    
-    for datum in data.data():
-        count = defaultdict(int)
-        for label in datum.annotator_labels():
-            count[label] += 1
-        entropy = -sum([i/5 * np.log(i/5) for i in count.values()])
-        for word in feature_set:
-            spaced_word = f' {word} '
-            if spaced_word in datum.sentence_1():
-                feature_stats[word].add_example('{} | {}'.format(datum.sentence_1(), datum.sentence_2()))
-                continue
-            if spaced_word in datum.sentence_2():
-                feature_stats[word].add_example('{} | {}'.format(datum.sentence_1(), datum.sentence_2()))
+    count = 0
+    contrasting_conjunctions = ['conversly']
 
-    for word in sorted(feature_set, key=lambda x: feature_stats[x].count(), reverse=False):
-        print(f'{word}: {feature_stats[word].count()} / {len(data.data())}')
-        for example in feature_stats[word].examples()[:10]:
-            print(example)
-        print('-----------------')
-        print()
+    for datum in data.data()[:]:
+        if any([word in datum.sentence_1().lower() for word in list(contrasting_conjunctions)]):
+            print(datum.sentence_1())
+            print()
+        if any([word in datum.sentence_2().lower() for word in list(contrasting_conjunctions)]):
+            print(datum.sentence_2())
+            print()
+    print(count)

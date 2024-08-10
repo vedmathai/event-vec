@@ -54,7 +54,10 @@ if __name__ == '__main__':
     all_entropies = []
     data = fr.chaos_data()
     examples = []
+    interested = []
     for datum in sorted(data, key=lambda x: x.entropy(), reverse=True):
+        if any(i in datum.premise().split() for i in ['but', 'because', 'so', 'therefore', 'however']) or any(i in datum.hypothesis() for i in ['but', 'because', 'so', 'therefore', 'however']):
+            interested.append(datum)
         event_string, event_string_2 = cm.match(datum.premise(), datum.hypothesis())
         features1 = fc.categorize(datum.premise(), event_string).to_dict()
         features2 = fc.categorize(datum.hypothesis(), event_string_2).to_dict()
@@ -77,3 +80,4 @@ if __name__ == '__main__':
         print(division)
         total = len(factuality_examples[division]) + len(non_factuality_examples[division])
         print(division, len(factuality_examples[division]) / total, len(non_factuality_examples[division]) / total)
+    print({i.uid() for i in interested})
