@@ -36,6 +36,7 @@ class Config:
         self._chaos_anli_data_location = None
         self._connectors_data_location = None
         self._connector_nli_data_location = None
+        self._temporal_nli_data_location = None
         self._roc_stories_data_location = None
         self._jade_logger = JadeLogger()
 
@@ -113,6 +114,10 @@ class Config:
     
     def connector_nli_data_location(self):
         location = self._jade_logger.file_manager.data_filepath(self._connector_nli_data_location)
+        return location
+    
+    def temporal_nli_data_location(self):
+        location = self._jade_logger.file_manager.data_filepath(self._temporal_nli_data_location)
         return location
 
     def model_save_location(self):
@@ -281,6 +286,9 @@ class Config:
     def set_connectors_data_location(self, connectors_data_location):
         self._connectors_data_location = connectors_data_location
 
+    def set_temporal_nli_data_location(self, temporal_nli_data_location):
+        self._temporal_nli_data_location = temporal_nli_data_location
+
     def set_connector_nli_data_location(self, connector_nli_data_location):
         self._connector_nli_data_location = connector_nli_data_location
 
@@ -323,4 +331,5 @@ class Config:
         config.set_chaos_anli_data_location(val.get('chaos_anli_data_location'))
         config.set_connector_nli_data_location(val.get('connector_nli_data_location'))
         config.set_connectors_data_location(val.get('connectors_data_location'))
+        config.set_temporal_nli_data_location(val.get('temporal_nli_data_location'))
         return config

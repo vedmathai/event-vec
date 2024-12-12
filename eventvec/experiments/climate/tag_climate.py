@@ -32,6 +32,8 @@ class ClimateTag():
         for datumi, datum in enumerate(data[1:]):
             if datum.msg_id_parent().strip() in seen:
                 continue
+            seen.add(datum.msg_id_parent().strip())
+            self._climate_data.append_tagged(datum)
             tagged = False
             featurized_doc = self._linguistic_featurizer.featurize_document(datum.body_parent())
             for sentence in featurized_doc.sentences():
@@ -63,14 +65,14 @@ class ClimateTag():
                         #reasons = ', '.join(reasons)
                         #tagged_datum.set_body_child_credence_roots_reason(reasons)
                         tagged_datum.set_body_child_credence_roots(token.text())
-                if tagged is True:
-                    self._climate_data.append_tagged(tagged_datum)
+                #if tagged is True:
+                #    self._climate_data.append_tagged(tagged_datum)
                 #if any(i in sentence.text().split() for i in quantifiers): #['and', 'but', 'because', 'so', 'therefore', 'however']):
                 #    self._climate_data.append_tagged(datum)
                             #if features_array.is_subordinate_of_said() or features_array._is_subordinate_of_believe:
                             #    self._climate_data.append_tagged(tagged_datum)
-            if tagged is False:
-                self._climate_data.append_tagged(datum)
+            #if tagged is False:
+            #    self._climate_data.append_tagged(datum)
             self._climate_data.write_data(self._write_location)
 
 

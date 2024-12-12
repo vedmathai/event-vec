@@ -1,7 +1,8 @@
 import requests
 import time
 
-API_URL = "https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-70B-Instruct"
+#API_URL = "https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3.1-405B-Instruct"
+API_URL = "https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3.1-70B-Instruct"
 #API_URL = "https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct"
 #API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407"
 headers = {"Authorization": "Bearer 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"}
@@ -14,6 +15,7 @@ def llama_3(system_prompt, user_prompt):
         response = requests.post(API_URL, headers=headers, json=payload)
         if 'error' in response.json():
             tries -= 1
+            print(response.json())
             time.sleep(60)
             print(response.json())
             print('sleeping', tries)
@@ -25,51 +27,25 @@ def llama_3(system_prompt, user_prompt):
 if __name__ == '__main__':
     system_prompt = """
     [INST] <<SYS>>
-    The task is to Fill in the blanks with only the following words ["is", "were", 'weren't", "isn't", "was", "wasn't", "doesn't", "does", "can", "can't", "did", "didn't", "won't", "will", "not", "but", "and", "therefore", "because", "X"]. 
-    If there is no appropriate word, then leave it unanswered. NO other word is allowed. Use the ADDITION as the culmination.
+    The premise is a set of battles and their temporal relationships
+    The hypothesis is a claim of the temporal relationship between two battles.
 
-    Apply a negation such as ["doesn't, didn't, won't, not, can't"] to negate the event it is next to.
-    Apply a conjunction such as ["and, but, therefore, because"] to connect the two events.
-    Make sure "but" is used to contrast two events.
-    "and" is used to connect two events that are similar but not contrasting.
-    "therefore" is used to show a consequence.
-    "because" is used to show a reason.
+    There are three answer choices:
+    1) True: The hypothesis is true given the premise
+    2) False: The hypothesis is False given the premise
+    3 Impossible: There is conflicting evidence in the premise regarding the events in the hypothesis. So no claim can be made.
 
-    Such as the following examples:
-    PASSAGE: I MASK_1 want to drive the Lamborghini. MASK_2 I MASK_3 know how to.
-    ADDITION: Therefore, I crashed the car.
-    Answer:
-    MASK_1: X
-    MASK_2: but
-    MASK_3: don't
 
-    PASSAGE: I am MASK_1 thirsty. MASK_2 I MASK_3 get a drink."
-    ADDITION: Therefore, I still want more water.
-    Answer: 
-    MASK_1: X
-    MASK_2: but
-    MASK_3: didn't
-
-    
-    PASSAGE: The win MASK_1 imminent. MASK_2 the team MASK_3 playing well.
-    ADDITION: Therefore, the crowd is cheering.
-    Answer:
-    MASK_1: is
-    MASK_2: because
-    MASK_3: is
-
-    Fill in the blanks strictly only with the following words ["is", "were", 'weren't", "isn't", "was", "wasn't", "doesn't", "does", "can", "can't", "did", "didn't", "won't", "will", "not", "but", "and", "therefore", "because", "X"].
-    If a word doesn't apply then leave it blank. 
+    Provide your choice with an explanation.
      <</SYS>> 
     """
 
     user_prompt = """
+Premise: start of Siege of Bloodthorn Keep happened after start of Conflict at Steelshade Valley. end of Siege of Bloodthorn Keep happened before start of Encounter at Misty Heights. end of Encounter at Misty Heights happened before start of Conflict at Steelshade Valley. start of Encounter at Misty Heights happened simultaneous end of Siege of Darkwater Keep
 
-  
-    PASSAGE :
-    MASK_1 chris MASK_2 tell me to MASK_3 hold one side of the sofa . MASK_4 we MASK_5 start MASK_6 carrying it downstairs , MASK_7 chris MASK_8 lose his grip .
-    ADDITION: It landed on the bottom floor.
+Hypothesis: Siege of Bloodthorn Keep happens after Siege of Darkwater Keep
 
+    Do justify your answer along with an answer from one of the following ['True', 'False', 'Impossible]'.
     [/INST] 
     """
     print(llama_3(system_prompt, user_prompt))

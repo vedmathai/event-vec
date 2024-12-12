@@ -7,7 +7,7 @@ from torch.optim import Adam
 from jadelogs import JadeLogger
 
 
-from eventvec.server.tasks.connectors_mlm.roberta.models.nli_classifier_model import NLIConnectorClassifierModel  # noqa
+from eventvec.server.tasks.event_ordering_nli.roberta.models.nli_classifier_model import NLITemporalClassifierModel  # noqa
 from eventvec.server.tasks.event_vectorization.datahandlers.data_handler_registry import DataHandlerRegistry
 
 
@@ -21,28 +21,18 @@ device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 SAVE_EVERY = 10000000
 
 labels2idx = {
-    'entailment': 0,
-    'neutral': 1,
-    'contradiction': 2,
+    'True': 0,
+    'False': 1,
+    'Impossible': 2,
 }
 
-connector_labels2idx = {
-    'and': 0,
-    'but': 1,
-    'because': 2,
-    'so': 3,
-    'though': 4,
-}
 
 idx2label = {
     v: k for k, v in labels2idx.items()
 }
 
-connector_idx2label = {
-    v: k for k, v in connector_labels2idx.items()
-}
 
-class NLIConnectorClassificationTrain:
+class TemporalNLIClassificationTrain:
     def __init__(self):
         self._jade_logger = JadeLogger()
         self._data_handler_registry = DataHandlerRegistry()
@@ -53,16 +43,17 @@ class NLIConnectorClassificationTrain:
         self._loss = None
 
     def load(self, run_config):
-        data_handler = 'nli_datahandler'
+        data_handler = 'temporal_datahandler'
         self._data_handler = self._data_handler_registry.get_data_handler(data_handler)
         self._data_handler.load(run_config)
-        self._connector_data_handler = self._data_handler_registry.get_data_handler('connectors_datahandler')
-        self._connector_data_handler.load(run_config)
-        self._model = NLIConnectorClassifierModel(run_config)
+        self._temporal_data_handler = self._data_handler_registry.get_data_handler('temporal_datahandler')
+        self._temporal_data_handler.load(run_config)
+        self._model = NLITemporalClassifierModel(run_config)
         self._model_optimizer = Adam(
             self._model.parameters(),
             lr=LEARNING_RATE,
         )
+        weights = torch.Tensor([1-(4515/10000), 1-(4631/10000), 1-(854/10000)]).to(device)
         self._criterion = nn.CrossEntropyLoss()
 
     def zero_grad(self):
@@ -85,20 +76,6 @@ class NLIConnectorClassificationTrain:
             self._loss += event_prediction_loss
         return event_prediction_loss, predicted_label
     
-    def train_connector_step(self, datum):
-        event_predicted_vector = self.classify(datum, 'connector', 'train')
-        relationship_target = self.connector_relationship_target(datum)
-        event_prediction_loss = self._criterion(
-            event_predicted_vector, relationship_target
-        )
-        predicted = event_predicted_vector.argmax(dim=1).item()
-        predicted_label = connector_idx2label[predicted]
-        if self._loss is None:
-            self._loss = event_prediction_loss
-        else:
-            self._loss += event_prediction_loss
-        return event_prediction_loss, predicted_label
-
     def nli_relationship_target(self, datum):
         relationship_target = np.array([0 for i in range(3)]).astype(float)
         target = datum.label()
@@ -108,30 +85,16 @@ class NLIConnectorClassificationTrain:
         relationship_target = relationship_target.unsqueeze(0)
         return relationship_target
     
-    def connector_relationship_target(self, datum):
-        relationship_target = np.array([0 for i in range(5)]).astype(float)
-        target = datum.label()
-        label_idx = connector_labels2idx[target]
-        relationship_target[label_idx] = 1
-        relationship_target = torch.from_numpy(relationship_target).to(device)
-        relationship_target = relationship_target.unsqueeze(0)
-        return relationship_target
-
     def classify(self, datum, model_type, train_test):
         output = self._model(datum, model_type, train_test)
         return output
 
     def train_epoch(self):
         self.zero_grad()
-        train_sample = self._data_handler.train_data()
+        train_sample = self._temporal_data_handler.train_data()
         self._jade_logger.new_train_batch()
-        connector_data = self._connector_data_handler.train_data()
         for datum_i, datum in enumerate(tqdm(train_sample)):
-            if datum.label() not in labels2idx:
-                continue
             loss, predicted_nli_label = self.train_nli_step(datum)
-            connector_datum = connector_data[int(datum_i % (len(connector_data) -1))]
-            #loss, predicted_connector_label = self.train_connector_step(connector_datum)
             self._all_losses += [loss.item()]
             self._iteration += 1
 
@@ -161,7 +124,7 @@ class NLIConnectorClassificationTrain:
             test_sample = self._data_handler.test_data()
             self._jade_logger.new_evaluate_batch()
             for datumi, datum in enumerate(test_sample):
-                event_predicted_vector = self.classify(datum, 'nli', 'train')
+                event_predicted_vector = self.classify(datum, 'nli', 'test')
 
                 relationship_target = self.nli_relationship_target(datum)
                 batch_loss = self._criterion(
@@ -177,37 +140,7 @@ class NLIConnectorClassificationTrain:
                     predicted_label,
                     loss,
                     {
-                        'entropy': datum.entropy(),
-                        'predicted_distribution': event_predicted_vector.tolist()[0],
-                        'distribution': datum.label_dist(),
                         'uid': datum.uid(),
                         'type': datum.type(),
-                    }
-                )
-
-    def evaluate_connector(self, run_config):
-        with torch.no_grad():
-            test_sample = self._connector_data_handler.test_data()
-            self._jade_logger.new_evaluate_batch()
-            for datumi, datum in enumerate(test_sample):
-                event_predicted_vector = self.classify(datum, 'connector', 'test')
-
-
-                relationship_target = self.connector_relationship_target(datum)
-                event_prediction_loss = self._criterion(
-                    event_predicted_vector, relationship_target
-                )
-                predicted = event_predicted_vector.argmax(dim=1).item()
-                predicted_label = connector_idx2label[predicted]
-
-                loss = event_prediction_loss.item()
-                self._jade_logger.new_evaluate_datapoint(
-                    datum.label(),
-                    predicted_label,
-                    loss,
-                    {
-                        'uid': datum.uid(),
-                        'predicted_label': predicted_label,
-                        'label': datum.label(), 
                     }
                 )

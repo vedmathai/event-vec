@@ -3,6 +3,8 @@ import csv
 from jadelogs import JadeLogger
 import random
 import numpy as np
+from collections import defaultdict
+import os
 
 from eventvec.server.featurizers.sentence_masker.sentence_masker import SentenceMasker
 from eventvec.server.featurizers.sentence_masker.sentence_masker_simpler import SentenceMaskerSimpler
@@ -44,11 +46,7 @@ system_prompt_larger_2 = """
     The task is to Fill in the blanks with only the following words ["because", "so", "but", "and", "though"]. 
     If there is no appropriate word, then leave it unanswered. NO other word is allowed.
 
-
-
-
     Hint:
-        Hint:
     To fill in the mask analyse the following structure:
     A <mask> B
 
@@ -182,7 +180,7 @@ system_prompt = """
     Answer: 9850 : but
 
     PASSAGE: 10450 : I am thirsty. But I didn't get a drink <mask>, I still want more water.
-    Answer: 10450 : so
+    Answer: 10450 : so  
     
     PASSAGE 56003: The win is imminent <mask> the team is playing well Therefore, the crowd is cheering.
     Answer: 56003 :  because
@@ -209,6 +207,9 @@ class Llama_NLI:
         self._alphanli_datareader = AlphaNLIDataReader()
         self._jade_logger = JadeLogger()
         self._filepath = self._jade_logger.file_manager.data_filepath('llama_mlm.csv')
+        self._confusion = defaultdict(lambda: defaultdict(list))
+        self._results_file = '/home/lalady6977/oerc/projects/data/roc_masked_connectors_llama_helped.csv'
+
 
     def read_data(self):
         data = []
@@ -221,24 +222,42 @@ class Llama_NLI:
                 datum._text = r[2].replace('[MASK]', '<mask>')
                 data.append(datum)
         return data
+    
+    def write_results(self, llm_answers):
+        with open(self._results_file, 'wt') as f:
+            writer = csv.writer(f, delimiter='\t')
+            for key in llm_answers:
+                used = False
+                for c in connectors:
+                    if c in llm_answers[key].split():
+                        used = True
+                        writer.writerow([key, c])
+                if not used:
+                    writer.writerow([key, ''])
 
     def mask(self, train_test='train'):
         data = self.read_data()
         random.seed(0)
         random.shuffle(data)
-        data = data[:500]
+        data = data[:]
         csv_data = []
         seen = set()
-        true_p = {'and': 0, 'but': 0, 'though':0, 'so': 0, 'because': 0}
-        false_n = {'and': 0, 'but': 0, 'though':0, 'so': 0, 'because': 0}
-        false_p = {'and': 0, 'but': 0, 'though':0, 'so': 0, 'because': 0}
+
         connector_counter = {i: 0 for i in connectors}
         required_answers = {}
         llm_answers = {}
 
-        for datum_i, datum in enumerate(data):
+        if os.path.exists(self._results_file):
+            with open(self._results_file, 'rt') as f:
+                reader = csv.reader(f, delimiter='\t')
+                for r in reader:
+                    llm_answers[r[0]] = r[1]
 
-            print(datum_i)
+
+        for datum_i, datum in enumerate(data):
+            if datum._uid in llm_answers:
+                continue
+            print(datum_i, datum._uid)
             required_answers[datum._uid] = datum._label
             llm_answers[datum._uid] = ''
             passage = f"{datum._text}."
@@ -254,16 +273,14 @@ class Llama_NLI:
             print('')
             print(connector_counter)
             response = ''
-            response = llama_3(system_prompt, user_prompt_formated)
+            response = llama_3(system_prompt_larger_2, user_prompt_formated)
             for line in response.split('\n'):
-                if any(i in line for i in ['Explanation', 'Form', 'Structure']):
-                    print(line)
-                if 'User Answer' in line and '<connector>' not in line:
+                if 'Answer' in line and '<connector>' not in line:
                     split_line = line.split(':')
                     if len(split_line) == 3:
-                        print(datum._label, split_line[2].strip())
-                        llm_answers[split_line[1].strip()] = split_line[2].strip()
-            true_p, false_p, false_n = self.check_metric(llm_answers, required_answers, true_p, false_p, false_n)
+                        if split_line[1].strip() == str(datum._uid).strip():
+                            llm_answers[split_line[1].strip()] = split_line[2].strip()
+            true_p, false_p, false_n = self.check_metric(llm_answers, required_answers)
             f1s = []
             for key in connectors:
                 f1 = 0
@@ -278,14 +295,30 @@ class Llama_NLI:
                 f1s.append(f1)
                 print(key, precision, recall, f1)
             print(np.mean(f1s))
-            
-        with open(self._filepath, 'wt') as f:
-            writer = csv.writer(f, delimiter='\t')
-            random.shuffle(csv_data)
-            for d in csv_data:
-                writer.writerow(d)
+            self.write_results(llm_answers)
 
-    def check_metric(self, llm_answers, required_answers, true_p, false_p, false_n):
+        for key in llm_answers.keys():
+            if key in required_answers:
+                used = False
+                for c in connectors:
+                    if c in llm_answers[key].split():
+                        self._confusion[required_answers[key]][c].append(key)
+                        used = True
+                if not used:
+                    self._confusion[required_answers[key]]['none'].append(key)
+
+
+        for key1 in self._confusion:
+            for key2 in self._confusion[key1]:
+                print(key1, key2, len(self._confusion[key1][key2]))
+                print(self._confusion[key1][key2])
+            
+
+
+    def check_metric(self, llm_answers, required_answers):
+        true_p = {'and': 0, 'but': 0, 'though':0, 'so': 0, 'because': 0}
+        false_n = {'and': 0, 'but': 0, 'though':0, 'so': 0, 'because': 0}
+        false_p = {'and': 0, 'but': 0, 'though':0, 'so': 0, 'because': 0}
         for key in llm_answers.keys():
             if key in required_answers:
                 if required_answers[key] == 'but':

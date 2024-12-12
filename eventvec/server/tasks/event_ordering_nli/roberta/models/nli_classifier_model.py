@@ -3,40 +3,34 @@ import torch.nn as nn
 from torch import cat
 import torch
 from transformers import BertModel, RobertaModel, RobertaTokenizer, DistilBertTokenizer, DistilBertModel, RobertaConfig
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, MPNetModel
 from numpy import arange
 import numpy as np
 
 from eventvec.server.config import Config
-from eventvec.server.tasks.relationship_classification.models.bert_input import BertInput
-from eventvec.server.tasks.entailment_classification.featurizers.clause_matcher import ClauseMatcher
-from eventvec.server.tasks.factuality_estimator.inferers.infer import FactualityClassificationInfer  # noqa
-from eventvec.server.tasks.factuality_estimator.inferers.infer_ml import FactualityRegressionInferML  # noqa
 
-ranges = [(i, i + 0.3) for i in arange(-4, 4, 0.3)]
-
-FEATURE_INPUT = len(ranges)
-
-LLM_INPUT = 1024 #768
+LLM_INPUT = 768
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
-llm = 'roberta'
-class NLIConnectorClassifierModel(nn.Module):
+llm = 'mpnet'
+class NLITemporalClassifierModel(nn.Module):
 
     def __init__(self, run_config, dropout=0.5):
-        super(NLIConnectorClassifierModel, self).__init__()
+        super(NLITemporalClassifierModel, self).__init__()
         config = Config.instance()
         self._forward_type = run_config.forward_type()
         self._llm = run_config.llm()
         self._run_config = run_config
         self._experiment_type = config.experiment_type()
-        model_key = run_config.factuality_inference_model()
         self._save_location = config.model_save_location()
         if llm == 'roberta':
             self._tokenizer = RobertaTokenizer.from_pretrained("transformers_cache/roberta-large")
             self.llm = RobertaModel.from_pretrained('transformers_cache/roberta-large', output_attentions=True).to(device) # noqa
+        if llm == 'mpnet':
+            self._tokenizer = AutoTokenizer.from_pretrained("microsoft/mpnet-base")
+            self.llm = MPNetModel.from_pretrained('microsoft/mpnet-base').to(device)
         modules = [self.llm.embeddings, *self.llm.encoder.layer[:]]
         for module in modules:
             for param in module.parameters():
@@ -50,40 +44,12 @@ class NLIConnectorClassifierModel(nn.Module):
         self.connector_relationship_classifier = nn.Linear(352, 5).to(device)
 
     def forward(self, datum, forward_type, train_test):
-        if forward_type == 'nli':
-            return self.nli_forward(datum, train_test)
-        if forward_type == 'connector':
-            return self.connector_forward(datum, train_test)
-
-    def connector_forward(self, datum, train_test):
-        if llm == 'roberta':
-            encoded_sentence = self._tokenizer(
-                [datum.para()],
-                padding='max_length',
-                max_length=500,
-                truncation=True,
-                return_tensors='pt',
-                return_token_type_ids=True
-            )
-            encoded_sentence = {k: v.to(device) for k, v in encoded_sentence.items()}
-            output = self.llm(**encoded_sentence)
-            pooler_output = output.pooler_output
-            input = pooler_output
-        linear_output1 = self.connector_linear1(input)
-
-        relu_output = self.relu(linear_output1)
-        if train_test == 'test':
-            self.dropout.eval()
-        if train_test == 'train':
-            self.dropout.train()
-        dropout_output2 = self.dropout(relu_output)
-        output = self.connector_relationship_classifier(dropout_output2)
-        return output
+        return self.nli_forward(datum, train_test)
 
     def nli_forward(self, datum, train_test):
-        if llm == 'roberta':
+        if llm in ['roberta', 'mpnet']:
             encoded_sentence = self._tokenizer(
-                [datum.sentence_1()], [datum.sentence_2()],
+                [datum.premise()], [datum.hypothesis()],
                 padding='max_length',
                 max_length=500,
                 truncation=True,
