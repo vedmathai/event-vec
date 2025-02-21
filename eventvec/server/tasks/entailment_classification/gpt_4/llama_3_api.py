@@ -2,10 +2,9 @@ import requests
 import time
 
 #API_URL = "https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3.1-405B-Instruct"
-API_URL = "https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3.1-70B-Instruct"
-#API_URL = "https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct"
+#API_URL = "https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3.1-70B-Instruct"
+API_URL = "https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct"
 #API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-Nemo-Instruct-2407"
-headers = {"Authorization": "Bearer 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"}
 
 def llama_3(system_prompt, user_prompt):
     payload = {"inputs": system_prompt + '\n\n' + user_prompt}

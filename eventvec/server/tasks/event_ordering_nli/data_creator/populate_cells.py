@@ -46,18 +46,18 @@ class PopulateCells:
     def populate_data(self):
         row_i = 0
         previous_row_i = 0
-        count = 100
+        count = 40
         while row_i < len(self._data):
             if self._data[row_i]._label != '':
                 row_i += 1
-                count = 100
+                count = 40
                 continue
             else:
                 if count > 0:
                     count -= 1
                 if count == 0:
                     row_i += 1
-                    count = 100
+                    count = 40
                 
             row = self._data[row_i]
             print(row_i, row._event_number, row._relationship_number)
@@ -95,16 +95,25 @@ class PopulateCells:
                     if row._relationship == 'overlap':
                         if creator.is_overlap_events(event_1, event_2):
                             row._hops = distance
-                            if random.random() > 0:
-                                row._hypothesis = f'{event_1.event_name()} {row._relationship}s with {event_2.event_name()}'
+                            if random.random() > 0.5:
+                                #row._hypothesis = f'{event_1.event_name()} {row._relationship}s with {event_2.event_name()}'
+                                #row._hypothesis = f'{event_1.event_name()} shares at least one longitude with {event_2.event_name()}'
+                                row._hypothesis = f'{event_1.event_name()} = {event_2.event_name()}'
+
                                 if is_impossible:
                                     row._label = 'Impossible'
                                 else:
-                                    continue
+                                    #continue
                                     row._label = 'True'
                             else:
-                                relationship = random.choice(['before', 'after'])
-                                row._hypothesis = f'{event_1.event_name()} happens {relationship} {event_2.event_name()}'
+                                #relationship = random.choice(['before', 'after'])
+                                #row._hypothesis = f'{event_1.event_name()} happens {relationship} {event_2.event_name()}'
+                                relationship = random.choice(['east', 'west'])
+                                relationship = random.choice(['<', '>'])
+
+                                row._hypothesis = f'{event_1.event_name()} is completely {relationship} of {event_2.event_name()}'
+                                row._hypothesis = f'{event_1.event_name()} {relationship} {event_2.event_name()}'
+
                                 row._label = 'False'
                         else:
                             continue
@@ -113,20 +122,33 @@ class PopulateCells:
                         if creator.is_strictly_before(event_1, event_2) and not creator.is_overlap_events(event_1, event_2):
                             row._premise = relationships
                             row._hops = distance
-                            if random.random() > 0:
-                                row._hypothesis = f'{event_1.event_name()} happens {row._relationship} {event_2.event_name()}'
+                            if random.random() > 0.5:
+                                #row._hypothesis = f'{event_1.event_name()} happens {row._relationship} {event_2.event_name()}'
+                                #row._hypothesis = f'{event_1.event_name()} is completely to the west of {event_2.event_name()}'
+                                row._hypothesis = f'{event_1.event_name()} < {event_2.event_name()}'
+
+
                                 if is_impossible:
                                     row._label = 'Impossible'
                                 else:
                                     
-                                    continue
+                                    #continue
                                     row._label = 'True'
                             else:
                                 relationship = random.choice(['overlaps', 'after'])
+                                relationship = random.choice(['=', '>'])
                                 if relationship == 'overlaps':
-                                    row._hypothesis = f'{event_1.event_name()} overlaps with {event_2.event_name()}'
+                                    #row._hypothesis = f'{event_1.event_name()} overlaps with {event_2.event_name()}'
+                                    #row._hypothesis = f'{event_1.event_name()} shares at least one longitude with {event_2.event_name()}'
+                                    row._hypothesis = f'{event_1.event_name()} = {event_2.event_name()}'
+
+
                                 else:
-                                    row._hypothesis = f'{event_1.event_name()} happens after {event_2.event_name()}'
+                                    #row._hypothesis = f'{event_1.event_name()} happens after {event_2.event_name()}'
+                                    #row._hypothesis = f'{event_1.event_name()} is completely to the east of {event_2.event_name()}'
+                                    row._hypothesis = f'{event_1.event_name()} > {event_2.event_name()}'
+
+
                                 if is_impossible:
                                     row._label = 'Impossible'
                                 else:
@@ -136,19 +158,30 @@ class PopulateCells:
                         if creator.is_strictly_before(event_2, event_1) and not creator.is_overlap_events(event_1, event_2):
                             row._hops = distance
                             row._premise = relationships
-                            if random.random() > 0:
-                                row._hypothesis = f'{event_1.event_name()} happens {row._relationship} {event_2.event_name()}'
+                            if random.random() > 0.5:
+                                #row._hypothesis = f'{event_1.event_name()} happens {row._relationship} {event_2.event_name()}'
+                                #row._hypothesis = f'{event_1.event_name()} is completely to the east of {event_2.event_name()}'
+                                row._hypothesis = f'{event_1.event_name()} > {event_2.event_name()}'
+
+
                                 if is_impossible:
                                     row._label = 'Impossible'
                                 else:
-                                    continue
+                                    #continue
                                     row._label = 'True'
                             else:
                                 relationship = random.choice(['overlaps', 'before'])
                                 if relationship == 'overlaps':
-                                    row._hypothesis = f'{event_1.event_name()} overlaps with {event_2.event_name()}'
+                                    #row._hypothesis = f'{event_1.event_name()} overlaps with {event_2.event_name()}'
+                                    #row._hypothesis = f'{event_1.event_name()} shares at least one longitude with {event_2.event_name()}'
+                                    row._hypothesis = f'{event_1.event_name()} = {event_2.event_name()}'
+
                                 else:
-                                    row._hypothesis = f'{event_1.event_name()} happens before {event_2.event_name()}'
+                                    #row._hypothesis = f'{event_1.event_name()} happens before {event_2.event_name()}'
+                                    #row._hypothesis = f'{event_1.event_name()} is completely to the east of {event_2.event_name()}'
+                                    row._hypothesis = f'{event_1.event_name()} < {event_2.event_name()}'
+
+
                                 if is_impossible:
                                     row._label = 'Impossible'
                                 else:

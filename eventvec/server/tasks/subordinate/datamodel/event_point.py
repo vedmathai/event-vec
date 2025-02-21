@@ -1,6 +1,6 @@
 import uuid
 
-class EventPoint():
+class SubordinateRow():
     def __init__(self):
         self._id = 'event_point_' + str(uuid.uuid4())
         self._event = None

@@ -13,8 +13,9 @@ import os
 
 from eventvec.server.config import Config
 from eventvec.server.tasks.entailment_classification.gpt_4.llama_3_api import llama_3
+from eventvec.server.tasks.entailment_classification.gpt_4.sambanova import sambanova
+from eventvec.server.tasks.entailment_classification.gpt_4.gpt_4_api import gpt_4
 from eventvec.server.tasks.event_ordering_nli.datareader.temporal_datareader import TemporalDatareader
-
 
 
 prompt_preamble = """
@@ -27,7 +28,28 @@ prompt_preamble = """
     There are three answer choices:
     1) True: The hypothesis is true given the premise
     2) False: The hypothesis is False given the premise
-    3) Contradictory: There is contradictory evidence in the premise regarding the events in the hypothesis. So no claim can be made.
+    3) Undefined: There is evidence for the hypothesis to be both true and false therefore the claim is undefined.
+
+    The first five are examples with the labels provided.
+    
+    Your task is to predict the label for the given examples. Do not provide reasoning and 
+    provide in the format of 'answer: index: label'. 
+
+    Examples:
+
+    """
+
+prompt_preamble_spatial = """
+[INST] <<SYS>>
+
+    The premise is a set of locations and their spatial relationships
+    The hypothesis is a claim of the spatial relationship between two battles.
+
+    
+    There are three answer choices:
+    1) True: The hypothesis is true given the premise
+    2) False: The hypothesis is False given the premise
+    3) Undefined: There is evidence for the hypothesis to be both true and false therefore the claim is undefined.
 
     The first five are examples with the labels provided.
     
@@ -47,7 +69,8 @@ prompt_preamble_helped = """
     There are three answer choices:
     1) True: The hypothesis is true given the premise
     2) False: The hypothesis is False given the premise
-    3) Contradictory: There is contradictory evidence in the premise regarding the events in the hypothesis. So no claim can be made.
+    3) Undefined: There is evidence for the hypothesis to be both true and false therefore the claim is undefined.
+
 
     Output all the paths in the premise between the events in the hypothesis.
 
@@ -69,11 +92,13 @@ prompt_preamble_helped = """
     """
 
 
-
 label_map = {
     'True': 'True',
     'False': 'False',
-    'Impossible': 'Contradictory'
+    'Impossible': 'Undefined',
+    'Contradictory': 'Undefined',
+    'Undefined': 'Undefined',
+    'Contrastive': 'Undefined',
 }
 
 class NLIDataPreparer():
@@ -84,15 +109,16 @@ class NLIDataPreparer():
 
     def load(self):
         k = 0
-        file_name = 'temporal/llama_3_temporal_70b_plain_4.json'
+        file_name = 'temporal/gpt_o3_mini_temporal_nli_test.json'
         jl = JadeLogger()
         gpt_answer = {}
         true_answers = {}
         data_reader = self._data_readers['temporal']
-        data = data_reader.data('test')[:4800]
+        data = data_reader.data('temporal_nli_test')[:4800]
         example_data = [data[256], data[140], data[158], data[2627], data[2626], data[876]]
         data = [datum for datum in data if datum not in example_data]
         random.shuffle(data)
+        data = data[:100]
         system_prompt = str(prompt_preamble)
         location = jl.file_manager.data_filepath(file_name)
         if os.path.exists(location):
@@ -120,7 +146,7 @@ class NLIDataPreparer():
             user_prompt += 'Hypothesis: ' + datum.hypothesis() + '\n [/INST] \n'
             print("prompting", datum.uid(), datum.label())
             print('sending prompt')
-            answer = llama_3(system_prompt, user_prompt)
+            answer = gpt_4(system_prompt, user_prompt)
             print('received response')
             for line in answer.split('\n'):
                 if 'answer' in line.lower():
@@ -136,7 +162,7 @@ class NLIDataPreparer():
                             raise ValueError
 
                     except ValueError:
-                        gpt_answer[datum.uid()] = ['', '', '']
+                        #gpt_answer[datum.uid()] = ['', '', '']
                         continue
             print(self.f1_score(true_answers, gpt_answer))
             k += 1
@@ -154,13 +180,13 @@ class NLIDataPreparer():
             if uid not in gpt_answers:
                 fn[label] += 1
                 continue
-            gpt_answer = gpt_answers[uid][0]
+            gpt_answer = label_map.get(gpt_answers[uid][0])
             if label.lower() in gpt_answer.lower():
                 tp[gpt_answer] += 1
             else:
                 fp[label] += 1
                 fn[gpt_answer] += 1
-        for key in ['Contradictory', 'True', 'False']:
+        for key in ['Undefined', 'True', 'False']:
             f1 = 0
             precision = 0
             recall = 0

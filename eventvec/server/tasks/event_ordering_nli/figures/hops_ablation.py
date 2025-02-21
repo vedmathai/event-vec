@@ -2,6 +2,7 @@
 
 import numpy as np  
 import matplotlib.pyplot as plt  
+import matplotlib
   
 X = ['1', '2', '3', '4', '5', '6']
 
@@ -16,15 +17,16 @@ sort_relationships = [.868, .809, .792, .786, .690, .691]
 only_after_sim = [.749, .713, .666, .613, 0.638, .6744]
 only_before_sim = [.769, .720, .666, .666, .648, .599]
 only_before_after = [.904, .80, .75, .69, .60, float('NaN')]
-mpnet = [.609, .536, .483, .49, .451, .438]
+gpt = [.456, .433, .415, .443, .43, .409]
+llama_405B = [.398, .406, .37, .384, .467, .383]
 
 
 X_axis = np.arange(len(X)) 
-
-markersize=7
+markersize=12
+matplotlib.rcParams.update({'font.size': 20})
 
 #plt.plot(X_axis,  plain_llama, 'r*', label = 'plain_llama', linestyle='-')
-plt.plot(X_axis, all_diff,  color='C0', marker='.', markersize=markersize, label = 'roberta_all_different', linestyle='--')
+plt.plot(X_axis, all_diff,  color='C0', marker='.', markersize=markersize, label = 'roberta_standard', linestyle='--')
 plt.plot(X_axis, same_english, color='C1', marker='o', markersize=markersize,  label = 'roberta_same_templates', linestyle='--')
 plt.plot(X_axis, same_names, color='C2', marker='v', markersize=markersize,  label = 'roberta_same_names', linestyle='--')
 plt.plot(X_axis, same_structures, color='C3', marker='^', markersize=markersize,  label = 'roberta_same_timelines', linestyle='--')
@@ -33,11 +35,12 @@ plt.plot(X_axis, sort_relationships, color='C4', marker='<', markersize=markersi
 plt.plot(X_axis, only_after_sim, color='C5', marker='>', markersize=markersize, label = 'roberta_only_after_sim', linestyle='--')
 plt.plot(X_axis, only_before_sim, color='C6', marker='1', markersize=markersize,  label = 'roberta_only_before_sim', linestyle='--')
 plt.plot(X_axis, only_before_after, color='C7', marker='2', markersize=markersize,  label = 'roberta_before_after', linestyle='--')
-plt.plot(X_axis, mpnet, color='C8', marker='s', markersize=markersize,  label = 'mpnet', linestyle='--')
+plt.plot(X_axis, gpt, color='C8', marker='3', markersize=markersize,  label = 'gpt', linestyle='--')
+plt.plot(X_axis, llama_405B, color='C9', marker='4', markersize=markersize,  label = 'llama-405B', linestyle='--')
 
 
 ax = plt.gca()
-ax.set_ylim([0.4, .95])
+ax.set_ylim([0.36, .95])
 #ax.set_xlim([0.2, 0.5])
 
 plt.grid()
@@ -45,6 +48,6 @@ plt.xticks(X_axis, X, rotation=45)
 plt.xlabel("Number of hops in the premise") 
 plt.ylabel("Model Macro-F1 scores") 
 #plt.title("Macro-F1 scores of the models grouped\nby Human Judgement Entropy Buckets")
-plt.legend( loc='upper center', bbox_to_anchor=(0.5,-0.15)) 
+#plt.legend( loc='upper center', bbox_to_anchor=(0.5,-0.15)) 
 
 plt.savefig('/home/lalady6977/Downloads/hops_ablation.png', bbox_inches='tight')

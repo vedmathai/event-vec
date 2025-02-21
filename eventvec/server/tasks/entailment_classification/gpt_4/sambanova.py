@@ -1,12 +1,10 @@
 import os
 from openai import OpenAI
 
-client = OpenAI()
 
-
-def gpt_4(system, user):
+def sambanova(system, user):
     completion = client.chat.completions.create(
-        model="gpt-4o",
+        model="Meta-Llama-3.1-405B-Instruct",
         messages=[
             {"role": "system", "content": system},
             {"role": "user", "content": user}

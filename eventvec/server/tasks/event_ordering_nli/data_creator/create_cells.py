@@ -23,7 +23,7 @@ class CreateCells:
 
 
     def write_data(self):
-        with open('/home/lalady6977/oerc/projects/data/temporal_nli/temporal_nli_sort_relationships_test.csv', 'w') as f:
+        with open('/home/lalady6977/oerc/projects/data/temporal_nli/logical_nli_relationships_test.csv', 'w') as f:
             writer = csv.writer(f, delimiter='\t')
             for row in self._data:
                writer.writerow(row)
