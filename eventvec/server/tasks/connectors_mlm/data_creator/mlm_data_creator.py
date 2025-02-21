@@ -32,49 +32,57 @@ class ConnectorMLMCreator():
             self.search_words(text)
   
     def search_words(self, text):
-        featurized_doc = self._linguistic_featurizer.featurize_document(text)
-        for sentence in featurized_doc.sentences():
-            for token in sentence.tokens():
-                if token.text() == 'but' and token.pos() == 'CCONJ':
-                    self._counter['but'] += 1
-                    if self._counter['but'] < 500:
-                        token.set_text('[MASK]')
-                        self._dataset['but'].append(self.get_sentences(featurized_doc))
-                        token.set_text('but')
-                if token.pos() in ['VERB', 'AUX'] and token.dep() in ['conj']:
-                    parent = token.parent()
-                    if 'cc' in parent.children():
-                        for child in parent.children()['cc']:
-                            if child.text() == 'and':
-                                self._counter['and'] += 1
-                                if self._counter['and'] < 500:
-                                    child.set_text('[MASK]')
-                                    self._dataset['and'].append(self.get_sentences(featurized_doc))
-                                    child.set_text('and')
-                if token.pos() in ['SCONJ'] and token.dep() in ['mark'] and token.text() == 'so':
-                    self._counter['so'] += 1
-                    if self._counter['so'] < 500:
-                        token.set_text('[MASK]')
-                        self._dataset['so'].append(self.get_sentences(featurized_doc))
-                        token.set_text('so')
-                if token.pos() in ['SCONJ'] and token.dep() in ['mark'] and token.text() in ['because']:
-                    self._counter['because'] += 1
-                    if self._counter['because'] < 500:
-                        token.set_text('[MASK]')
-                        self._dataset['because'].append(self.get_sentences(featurized_doc))
-                        token.set_text('because')
-                if token.pos() in ['SCONJ'] and token.dep() in ['mark'] and token.text() in ['though']:
-                    self._counter['though'] += 1
-                    if self._counter['though'] < 500:
-                        token.set_text('[MASK]')
-                        self._dataset['though'].append(self.get_sentences(featurized_doc))
-                        token.set_text('though')
-                if token.pos() in ['ADV'] and token.dep() in ['advmod'] and token.text() in ['therefore']:
-                    self._counter['so'] += 1
-                    if self._counter['so'] < 500:
-                        token.set_text('[MASK]')
-                        self._dataset['so'].append(self.get_sentences(featurized_doc))
-                        token.set_text('so')
+        if any(i in text.strip() for i in ['and', 'but', 'because', 'so', 'though']):
+            featurized_doc = self._linguistic_featurizer.featurize_document(text)
+            for sentence in featurized_doc.sentences():
+                for token in sentence.tokens():
+                    if token.text() == 'but' and token.pos() == 'CCONJ':
+                        self._counter['but'] += 1
+                        if self._counter['but'] < 500:
+                            token.set_text('[MASK]')
+                            self._dataset['but'].append(self.get_sentences(featurized_doc))
+                            token.set_text('but')
+                    if token.pos() in ['VERB', 'AUX'] and token.dep() in ['conj']:
+                        parent = token.parent()
+                        if 'cc' in parent.children():
+                            for child in parent.children()['cc']:
+                                if child.text() == 'and':
+                                    self._counter['and'] += 1
+                                    if self._counter['and'] < 500:
+                                        child.set_text('[MASK]')
+                                        self._dataset['and'].append(self.get_sentences(featurized_doc))
+                                        child.set_text('and')
+                    if token.pos() in ['SCONJ'] and token.dep() in ['mark'] and token.text() == 'so':
+                        self._counter['so'] += 1
+                        if self._counter['so'] < 500:
+                            token.set_text('[MASK]')
+                            self._dataset['so'].append(self.get_sentences(featurized_doc))
+                            token.set_text('so')
+                    if token.pos() in ['SCONJ'] and token.dep() in ['mark'] and token.text() in ['because']:
+                        self._counter['because'] += 1
+                        if self._counter['because'] < 500:
+                            token.set_text('[MASK]')
+                            self._dataset['because'].append(self.get_sentences(featurized_doc))
+                            token.set_text('because')
+                    if token.pos() in ['SCONJ'] and token.dep() in ['mark'] and token.text() in ['though']:
+                        changed = ''
+                        self._counter['though'] += 1
+                        if self._counter['though'] < 500:
+                            token.set_text('[MASK]')
+                            if sentence.tokens()[-1].text().strip().lower() == 'even':
+                                sentence.tokens()[-1].set_text('')
+                                changed = sentence.tokens()[-1].text()
+                            self._dataset['though'].append(self.get_sentences(featurized_doc))
+                            token.set_text('though')
+                            if changed != '':
+                                sentence.tokens()[-1].set_text(changed)
+
+                    if token.pos() in ['ADV'] and token.dep() in ['advmod'] and token.text() in ['therefore']:
+                        self._counter['so'] += 1
+                        if self._counter['so'] < 500:
+                            token.set_text('[MASK]')
+                            self._dataset['so'].append(self.get_sentences(featurized_doc))
+                            token.set_text('so')
         print(self._counter)
         self.save_dataset()
         

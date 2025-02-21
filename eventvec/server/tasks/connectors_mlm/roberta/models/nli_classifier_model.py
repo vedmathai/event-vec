@@ -40,7 +40,7 @@ class NLIConnectorClassifierModel(nn.Module):
         modules = [self.llm.embeddings, *self.llm.encoder.layer[:]]
         for module in modules:
             for param in module.parameters():
-                param.requires_grad = False
+                param.requires_grad = True
         self.dropout = nn.Dropout(dropout)
         self.nli_linear1 = nn.Linear(LLM_INPUT, 352).to(device)
         self.relu = nn.ReLU()

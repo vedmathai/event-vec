@@ -17,6 +17,8 @@ class ConnectorNLICreator():
         for filename in wiki_datahandler.wiki_file_list():
             for line in wiki_datahandler.read_file(filename):
 
+                if 'so' not in line.split():
+                    continue
                 featurized_doc = self._linguistic_featurizer.featurize_document(line)
                 for sentence in featurized_doc.sentences():
                     for token in sentence.tokens():
@@ -34,11 +36,11 @@ class ConnectorNLICreator():
                                         self._dataset['and'].append(sentence.text())
                         if token.pos() in ['SCONJ'] and token.dep() in ['mark'] and token.text() == 'so':
                             self._counter['so'] += 1
-                            if self._counter['so'] < 250:
+                            if self._counter['so'] < 500:
                                 self._dataset['so'].append(sentence.text())
                         if token.pos() in ['SCONJ'] and token.dep() in ['mark'] and token.text() in ['because']:
                             self._counter['because'] += 1
-                            if self._counter['because'] < 250:
+                            if self._counter['because'] < 500:
                                 self._dataset['because'].append(sentence.text())
                         if token.pos() in ['SCONJ'] and token.dep() in ['mark'] and token.text() in ['though']:
                             self._counter['though'] += 1
@@ -46,10 +48,11 @@ class ConnectorNLICreator():
                                 self._dataset['though'].append(sentence.text())
                         if token.pos() in ['ADV'] and token.dep() in ['advmod'] and token.text() in ['therefore']:
                             self._counter['so'] += 1
-                            if self._counter['so'] < 250:
+                            if self._counter['so'] < 500:
                                 self._dataset['so'].append(sentence.text())
                 print(self._counter)
-                if all([value >= 250 for value in self._counter.values()]):
+                #if all([value >= 250 for value in self._counter.values()]):
+                if self._counter['so'] >= 500:
                     self.save_dataset()
                     return
 

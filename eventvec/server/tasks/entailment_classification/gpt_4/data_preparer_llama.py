@@ -90,7 +90,7 @@ prompt_preamble_connector = """
     may be inferred from the premise.
 
     This is the task of natural language understanding, where given the premise and hypothesis, you would have to classify whether 
-    1. strict: The premise strictly entails the hypothesis, which means the individual clauses entail and the overall sentence entails.
+    1. strict: The premise strictly entails the hypothesis, which means the individual clauses entail and the overall sentence entails entails in both directions.
 
     2. non_strict: The premise non-strictly entails the hypothesis, which means the individual clauses entail but the overall sentence has some information loss such as causality.
 
@@ -147,11 +147,11 @@ prompt_preamble_connector_2 = """
     'but' non-strictly entails 'and'. a but b non-strictly entails a and b. a but b non-strictly entails b and a.
     'but' contradicts 'because'. a but b contradicts a because b. a but b contradicts b because a.
     'but' contradicts 'so'. a but b contradicts a so b.
-    'but' contradicts 'though'. a but b contradicts a though b.
+    'but' is the opposite of 'though'. a but b contradicts a though b. a but b strictly entails b though a.
     'but' strictly entails 'but' in one direction. a but b contradicts a but b.
     a but b contradicts b but a.
 
-    'so' contradicts 'because'. a so b contradicts a because b. a so b contradicts b because a.
+    'so' is the opposite of 'because'. a so b contradicts a because b. a so b strictly entails b because a.
     'so' contradicts 'but'. a so b contradicts a but b. a so b contradicts b but a.
     'so' non-strictly entails 'and'. a so b non-strictly entails a and b. a so b non-strictly entails b and a.
     'so' contradicts 'though'. a so b contradicts a though b. a so b contradicts b though a.
@@ -169,6 +169,44 @@ prompt_preamble_connector_2 = """
     Examples:    
     """
 
+prompt_preamble_connector_3 = """
+[INST] <<SYS>>
+
+    Textual entailment is the task of determining whether a given hypothesis can be inferred from a given premise.
+    In this task, you will be given a premise and a hypothesis, and you will have to decide whether the hypothesis
+    may be inferred from the premise.
+
+    This is the task of natural language understanding, where given the premise and hypothesis, you would have to classify whether 
+    1. strict: The premise strictly entails the hypothesis, which means the individual clauses entail and the overall sentence entails in both directions.
+
+    2. non_strict: The premise non-strictly entails the hypothesis, which means the individual clauses entail but the overall sentence has some information loss such as causality.
+
+    3. contradicts: Premise contradicts the hypothesis: Even though the clauses individually entail, the overall sentences contradict each other.
+
+    Do not provide any explanation just provide the classification.
+
+    The first five are examples with the labels provided.
+
+    Your task is to predict the label for the given examples. Do not provide reasoning and 
+    provide in the format of 'answer: index: label'. 
+
+    Hint: 
+    Use the logic of sentence connectors 'because', 'and', 'but' and 'so'
+    The combination of sentence connector and clause order determines the label.
+
+    To fill in the mask analyse the following structure:
+
+    And ask the following questions:
+    A but B: if A then B is surprising.
+    A so B: if A then B follows. A is the reason.
+    A though B: if B then A is surprising.
+    A because B: if A then B is the reason. 
+    A and B: not contrasting not causal
+
+
+    
+    Examples:    
+    """
 
 prompt_preamble_contrast = """
 [INST] <<SYS>>
@@ -336,7 +374,7 @@ class NLIDataPreparer():
 
     def load(self):
         k = 0
-        file_name = 'llama_3_connectors_70b_helped_5.json'
+        file_name = 'llama_3_connectors_70b_helped_3.json'
         window = 1
         jl = JadeLogger()
         gpt_answer = {}
@@ -345,12 +383,13 @@ class NLIDataPreparer():
         data = data_reader.read_file('test').data()[:1800]
         example_data = [data[0], data[43], data[124], data[630], data[173], data[250]]
         data = [datum for datum in data if datum not in example_data]
-        system_prompt = str(prompt_preamble_connector_2)
+        system_prompt = str(prompt_preamble_connector_3)
         location = jl.file_manager.data_filepath(file_name)
         if os.path.exists(location):
             with open(location, 'rt') as f:
                 gpt_answer = json.load(f)
         for datumi, datum in enumerate(example_data, start=1):
+
 
             system_prompt += f'{datum.uid()} \n Premise: ' + datum.sentence_1() + '\n'
             system_prompt += 'Hypothesis: ' + datum.sentence_2() + '\n'
@@ -372,7 +411,10 @@ class NLIDataPreparer():
             user_prompt_normal = ""
             user_prompt = ''
 
-            for datumi, datum in enumerate(data[5 + (k*window): (k+1) * window + 5], start=6):
+
+            for datumi, datum in enumerate(data[0 + (k*window): (k+1) * window + 0], start=6):
+                if str(datum.uid()) in gpt_answer:
+                    continue
                 print('premise:', datum.sentence_1())
                 print('hypothesis:', datum.sentence_2())
                 user_prompt_credence += f"""

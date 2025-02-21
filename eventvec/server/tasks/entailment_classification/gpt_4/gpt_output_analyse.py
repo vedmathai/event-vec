@@ -9,6 +9,8 @@ from collections import defaultdict
 from jadelogs import JadeLogger
 import json
 import csv
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
 
 from eventvec.server.featurizers.factuality_categorizer.factuality_categorizer import FactualityCategorizer
 from eventvec.server.tasks.entailment_classification.featurizers.clause_matcher import ClauseMatcher
@@ -221,15 +223,22 @@ class GPTAnalyse():
         ]
         files = [
             
-            'llama_3_connectors_70b_base_1.json',
-            'llama_3_connectors_70b_base_2.json',
+            #'llama_3_connectors_70b_base_2.json',
             #'llama_3_connectors_70b_base_3.json',
             #'llama_3_connectors_70b_base_4.json',
-            'llama_3_connectors_70b_helped_1.json',
+            #'llama_3_connectors_70b_helped_1.json',
+            'llama_3_connectors_70b_base_1.json',
+            'llama_3_connectors_70b_base_2.json',
+
             'llama_3_connectors_70b_helped_2.json',
             'llama_3_connectors_70b_helped_3.json',
-            'llama_3_connectors_70b_helped_4.json',
-            'llama_3_connectors_70b_helped_5.json',
+
+
+
+            #'llama_3_connectors_70b_helped_2.json',
+            #'llama_3_connectors_70b_helped_3.json',
+            #'llama_3_connectors_70b_helped_4.json',
+            #'llama_3_connectors_70b_helped_5.json',
 
         ]
 
@@ -263,6 +272,8 @@ class GPTAnalyse():
             'llama_3_anli_credence_5_full.json',
         ]
         uid2data = {}
+        file2items = {}
+
         for filename in files:
             print(filename)
 
@@ -281,6 +292,9 @@ class GPTAnalyse():
                 ][:1]:
                     print(feature_name)
                     counter = 0
+                    expected = []
+                    predicted = []
+                    type2count = defaultdict(int)
                     for d in data:
                         uid2data[d.uid()] = d
                         #dist = d.label_dist()
@@ -294,9 +308,17 @@ class GPTAnalyse():
                                 cache[d.uid()] = True
                             else:
                                 cache[d.uid()] = False
-                        if True:
+                        if 'switch' in d.type():
+                            converter = {'c': 'contradiction', 'n': 'non-strict entailment', 's': 'strict entailment', 'o': 'out'}
                             if d.uid() in gpt_answer:
                                 counter += 1
+                                expected.append(converter[d.label()[0]])
+                                if len(gpt_answer[d.uid()][0]) == 0:
+                                    gpt_answer[d.uid()] = ['o']
+                                predicted.append(converter.get(gpt_answer.get(d.uid())[0][0], 'none'))
+                                
+                                if gpt_answer.get(d.uid())[0][0] == 'n' and d.type() == 'but_though_straight':
+                                    print(d.uid())
                                 if isinstance(gpt_answer[d.uid()], list) and len(gpt_answer[d.uid()][0]) > 0 :
                                     gpt_answer[d.uid()] = gpt_answer[d.uid()][0][0]
                                     interested.add(d.uid())
@@ -309,9 +331,25 @@ class GPTAnalyse():
                                     file2correct[filename].add(d.uid())
                                 if len(d.label()) > 0:
                                     true_answers[d.uid()] = d.label()[0]
+                    classes = ['strict entailment', 'non-strict entailment', 'contradiction']
+                    cm = confusion_matrix(expected, predicted, labels=classes)
+                    display_labels = ['strict\nentailment', 'non-strict\nentailment', 'contradiction']
+                    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=display_labels)
+                    disp.plot()
+                    plt.rcParams.update({'font.size': 15})
+                    plt.savefig('/home/lalady6977/Downloads/confusion_llama_nli_base.png', bbox_inches='tight')
                     gpt_answers[filename] = gpt_answer
-                    print(' ' * 4, i, '{:.3f}'.format(self.f1_score(true_answers, gpt_answer, uid2data)))
+                    f1_score, items = self.f1_score(true_answers, gpt_answer, uid2data)
+                    file2items[filename] = items
+
+                    print(' ' * 4, i, '{:.3f}'.format(f1_score))
                 print(counter)
+        feature2diff = {}
+        for key in file2items['llama_3_connectors_70b_base_1.json']:
+            diff = file2items['llama_3_connectors_70b_helped_2.json'][key] - file2items['llama_3_connectors_70b_base_1.json'][key]
+            feature2diff[key] = diff
+        for key, value in sorted(feature2diff.items(), key=lambda x: x[1], reverse=True):
+            print(key, file2items['llama_3_connectors_70b_base_1.json'][key], file2items['llama_3_connectors_70b_helped_2.json'][key], value)
         #self.print_confusion(file2correct, uid2data, gpt_answers)
         #print(all_uids)
         
@@ -353,6 +391,7 @@ class GPTAnalyse():
         fn = defaultdict(int)
         f1s = []
         confusion = defaultdict(lambda: defaultdict(int))
+        feature2labelcount = defaultdict(lambda: defaultdict(int))
         for uid, label in true_answers.items():
             if uid not in gpt_answers:
                 continue
@@ -362,6 +401,7 @@ class GPTAnalyse():
                 gpt_answer = gpt_answers[uid][0]
             else :
                 continue
+            feature2labelcount[uid2data[uid].type()][gpt_answer] += 1
             if label[0] == gpt_answer:
                 tp[gpt_answer] += 1
                 confusion[uid2data[uid].type()]['correct'] += 1
@@ -380,14 +420,14 @@ class GPTAnalyse():
             if precision + recall != 0:
                 f1 = 2 * (precision * recall) / (precision + recall)
             f1s.append(f1)
-        items = []
+        items = {}
         for key1 in confusion:
             if confusion[key1]['correct'] + confusion[key1]['wrong'] > 1:
-                items += [(key1 ,confusion[key1]['wrong']/(confusion[key1]['correct'] + confusion[key1]['wrong']))]
-        items = sorted(items, key=lambda x: x[1])
-        for item in items:
-            print(item)
-        return np.mean(f1s)
+                items[key1] = confusion[key1]['correct']/(confusion[key1]['correct'] + confusion[key1]['wrong'])
+        #items = sorted(items, key=lambda x: x[1])
+        for item in feature2labelcount:
+            print(item, feature2labelcount[item])
+        return np.mean(f1s), items
 
 if __name__ == '__main__':
     Config.instance()

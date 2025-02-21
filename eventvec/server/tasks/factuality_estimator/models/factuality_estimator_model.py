@@ -39,7 +39,7 @@ tokenizer_dict = {
     #'roberta': RobertaTokenizer.from_pretrained("transformers_cache/roberta-base"),
     #'roberta_large': RobertaTokenizer.from_pretrained("transformers_cache/roberta-large"),
 
-    'distilbert': DistilBertTokenizer.from_pretrained("transformers_cache/distilbert-base-uncased"),
+    #'distilbert': DistilBertTokenizer.from_pretrained("transformers_cache/distilbert-base-uncased"),
     #'xlm_roberta': XLMRobertaTokenizer.from_pretrained("transformers_cache/xlm-roberta-large"),
     #'deberta': DebertaTokenizer.from_pretrained("transformers_cache/deberta-large"),
     #'t5': T5Tokenizer.from_pretrained("transformers_cache/t5-large"),
@@ -51,7 +51,7 @@ tokenizer_dict = {
 model_dict = {
     #'roberta': RobertaModel.from_pretrained("transformers_cache/roberta-base"),
     #'roberta_large': RobertaModel.from_pretrained("transformers_cache/roberta-large"),
-    'distilbert': DistilBertModel.from_pretrained("transformers_cache/distilbert-base-uncased"),
+    #'distilbert': DistilBertModel.from_pretrained("transformers_cache/distilbert-base-uncased"),
     #'xlm_roberta': XLMRobertaModel.from_pretrained("transformers_cache/xlm-roberta-large"),
     #'deberta': DebertaModel.from_pretrained("transformers_cache/deberta-large"),
     #'t5': T5Model.from_pretrained("transformers_cache/t5-large"),

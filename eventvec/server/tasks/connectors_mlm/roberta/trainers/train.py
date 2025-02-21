@@ -123,15 +123,15 @@ class NLIConnectorClassificationTrain:
 
     def train_epoch(self):
         self.zero_grad()
-        train_sample = self._connector_data_handler.train_data()
+        train_sample = self._data_handler.train_data()
         self._jade_logger.new_train_batch()
         connector_data = self._connector_data_handler.train_data()
         for datum_i, datum in enumerate(tqdm(train_sample)):
-            #if datum.label() not in labels2idx:
-            #    continue
-            #loss, predicted_nli_label = self.train_nli_step(datum)
+            if datum.label() not in labels2idx:
+                continue
+            loss, predicted_nli_label = self.train_nli_step(datum)
             connector_datum = connector_data[int(datum_i % (len(connector_data) -1))]
-            loss, predicted_connector_label = self.train_connector_step(connector_datum)
+            #loss, predicted_connector_label = self.train_connector_step(connector_datum)
             self._all_losses += [loss.item()]
             self._iteration += 1
 
@@ -140,7 +140,7 @@ class NLIConnectorClassificationTrain:
                 self.optimizer_step()
                 self.zero_grad()
                 self._loss = None
-            self._jade_logger.new_train_datapoint(connector_datum.label(), predicted_connector_label, loss.item(), {})
+            self._jade_logger.new_train_datapoint(datum.label(), predicted_nli_label, loss.item(), {})
             
 
     def train(self, run_config):
@@ -154,7 +154,7 @@ class NLIConnectorClassificationTrain:
             self.evaluate(run_config)
 
     def evaluate(self, run_config):
-        self.evaluate_connector(run_config)
+        self.evaluate_nli(run_config)
 
     def evaluate_nli(self, run_config):
         with torch.no_grad():

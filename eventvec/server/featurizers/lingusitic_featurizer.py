@@ -1,4 +1,4 @@
-import spacy, coreferee
+import spacy
 
 
 
