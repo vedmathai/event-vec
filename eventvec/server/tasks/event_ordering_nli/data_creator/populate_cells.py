@@ -108,10 +108,10 @@ class PopulateCells:
                             else:
                                 #relationship = random.choice(['before', 'after'])
                                 #row._hypothesis = f'{event_1.event_name()} happens {relationship} {event_2.event_name()}'
-                                relationship = random.choice(['east', 'west'])
+                                #relationship = random.choice(['east', 'west'])
                                 relationship = random.choice(['<', '>'])
 
-                                row._hypothesis = f'{event_1.event_name()} is completely {relationship} of {event_2.event_name()}'
+                                #row._hypothesis = f'{event_1.event_name()} is completely {relationship} of {event_2.event_name()}'
                                 row._hypothesis = f'{event_1.event_name()} {relationship} {event_2.event_name()}'
 
                                 row._label = 'False'
@@ -136,7 +136,7 @@ class PopulateCells:
                                     row._label = 'True'
                             else:
                                 relationship = random.choice(['overlaps', 'after'])
-                                relationship = random.choice(['=', '>'])
+                                #relationship = random.choice(['=', '>'])
                                 if relationship == 'overlaps':
                                     #row._hypothesis = f'{event_1.event_name()} overlaps with {event_2.event_name()}'
                                     #row._hypothesis = f'{event_1.event_name()} shares at least one longitude with {event_2.event_name()}'

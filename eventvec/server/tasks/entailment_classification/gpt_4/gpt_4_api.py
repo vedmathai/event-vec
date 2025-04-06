@@ -6,7 +6,7 @@ client = OpenAI()
 
 def gpt_4(system, user):
     completion = client.chat.completions.create(
-        model="gpt-4o",
+        model="o1",
         messages=[
             {"role": "system", "content": system},
             {"role": "user", "content": user}

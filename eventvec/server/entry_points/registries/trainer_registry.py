@@ -6,6 +6,7 @@ from eventvec.server.tasks.entailment_classification.trainers.train import NLICl
 from eventvec.server.tasks.factuality_estimator.trainers.train_ml import FactualityEstimationTrainML
 from eventvec.server.tasks.connectors_mlm.roberta.trainers.train import NLIConnectorClassificationTrain
 from eventvec.server.tasks.event_ordering_nli.roberta.trainers.train import TemporalNLIClassificationTrain
+from eventvec.server.tasks.subordinate.roberta.trainers.train import TemporalSubordinateClassificationTrain
 
 class TrainerRegistry:
     _registry = {
@@ -17,6 +18,7 @@ class TrainerRegistry:
         "qa_reinforce_trainer": QAReinforceTrain,
         'nli_connector_trainer': NLIConnectorClassificationTrain,
         'temporal_nli_trainer': TemporalNLIClassificationTrain,
+        'temporal_subordinate_trainer': TemporalSubordinateClassificationTrain,
     }
 
     def get_trainer(self, trainer):

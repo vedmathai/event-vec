@@ -1,10 +1,10 @@
-import spacy
+#import spacy
 import re
 from collections import defaultdict
 from collections import deque
 
 
-nlp = spacy.load("en_core_web_trf")
+#nlp = spacy.load("en_core_web_trf")
 
 
 class Node():

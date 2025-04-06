@@ -205,12 +205,6 @@ class QATrainBase:
         self._base_model.to(device)
         self._config = Config.instance()
         self._task_criterion = nn.CrossEntropyLoss(weight=torch.tensor([0.025, 1-.025])).to(device)
-        self._question_event_criterion = nn.CrossEntropyLoss(weight=torch.tensor([0.025, 1-.025])).to(device)
-        self._tense_criterion = nn.CrossEntropyLoss(weight=torch.tensor([0.995, .99, .99, .014])).to(device)
-        self._aspect_criterion = nn.CrossEntropyLoss(weight=torch.tensor([0.99, .99, 0.14])).to(device)
-        self._tense_criterion = nn.CrossEntropyLoss(weight=torch.tensor([0.99, .99, 0.99, .99, 0.99, .99, 0.99, .99, 0.99, .99, 0.99, 0.99, .99, 0.99, .99, 0.14])).to(device)
-        self._aspect_criterion = nn.CrossEntropyLoss(weight=torch.tensor([.99, 0.99, .99, 0.99, 0.99, .99, 0.99, .99, 0.14])).to(device)
-        self._pos_criterion = nn.CrossEntropyLoss(weight=torch.tensor([0.99, .99, .99, .99, 0.14])).to(device)
         self._question_classification_criterion =  nn.CrossEntropyLoss()
         self._linguistic_featurizer = LinguisticFeaturizer()
         self._date_question_creator.load()
@@ -373,7 +367,7 @@ class QATrainBase:
         altered_required = []
         possible_answers = []
         for token_i in range(start, len(tokens) - 1):
-            if token_i not in token2featurized_token or not ((run_config.use_question_event_features() is True and token2featurized_token[token_i].text().lower() in qa_datum.question_events()) or token_i not in token_indices):
+            if token_i not in token2featurized_token:
                 continue
             featurized_token = token2featurized_token[token_i]
             token = featurized_token
@@ -400,14 +394,10 @@ class QATrainBase:
             tokeni2tense[token.idx()] = (tense, aspect) 
             tense = '{}{}'.format(parent_tense, tense)
             aspect = '{}{}'.format(parent_aspect, aspect)
-            if parent_tense is not None:
-                use = True
-
             if featurized_token.text().lower() in qa_datum.question_events():
                 question_event_bitmap[token_i] = [0, 1]
             tense_array = [0] * tense_num
             aspect_array = [0] * aspect_num
-            pos_array = [0] * pos_num
             if featurized_token.text().lower() in qa_datum.question_events():
                 question_event_bitmap[token_i] = [0, 1]
             # uncomment for ta-16 tense = token.tense() if tense != 'Future' else 'Future'
@@ -417,8 +407,6 @@ class QATrainBase:
             aspect_bitmap[token_i] = aspect_array
             pos = featurized_token.pos()
             mapped_pos = pos_mapping.get(pos, pos_mapping['OTHERS'])
-            pos_array[mapped_pos] = 1
-            pos_bitmap[token_i] = pos_array
         for index in token_indices:
             answer_bitmap[index] = [0, 1]
 
@@ -427,9 +415,6 @@ class QATrainBase:
             'answer_bitmap': answer_bitmap,
             'tense_bitmap': tense_bitmap,
             'aspect_bitmap': aspect_bitmap,
-            'pos_bitmap': pos_bitmap,
-            'question_event_bitmap': question_event_bitmap,
-            'use': use,
             'altered_required': altered_required,
             'possible_answers': possible_answers,
         }
@@ -477,32 +462,10 @@ class QATrainBase:
         return parent
 
     def _align_answer(self, llm, tokens, paragraph, start_index, end_index):
-        if llm == 'bigbird':
-            token_indices = self._align_answer_bigbird(llm, tokens, paragraph, start_index, end_index)
         if llm == 'roberta':
             token_indices = self._align_answer_roberta(llm, tokens, paragraph, start_index, end_index)
         return token_indices
 
-    def _align_answer_bigbird(self, llm, tokens, paragraph, start_index, end_index):
-        answer = paragraph[0][start_index: end_index]
-        token_delimiter = token_delimiters.get(llm)
-        token_i = tokens.index(sentence_breaks.get(llm))
-        summed_token_indices = []
-        all_answer_indices = []
-        summed_token = ""
-        while token_i < len(tokens):
-            token = tokens[token_i]
-            if token[0] == token_delimiter:
-                summed_token = token[1:]
-                summed_token_indices = [token_i]
-            if token[0] != token_delimiter:
-                summed_token += token
-                summed_token_indices.append(token_i)
-            if summed_token.lower() == answer.lower():
-                all_answer_indices.extend(summed_token_indices)
-            token_i += 1
-        return all_answer_indices
-    
     def _align_answer_roberta(self, llm, tokens, paragraph, start_index, end_index):
         answer = paragraph[0][start_index: end_index]
         token_delimiter = token_delimiters.get(llm)
@@ -628,53 +591,6 @@ class QATrainBase:
                 best_answer = expected_label
         return best_answer
         
-    def _answers_f1_score(self, predicted_label, expected_label):
-        precisions = []
-        recalls = []
-        f1s = []
-        exact_matches = []
-        precision_list = []
-        recall_list = []
-        for pred in predicted_label:
-            if pred in expected_label:
-                precision_list += [1]
-            else:
-                precision_list += [0]
-        for expected in expected_label:
-            if expected in predicted_label:
-                recall_list += [1]
-            else:
-                recall_list += [0]
-        precision = 0
-
-        if len(precision_list) > 0:
-            precision = np.mean(precision_list)
-        recall = 0
-        if len(recall_list) > 0:
-            recall = np.mean(recall_list)
-        f1 = 0
-        if len(predicted_label) == 0:
-            precision = 1
-        if len(expected_label) == 0:
-            recall = 1
-        if len(predicted_label) == len(expected_label) == 0:
-            f1 = 1
-        elif (precision + recall) != 0:
-            f1 = (2 * precision * recall) / (precision + recall)
-        precisions += [precision]
-        recalls += [recall]
-        f1s += [f1]
-        exact_matches += [1 if expected_label == predicted_label else 0]
-        precision = np.mean(precisions)
-        recall = np.mean(recalls)
-        f1 = np.mean(f1s)
-        return {
-            'precision': precision,
-            'recall': recall,
-            'f1': f1,
-            'exact_match': np.mean(exact_matches),
-        }
-
 
 if __name__ == '__main__':
     qa_train = QATrainBase()

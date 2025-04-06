@@ -20,8 +20,8 @@ class LlamaMLMAnalysis:
     def __init__(self):
         self._jade_logger = JadeLogger()
         self._filepath = self._jade_logger.file_manager.data_filepath('llama_mlm.csv')
-        self._results_file_helped = '/home/lalady6977/oerc/projects/data/roc_masked_connectors_llama_helped.csv'
-        self._results_file_plain = '/home/lalady6977/oerc/projects/data/roc_masked_connectors_llama_base.csv'
+        self._results_file_helped = '/home/lalady6977/oerc/projects/data/roc_masked_connectors_deepseek_helped.csv'
+        self._results_file_plain = '/home/lalady6977/oerc/projects/data/roc_masked_connectors_deepseek.csv'
 
     def read_results(self, filename):
         llm_answers = {}
@@ -53,10 +53,9 @@ class LlamaMLMAnalysis:
 
         for datum_i, datum in enumerate(data.values()):
             required_answers[datum._uid] = datum._label
-            llm_answers_plain = self.read_results(self._results_file_plain)
-            llm_answers_helped = self.read_results(self._results_file_helped)
-            self.check_metric(llm_answers_plain, required_answers)
-            f1s = []
+        llm_answers_plain = self.read_results(self._results_file_plain)
+        llm_answers_helped = self.read_results(self._results_file_helped)
+        self.check_metric(llm_answers_plain, required_answers)
 
         y_test = []
         predictions = []
@@ -74,7 +73,7 @@ class LlamaMLMAnalysis:
                     confusion_helped[required_answers[key]]['none'].append(key)
                     predictions.append('none')
 
-        for key in confusion_helped['because']['but']:
+        for key in confusion_helped['but']['and']:
             print()
             print(key, data[key]._text)
 
@@ -147,7 +146,6 @@ class LlamaMLMAnalysis:
             if precision + recall > 0:
                 f1 = 2 * (precision * recall) / (precision + recall)
             f1s.append(f1)
-            print(key, precision, recall, f1)
         print(np.mean(f1s))
 
 

@@ -41,7 +41,8 @@ class GPTAnalyse():
             #'temporal/llama_104B_temporal.json',
             #'temporal/gpt_before_only_ordered.json',
             #'temporal/gpt_temporal_nli_test.json',
-            'temporal/gpt_temporal_plain_1.json',
+            #'temporal/gpt_temporal_plain_1.json',
+            'temporal/gpt_o1_temporal_nli_test_high_reasoning_1.json',
 
             #'temporal/llama_3_temporal_70b_plain_6.json',
             #'temporal/llama_3_temporal_70b_helped_1.json',
@@ -92,6 +93,7 @@ class GPTAnalyse():
         fn = defaultdict(int)
         f1s = []
         for uid, label in true_answers.items():
+            label = label_map.get(label)
             if uid not in gpt_answers:
 
                 continue

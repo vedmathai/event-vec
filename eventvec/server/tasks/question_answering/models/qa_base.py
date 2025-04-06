@@ -13,12 +13,9 @@ class QuestionAnsweringBase(nn.Module):
     def __init__(self, run_config):
         super().__init__()
         config = Config.instance()
-        if run_config.llm() == 'bigbird':
-            self._tokenizer = BigBirdTokenizer.from_pretrained('google/bigbird-roberta-base', pad_token="[PAD]")
-            self._model = BigBirdModel.from_pretrained('google/bigbird-roberta-base', attention_type="original_full").to(device)
         if run_config.llm() == 'roberta':
-            self._tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
-            self._model = RobertaModel.from_pretrained('roberta-base')
+            self._tokenizer = RobertaTokenizer.from_pretrained("FacebookAI/roberta-large")
+            self._model = RobertaModel.from_pretrained("FacebookAI/roberta-large")
         modules = [self._model.embeddings, *self._model.encoder.layer[:-4]]
         for module in modules:
             for param in module.parameters():
@@ -27,23 +24,17 @@ class QuestionAnsweringBase(nn.Module):
         self._run_config = run_config
         self._dropout = nn.Dropout(0.5).to(device)
         self._base_layer_classifier = torch.nn.Linear(768, hidden_layer_size).to(device)
-        self._base_classifier_activation = nn.Tanh().to(device)
+        self._base_classifier_activation = nn.ReLU().to(device)
         classifier_size = hidden_layer_size
         if run_config.forward_type() == 'features' and run_config.use_tense() is True:
             classifier_size += 16
         if run_config.forward_type() == 'features' and run_config.use_aspect() is True:
             classifier_size += 9
-        if run_config.forward_type() == 'features' and run_config.use_pos() is True:
-            classifier_size += 5
 
         if run_config.forward_type() == 'attention' and run_config.use_tense() is True:
             classifier_size += 16
         if run_config.forward_type() == 'attention' and run_config.use_aspect() is True:
-            classifier_size += 16
-        if run_config.forward_type() == 'attention' and run_config.use_pos() is True:
-            classifier_size += 16
-        if run_config.forward_type() == 'attention_mul':
-            classifier_size = hidden_layer_size + 16
+            classifier_size += 9
 
         self._token_classifier = torch.nn.Linear(classifier_size, 2).to(device)
         #self._token_classifier = torch.nn.Linear(hidden_layer_size, 2).to(device)
@@ -117,11 +108,6 @@ class QuestionAnsweringBase(nn.Module):
             token_classifier_input = torch.concat((
                 token_classifier_input,
                 aspect_classification_output
-            ), dim=1)
-        if self._run_config.use_pos() is True:
-            token_classifier_input = torch.concat((
-                token_classifier_input,
-                pos_classification_output
             ), dim=1)
 
         token_classification_output = self._token_classifier(token_classifier_input)

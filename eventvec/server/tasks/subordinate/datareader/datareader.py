@@ -9,10 +9,10 @@ from eventvec.server.config import Config
 
 
 files = {
-    'temporal_subordinate_said': 'temporal_subordinate_said.csv',
-    'temporal_subordinate_stated': 'temporal_subordinate_stated.csv',
-    'temporal_subordinate_suggested': 'temporal_subordinate_suggested.csv',
-    'temporal_subordinate_insinuated': 'temporal_subordinate_insinuated.csv',
+    'temporal_subordinate_said': 'temporal_subordinate_said.tsv',
+    'temporal_subordinate_stated': 'temporal_subordinate_stated.tsv',
+    'temporal_subordinate_suggested': 'temporal_subordinate_suggested.tsv',
+    'temporal_subordinate_insinuated': 'temporal_subordinate_insinuated.tsv',
 }
 
 class SubordinateTemporalDatareader(AbstractDatareader):
@@ -22,13 +22,14 @@ class SubordinateTemporalDatareader(AbstractDatareader):
         self.folder = self._config.subordinate_data_location()
         self._jade_logger = JadeLogger()
 
-    def data(self):
+    def data(self, name):
         path = self._config.subordinate_data_location()
+        full_path = os.path.join(path, files[name])
         data = []
-        with open(path, 'r') as f:
+        with open(full_path, 'r') as f:
             reader = csv.reader(f, delimiter='\t')
             for ri, r in enumerate(reader):
-                if r[0] != '':
+                if r[0] != '' and ri > 0:
                     data.append(SubordinateRow.from_csv_row(r))
         return data
 

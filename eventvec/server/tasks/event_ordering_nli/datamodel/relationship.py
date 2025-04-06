@@ -90,6 +90,22 @@ parameters = {
         'relationship_types': ['before', 'after'],
         'sort_relationships': True,
     },
+    'temporal_nli_only_before_train': {
+        'filename': 'temporal_nli_only_before_train.csv',
+        'random_seed': False,
+        'names': 'train_event_names',
+        'templates': 'train',
+        'relationship_types': ['before', 'after'],
+        'sort_relationships': False,
+    },
+    'temporal_nli_only_before_test': {
+        'filename': 'temporal_nli_only_before_test.csv',
+        'random_seed': False,
+        'names': 'test_event_names',
+        'templates': 'test',
+        'relationship_types': ['before', 'after'],
+        'sort_relationships': False,
+    },
     'temporal_nli_before_after_test': {
         'filename': 'temporal_nli_before_after_test.csv',
         'random_seed': False,
@@ -177,10 +193,26 @@ parameters = {
         'templates': 'test',
         'relationship_types': ['after', 'before', 'simultaneous'],
         'sort_relationships': False,
+    },
+    'logical_only_before_sorted_nli_train': {
+        'filename': 'logical_only_before_sorted_nli_train.csv',
+        'random_seed': False,
+        'names': 'train_event_names',
+        'templates': 'train',
+        'relationship_types': ['after', 'before'],
+        'sort_relationships': True,
+    },
+    'logical_only_before_sorted_nli_test': {
+        'filename': 'logical_only_before_sorted_nli_test.csv',
+        'random_seed': False,
+        'names': 'test_event_names',
+        'templates': 'test',
+        'relationship_types': ['after', 'before'],
+        'sort_relationships': True,
     }
 }
 
-parameter_name = 'logical_nli_test'
+parameter_name = 'logical_only_before_sorted_nli_test'
 
 before_train_templates = [
     "The {A} occurred before the {B}",
@@ -339,23 +371,23 @@ class EventRelationship():
     
     def get_before_switched_sentence(self, event_point_1, event_point_2):
         if parameters[parameter_name]['templates'] == 'train':
-            templates = before_spatial_test_templates
+            templates = after_logical_train_templates
         else:
-            templates = before_test_templates
-        return random.choice(templates).format(A=event_point_1, B=event_point_2)
+            templates = after_logical_train_templates
+        return random.choice(templates).format(A=event_point_2, B=event_point_1)
     
     def get_before_sentence(self, event_point_1, event_point_2):
         if parameters[parameter_name]['templates'] == 'train':
-            templates = before_logical_train_templates
+            templates = after_logical_train_templates
         else:
-            templates = before_logical_train_templates
+            templates = after_logical_train_templates
         return random.choice(templates).format(A=event_point_1, B=event_point_2)
     
     def get_simultaneous_sentence(self, event_point_1, event_point_2):
         if parameters[parameter_name]['templates'] == 'train':
-            templates = simultaneous_logical_train_templates
+            templates = simultaneous_train_templates
         else:
-            templates = simultaneous_logical_train_templates
+            templates = simultaneous_train_templates
         return random.choice(templates).format(A=event_point_1, B=event_point_2)
 
     def __str__(self):
@@ -364,4 +396,4 @@ class EventRelationship():
         elif self.relationship_type() == 'before':
             return self.get_before_sentence(self._event_point_1, self._event_point_2)
         elif self.relationship_type() == 'after':
-            return self.get_after_sentence(self._event_point_1, self._event_point_2)
+            return self.get_before_switched_sentence(self._event_point_1, self._event_point_2)

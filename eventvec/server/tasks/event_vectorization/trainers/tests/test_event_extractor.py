@@ -1,6 +1,6 @@
 import unittest
 
-import spacy
+#import spacy
 
 from eventvec.server.entry_points.vectorizer.event_extractor import EventExtractor
 from eventvec.server.entry_points.vectorizer.dep_parser_model import parse_sentence
