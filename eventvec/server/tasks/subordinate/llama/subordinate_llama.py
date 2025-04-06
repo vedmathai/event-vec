@@ -18,7 +18,7 @@ from eventvec.server.tasks.entailment_classification.gpt_4.gpt_4_api import gpt_
 from eventvec.server.tasks.entailment_classification.gpt_4.sambanova import sambanova
 
 from eventvec.server.tasks.event_ordering_nli.datareader.temporal_datareader import TemporalDatareader
-from eventvec.server.tasks.subordinate.datareader.subordinate_datareader import SubordinateTemporalDatareader
+from eventvec.server.tasks.subordinate.datareader.datareader import SubordinateTemporalDatareader
 
 
 

@@ -40,9 +40,9 @@ if __name__ == '__main__':
     """
 
     user_prompt = """
-Premise: start of Siege of Bloodthorn Keep happened after start of Conflict at Steelshade Valley. end of Siege of Bloodthorn Keep happened before start of Encounter at Misty Heights. end of Encounter at Misty Heights happened before start of Conflict at Steelshade Valley. start of Encounter at Misty Heights happened simultaneous end of Siege of Darkwater Keep
+    Premise: start of Siege of Bloodthorn Keep happened after start of Conflict at Steelshade Valley. end of Siege of Bloodthorn Keep happened before start of Encounter at Misty Heights. end of Encounter at Misty Heights happened before start of Conflict at Steelshade Valley. start of Encounter at Misty Heights happened simultaneous end of Siege of Darkwater Keep
 
-Hypothesis: Siege of Bloodthorn Keep happens after Siege of Darkwater Keep
+    Hypothesis: Siege of Bloodthorn Keep happens after Siege of Darkwater Keep
 
     Do justify your answer along with an answer from one of the following ['True', 'False', 'Impossible]'.
     [/INST] 

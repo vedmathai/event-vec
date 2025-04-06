@@ -1,4 +1,4 @@
-import spacy
+#import spacy
 
 
 
@@ -6,7 +6,7 @@ from eventvec.server.datamodels.featurized_document_datamodel.featurized_documen
 from eventvec.server.datamodels.featurized_document_datamodel.featurized_sentence import FeaturizedSentence  # noqa
 
 
-nlp = spacy.load('en_core_web_lg')
+#nlp = spacy.load('en_core_web_lg')
 #nlp.add_pipe('coreferee')
 
 

@@ -1,6 +1,6 @@
 import unittest
 
-import spacy
+#import spacy
 
 from eventvec.server.entry_points.vectorizer.dep_parser_model import (
     parse_sentence, get_path, follow_down

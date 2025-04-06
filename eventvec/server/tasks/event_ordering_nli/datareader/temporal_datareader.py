@@ -30,11 +30,16 @@ files = {
     'temporal_nli_sort_relationships_test': 'temporal_nli_sort_relationships_test.csv',
     'temporal_nli_only_before_sort_train': 'temporal_nli_only_before_sort_train.csv',
     'temporal_nli_only_before_sort_test': 'temporal_nli_only_before_sort_test.csv',
+    'temporal_nli_only_before_train': 'temporal_nli_only_before_sort_train.csv',
+    'temporal_nli_only_before_test': 'temporal_nli_only_before_sort_test.csv',
     'spatial_nli_relationships_test': 'spatial_nli_relationships_test.csv',
     'spatial_nli_relationships_train': 'spatial_nli_relationships_train.csv',
     'logical_nli_relationships_test': 'logical_nli_relationships_test.csv',
     'logical_nli_relationships_train': 'logical_nli_relationships_train.csv',
+    'logical_only_before_sorted_nli_train': 'logical_only_before_sorted_nli_train.csv',
+    'logical_only_before_sorted_nli_test': 'logical_only_before_sorted_nli_test.csv',
 }
+
 
 class TemporalDatareader(AbstractDatareader):
     def __init__(self):

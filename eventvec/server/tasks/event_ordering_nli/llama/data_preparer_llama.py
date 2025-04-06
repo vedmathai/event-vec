@@ -105,11 +105,21 @@ class NLIDataPreparer():
     def __init__(self):
         self._data_readers = {
             'temporal': TemporalDatareader(),
-        } 
+        }
+
+    def sample_data(self, data):
+        new_sample = defaultdict(list)
+        for datum in data:
+            key = '{}_{}_{}'.format(datum.label(), datum.relationship(), datum.relationship_number())
+            new_sample[key].append(datum)
+        new_data = []
+        for key, value in new_sample.items():
+            new_data.extend(value[:6])
+        return new_data
 
     def load(self):
         k = 0
-        file_name = 'temporal/gpt_o3_mini_temporal_nli_test.json'
+        file_name = 'temporal/gpt_o1_temporal_nli_test_high_reasoning_1.json'
         jl = JadeLogger()
         gpt_answer = {}
         true_answers = {}
@@ -117,8 +127,9 @@ class NLIDataPreparer():
         data = data_reader.data('temporal_nli_test')[:4800]
         example_data = [data[256], data[140], data[158], data[2627], data[2626], data[876]]
         data = [datum for datum in data if datum not in example_data]
+        random.seed(0)
         random.shuffle(data)
-        data = data[:100]
+        data = self.sample_data(data)
         system_prompt = str(prompt_preamble)
         location = jl.file_manager.data_filepath(file_name)
         if os.path.exists(location):
@@ -176,6 +187,7 @@ class NLIDataPreparer():
         fn = defaultdict(int)
         f1s = []
         for uid, label in true_answers.items():
+            label = label_map.get(label)
 
             if uid not in gpt_answers:
                 fn[label] += 1

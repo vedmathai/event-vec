@@ -32,7 +32,7 @@ class RelationshipClassifierModel(nn.Module):
             modules = [self.llm.embeddings, *self.llm.encoder.layer[:-1]]
             for module in modules:
                 for param in module.parameters():
-                    param.requires_grad = False
+                    param.requires_grad = True
         self.dropout = nn.Dropout(dropout)
         if run_config.forward_type() == 'llm_only':
             self.linear1 = nn.Linear(LLM_INPUT, 352).to(device)

@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt  
 import matplotlib
   
-X = ['dct is _ sub', 'dct is _ matrix', 'matrix is _ sub']
+X = ['DCT-sub', 'DCT-matrix', 'matrix-sub']
 
 # is_quote
 
@@ -12,6 +12,8 @@ gpt_yes = [.489, .74, .627]
 gpt_no= [.562, .753, .622]
 llama_yes = [.525, .714, .73]
 llama_no = [.6, .708, .69]
+roberta_yes = [.711, .85, .794]
+roberta_no = [.809, .809, .712]
 
 X_axis = np.arange(len(X)) 
 
@@ -24,11 +26,14 @@ matplotlib.rc('ytick', labelsize=22)
 
 #plt.plot(X_axis,  plain_llama, 'r*', label = 'plain_llama', linestyle='-')
 
-ax.bar(X_axis-0.2, gpt_yes, width=0.1, color='C0', align='center', hatch='//', label = 'gpt_yes')
-ax.bar(X_axis-0.1, gpt_no, width=0.1, color='C1', align='center', hatch='//', label = 'gpt_no')
+ax.bar(X_axis-0.3, gpt_yes, width=0.1, color='C0', align='center', hatch='//', label = 'gpt_yes')
+ax.bar(X_axis-0.2, gpt_no, width=0.1, color='C1', align='center', hatch='//', label = 'gpt_no')
 
-ax.bar(X_axis+0.1, llama_yes, width=0.1, color='C0', align='center', label = 'llama_yes')
-ax.bar(X_axis+0.2, llama_no, width=0.1, color='C1', align='center', label = 'llama_no')
+ax.bar(X_axis-.05, llama_yes, width=0.1, color='C0', align='center', label = 'llama_yes')
+ax.bar(X_axis+0.05, llama_no, width=0.1, color='C1', align='center', label = 'llama_no')
+
+ax.bar(X_axis+0.2, roberta_yes, width=0.1, color='C0', align='center', hatch='\\', label = 'roberta_yes')
+ax.bar(X_axis+0.3, roberta_no, width=0.1, color='C1', align='center', hatch='\\', label = 'roberta_no')
 
 
 ax = plt.gca()
@@ -36,9 +41,10 @@ ax.set_ylim([0.45, .9])
 #ax.set_xlim([0.2, 0.5])
 
 plt.xticks(X_axis, X, rotation=0) 
-plt.xlabel("Sub is a quote") 
+plt.xlabel("Relationship") 
 plt.ylabel("Model Macro-F1 scores") 
 #plt.title("Macro-F1 scores of the models grouped\nby Human Judgement Entropy Buckets")
-plt.legend( loc='upper center', ncol=3) 
+plt.legend( loc='upper center', bbox_to_anchor=(0.5,-0.15), ncols=3) 
+
 
 plt.savefig('/home/lalady6977/Downloads/is_quote.png', bbox_inches='tight')

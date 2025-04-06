@@ -4,7 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt  
 import matplotlib
   
-X = ['dct is _ sub', 'dct is _ matrix', 'matrix is _ sub']
+X = ['DCT-sub', 'DCT-matrix', 'matrix-sub']
 
 
 # temporal marker
@@ -23,6 +23,13 @@ llama_now = [.589, .697, .679]
 llama_tomorrow = [.622, .749, .701]
 llama_everyday = [.599, .708, .689]
 
+roberta_no_marker = [.782, .856, .805]
+roberta_yesterday = [.645, .81, .628]
+roberta_today = [.822, .851, .812]
+roberta_now = [.842, .836, .902]
+roberta_tomorrow = [.5, .802, .578]
+roberta_everyday = [.862, .828, .898]
+
 
 X_axis = np.arange(len(X)) 
 
@@ -30,33 +37,41 @@ fig, ax = plt.subplots(layout='constrained')
 
 markersize=12
 #matplotlib.rcParams.update({'font.size': 20})
-middle = 0.01
-width = 0.06
+middle = 0
+width = 0.04
 #plt.plot(X_axis,  plain_llama, 'r*', label = 'plain_llama', linestyle='-')
 
-ax.bar(X_axis - (6 * width) - middle, gpt_no_marker, width=width, color='C0', align='center', hatch='//', label = 'gpt_no_marker')
-ax.bar(X_axis - (5 * width) - middle, gpt_yesterday, width=width, color='C1', align='center', hatch='//', label = 'gpt_yesterday')
-ax.bar(X_axis - (4 * width) - middle, gpt_tomorrow, width=width, color='C4', align='center', hatch='//', label = 'gpt_tomorrow')
-ax.bar(X_axis - (3 * width) - middle, gpt_today, width=width, color='C2', align='center', hatch='//', label = 'gpt_today')
-ax.bar(X_axis - (2 * width) - middle, gpt_now, width=width, color='C3', align='center', hatch='//', label = 'gpt_now')
-ax.bar(X_axis - (1 * width) - middle, gpt_everyday, width=width, color='C5', align='center', hatch='//', label = 'gpt_everyday')
+ax.bar(X_axis - (9 * width) - middle, gpt_no_marker, width=width, color='C0', align='center', hatch='//', label = 'gpt_no_marker')
+ax.bar(X_axis - (8 * width) - middle, gpt_yesterday, width=width, color='C1', align='center', hatch='//', label = 'gpt_yesterday')
+ax.bar(X_axis - (7 * width) - middle, gpt_tomorrow, width=width, color='C4', align='center', hatch='//', label = 'gpt_tomorrow')
+ax.bar(X_axis - (6 * width) - middle, gpt_today, width=width, color='C2', align='center', hatch='//', label = 'gpt_today')
+ax.bar(X_axis - (5 * width) - middle, gpt_now, width=width, color='C3', align='center', hatch='//', label = 'gpt_now')
+ax.bar(X_axis - (4 * width) - middle, gpt_everyday, width=width, color='C5', align='center', hatch='//', label = 'gpt_everyday')
 
-ax.bar(X_axis + (1 * width) + middle, llama_no_marker, width=width, color='C0', align='center', label = 'llama_no_marker')
-ax.bar(X_axis + (2 * width) + middle, llama_yesterday, width=width, color='C1', align='center', label = 'llama_yesterday')
-ax.bar(X_axis + (3 * width) + middle, llama_tomorrow, width=width, color='C4', align='center', label = 'llama_tomorrow')
-ax.bar(X_axis + (4 * width) + middle, llama_today, width=width, color='C2', align='center', label = 'llama_today')
-ax.bar(X_axis + (5 * width) + middle, llama_now, width=width, color='C3', align='center', label = 'llama_now')
-ax.bar(X_axis + (6 * width) + middle, llama_everyday, width=width, color='C5', align='center', label = 'llama_everyday')
+ax.bar(X_axis - (2.5 * width) - middle, llama_no_marker, width=width, color='C0', align='center', label = 'llama_no_marker')
+ax.bar(X_axis - (1.5 * width) - middle, llama_yesterday, width=width, color='C1', align='center', label = 'llama_yesterday')
+ax.bar(X_axis - (.5 * width) - middle, llama_tomorrow, width=width, color='C4', align='center', label = 'llama_tomorrow')
+ax.bar(X_axis + (.5 * width) - middle, llama_today, width=width, color='C2', align='center', label = 'llama_today')
+ax.bar(X_axis + (1.5 * width) - middle, llama_now, width=width, color='C3', align='center', label = 'llama_now')
+ax.bar(X_axis + (2.5 * width) - middle, llama_everyday, width=width, color='C5', align='center', label = 'llama_everyday')
+
+ax.bar(X_axis + (4 * width) + middle, roberta_no_marker, width=width, color='C0', align='center', hatch='\\', label = 'roberta_no_marker')
+ax.bar(X_axis + (5* width) + middle, roberta_yesterday, width=width, color='C1', align='center', hatch='\\', label = 'roberta_yesterday')
+ax.bar(X_axis + (6 * width) + middle, roberta_tomorrow, width=width, color='C4', align='center', hatch='\\', label = 'roberta_tomorrow')
+ax.bar(X_axis + (7 * width) + middle, roberta_today, width=width, color='C2', align='center', hatch='\\', label = 'roberta_today')
+ax.bar(X_axis + (8 * width) + middle, roberta_now, width=width, color='C3', align='center', hatch='\\', label = 'roberta_now')
+ax.bar(X_axis + (9 * width) + middle, roberta_everyday, width=width, color='C5', align='center', hatch='\\', label = 'roberta_everyday')
 
 
 ax = plt.gca()
-ax.set_ylim([0.23, 1])
+ax.set_ylim([0.45, 1])
 #ax.set_xlim([0.2, 0.5])
 
 plt.xticks(X_axis, X, rotation=0) 
 plt.xlabel("Temporal Marker") 
 plt.ylabel("Model Macro-F1 scores") 
-plt.title("Temporal Marker")
-plt.legend( loc='upper center', ncol=3) 
+#plt.title("Relationship")
+plt.legend( loc='upper center', bbox_to_anchor=(0.5,-0.15), ncols=3) 
+
 
 plt.savefig('/home/lalady6977/Downloads/temporal_marker.png', bbox_inches='tight')

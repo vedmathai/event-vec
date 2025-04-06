@@ -8,7 +8,7 @@ from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
 
 from eventvec.server.config import Config
-from eventvec.server.tasks.subordinate.datareader.subordinate_datareader import SubordinateTemporalDatareader
+from eventvec.server.tasks.subordinate.datareader.datareader import SubordinateTemporalDatareader
 
 aspects = ['perfect', 'simple', 'continuous', 'perfect-continuous']
 tenses = ['past', 'present', 'future']

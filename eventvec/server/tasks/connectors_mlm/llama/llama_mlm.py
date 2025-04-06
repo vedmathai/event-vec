@@ -5,11 +5,13 @@ import random
 import numpy as np
 from collections import defaultdict
 import os
+import time
 
 from eventvec.server.featurizers.sentence_masker.sentence_masker import SentenceMasker
 from eventvec.server.featurizers.sentence_masker.sentence_masker_simpler import SentenceMaskerSimpler
 
 from eventvec.server.tasks.entailment_classification.gpt_4.llama_3_api import llama_3
+from eventvec.server.tasks.entailment_classification.gpt_4.sambanova import sambanova
 from eventvec.server.data.alphanli.alphanli_reader import AlphaNLIDataReader
 
 
@@ -208,7 +210,7 @@ class Llama_NLI:
         self._jade_logger = JadeLogger()
         self._filepath = self._jade_logger.file_manager.data_filepath('llama_mlm.csv')
         self._confusion = defaultdict(lambda: defaultdict(list))
-        self._results_file = '/home/lalady6977/oerc/projects/data/roc_masked_connectors_llama_helped.csv'
+        self._results_file = '/home/lalady6977/oerc/projects/data/roc_masked_connectors_deepseek_helped.csv'
 
 
     def read_data(self):
@@ -273,7 +275,7 @@ class Llama_NLI:
             print('')
             print(connector_counter)
             response = ''
-            response = llama_3(system_prompt_larger_2, user_prompt_formated)
+            response = sambanova(system_prompt_larger, user_prompt_formated)
             for line in response.split('\n'):
                 if 'Answer' in line and '<connector>' not in line:
                     split_line = line.split(':')
@@ -296,6 +298,7 @@ class Llama_NLI:
                 print(key, precision, recall, f1)
             print(np.mean(f1s))
             self.write_results(llm_answers)
+            time.sleep(75)
 
         for key in llm_answers.keys():
             if key in required_answers:

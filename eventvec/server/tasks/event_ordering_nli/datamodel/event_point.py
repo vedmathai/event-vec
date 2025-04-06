@@ -45,9 +45,9 @@ class EventPoint():
 
     def __repr__(self):
         if self.is_start():
-            s1 = '1' #start
+            s1 = '1'#'start'
         else:
-            s1 = '2' #end
+            s1 = '2'#'end'
         
         #return f'{s1} of {self.event().event_name()}'
         return f'{self.event().event_name()}{s1}'

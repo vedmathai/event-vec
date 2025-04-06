@@ -137,8 +137,8 @@ class TenseAspectAnalyser:
         mutual_information = self.calculate_mutual_information(tuples)
         info, totals = self.calculate_feature_information(tuples)
         for ii, (k, v) in enumerate(sorted(info.items(), key=lambda x: totals[x[0]])):
-            pass
-            #print('info {} & {} & {} & {} & {} & {} & {} \\\\'.format(ii + 1, k[0][0], k[0][1], k[1][0], k[1][1], int(v*1000) / 1000, totals[k]))
+            if 'Past' in k[0][0]:
+                print('info {} & {} & {} & {} & {} & {} & {} & {} \\\\'.format(ii + 1, k[0][0], k[0][1], k[1][0], k[1][1], k[2], int(v*1000) / 1000, totals[k]))
         contexts = {}
         for ii, i in enumerate(self._examples):
             contexts[i[6]] = len(contexts)
@@ -188,7 +188,7 @@ class TenseAspectAnalyser:
                     self._contexts.add(qa_datum.context()[0])
                 bracket_context += [token.text()]
                 if str(token.tag())[0] == 'V':
-                    bracket_context += ['(',token.tense(), token.aspect(), token.tag(), ')']
+                    bracket_context += ['(', token.tense(), token.aspect(), token.tag(), ')']
             for token in sentence.tokens():
                 context_i2token[token.idx()] = token
                 if token.text() in qa_datum.question_events():
@@ -220,10 +220,9 @@ class TenseAspectAnalyser:
                             answer_tuples += [tuple([tense, aspect, 'out'])]
                             key = (question_tense, question_aspect, tense, aspect, 'out')
 
-
         for answer_tuple in answer_tuples:
             question_tuple = tuple([question_tense, question_aspect])
-            if True or question_tense == 'Past' and answer_tuple[0] == 'Pres':
+            if True or (question_tense == 'PastPast' and answer_tuple[0] == 'PastPast'):
                 if 'happened after' in qa_datum.question():
                     self._counter[((question_tuple, (answer_tuple[0], answer_tuple[1]), 'after')), (answer_tuple[-1])] += 1
                 if 'happened before' in qa_datum.question():
@@ -291,7 +290,7 @@ class TenseAspectAnalyser:
             tense = '{}{}'.format(parent_tense, tense)
             aspect = '{}{}'.format(parent_aspect, aspect)
             
-        return tense, aspect
+        return str(tense), str(aspect)
 
 
     def calculate_feature_information(self, tuples):

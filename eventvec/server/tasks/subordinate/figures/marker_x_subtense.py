@@ -36,7 +36,7 @@ ax.set_ylim([0.23, 1])
 plt.xticks(X_axis, X, rotation=0) 
 plt.xlabel("Temporal Marker") 
 plt.ylabel("Model Macro-F1 scores") 
-plt.title("Temporal Marker split by subordinate tense for GPT-4o")
+#plt.title("Temporal Marker split by subordinate tense for GPT-4o")
 plt.legend( loc='upper center', ncol=3) 
 
 plt.savefig('/home/lalady6977/Downloads/temporal_marker_x_sub_tense.png', bbox_inches='tight')
