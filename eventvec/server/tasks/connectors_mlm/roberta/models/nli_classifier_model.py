@@ -35,8 +35,8 @@ class NLIConnectorClassifierModel(nn.Module):
         model_key = run_config.factuality_inference_model()
         self._save_location = config.model_save_location()
         if llm == 'roberta':
-            self._tokenizer = RobertaTokenizer.from_pretrained("transformers_cache/roberta-large")
-            self.llm = RobertaModel.from_pretrained('transformers_cache/roberta-large', output_attentions=True).to(device) # noqa
+            self._tokenizer = RobertaTokenizer.from_pretrained("FacebookAI/roberta-large")
+            self.llm = RobertaModel.from_pretrained("FacebookAI/roberta-large", output_attentions=True).to(device) # noqa
         modules = [self.llm.embeddings, *self.llm.encoder.layer[:]]
         for module in modules:
             for param in module.parameters():

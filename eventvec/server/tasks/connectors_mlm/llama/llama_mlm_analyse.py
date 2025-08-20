@@ -73,7 +73,7 @@ class LlamaMLMAnalysis:
                     confusion_helped[required_answers[key]]['none'].append(key)
                     predictions.append('none')
 
-        for key in confusion_helped['but']['and']:
+        for key in confusion_helped['so']['but']:
             print()
             print(key, data[key]._text)
 
