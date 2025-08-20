@@ -11,6 +11,7 @@ import json
 import csv
 from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay
 import matplotlib.pyplot as plt
+import matplotlib
 
 from eventvec.server.featurizers.factuality_categorizer.factuality_categorizer import FactualityCategorizer
 from eventvec.server.tasks.entailment_classification.featurizers.clause_matcher import ClauseMatcher
@@ -227,19 +228,20 @@ class GPTAnalyse():
             #'llama_3_connectors_70b_base_3.json',
             #'llama_3_connectors_70b_base_4.json',
             #'llama_3_connectors_70b_helped_1.json',
-            'llama_3_connectors_70b_base_1.json',
-            'llama_3_connectors_70b_base_2.json',
+            #'llama_3_connectors_70b_base_1.json',
+            #'llama_3_connectors_70b_base_2.json',
 
-            'llama_3_connectors_70b_helped_2.json',
-            'llama_3_connectors_70b_helped_3.json',
-
-
+            #'llama_3_connectors_70b_helped_2.json',
+            #'llama_3_connectors_70b_helped_3.json',
+            #'deep_seek_connectors_with_full.json',
+            'deep_seek_connectors_with_full_logic_2.json',
+            #'deep_seek_connectors_with_examples.json',
+            #'deep_seek_connectors_with_no_examples_2.json',
 
             #'llama_3_connectors_70b_helped_2.json',
             #'llama_3_connectors_70b_helped_3.json',
             #'llama_3_connectors_70b_helped_4.json',
             #'llama_3_connectors_70b_helped_5.json',
-
         ]
 
         files_mnli = [
@@ -254,8 +256,6 @@ class GPTAnalyse():
             'llama_3_mnli_credence_3_full.json',
             'llama_3_mnli_credence_4_full.json',
             'llama_3_mnli_credence_5_full.json',
-
-
         ]
         
 
@@ -308,48 +308,40 @@ class GPTAnalyse():
                                 cache[d.uid()] = True
                             else:
                                 cache[d.uid()] = False
-                        if 'switch' in d.type():
-                            converter = {'c': 'contradiction', 'n': 'non-strict entailment', 's': 'strict entailment', 'o': 'out'}
+                        if True:# 'switch' in d.type():
+                            converter = {'contradiction': 'not_entails', 'non_strict': 'non_strict', 'strict': 'strict', 'not_entails': 'not_entails', 'non-strict': 'non_strict'}
                             if d.uid() in gpt_answer:
                                 counter += 1
-                                expected.append(converter[d.label()[0]])
+                                expected.append(converter[d.label()])
                                 if len(gpt_answer[d.uid()][0]) == 0:
                                     gpt_answer[d.uid()] = ['o']
-                                predicted.append(converter.get(gpt_answer.get(d.uid())[0][0], 'none'))
+                                predicted.append(converter[gpt_answer[d.uid()][0]])
                                 
-                                if gpt_answer.get(d.uid())[0][0] == 'n' and d.type() == 'but_though_straight':
-                                    print(d.uid())
                                 if isinstance(gpt_answer[d.uid()], list) and len(gpt_answer[d.uid()][0]) > 0 :
-                                    gpt_answer[d.uid()] = gpt_answer[d.uid()][0][0]
+                                    gpt_answer[d.uid()] = gpt_answer[d.uid()][0]
                                     interested.add(d.uid())
 
                                 elif len(gpt_answer[d.uid()]) > 0:
-                                    gpt_answer[d.uid()] = gpt_answer[d.uid()][0]
+                                    gpt_answer[d.uid()] = gpt_answer[d.uid()]
                                     interested.add(d.uid())
 
                                 if len(d.label()) > 0 and gpt_answer[d.uid()] == d.label()[0]:
                                     file2correct[filename].add(d.uid())
                                 if len(d.label()) > 0:
-                                    true_answers[d.uid()] = d.label()[0]
-                    classes = ['strict entailment', 'non-strict entailment', 'contradiction']
+                                    true_answers[d.uid()] = converter[d.label()]
+
+                    classes = ['strict', 'non_strict', 'not_entails']
                     cm = confusion_matrix(expected, predicted, labels=classes)
-                    display_labels = ['strict\nentailment', 'non-strict\nentailment', 'contradiction']
+                    display_labels = ['strict', 'non_strict', 'not_entails']
                     disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=display_labels)
                     disp.plot()
-                    plt.rcParams.update({'font.size': 15})
-                    plt.savefig('/home/lalady6977/Downloads/confusion_llama_nli_base.png', bbox_inches='tight')
+                    plt.savefig('/home/lalady6977/Downloads/deep_seek_connectors_full_logic.png', bbox_inches='tight')
                     gpt_answers[filename] = gpt_answer
                     f1_score, items = self.f1_score(true_answers, gpt_answer, uid2data)
                     file2items[filename] = items
 
                     print(' ' * 4, i, '{:.3f}'.format(f1_score))
                 print(counter)
-        feature2diff = {}
-        for key in file2items['llama_3_connectors_70b_base_1.json']:
-            diff = file2items['llama_3_connectors_70b_helped_2.json'][key] - file2items['llama_3_connectors_70b_base_1.json'][key]
-            feature2diff[key] = diff
-        for key, value in sorted(feature2diff.items(), key=lambda x: x[1], reverse=True):
-            print(key, file2items['llama_3_connectors_70b_base_1.json'][key], file2items['llama_3_connectors_70b_helped_2.json'][key], value)
         #self.print_confusion(file2correct, uid2data, gpt_answers)
         #print(all_uids)
         
@@ -396,20 +388,24 @@ class GPTAnalyse():
             if uid not in gpt_answers:
                 continue
             if isinstance(gpt_answers[uid], list) and len(gpt_answers[uid][0]) > 0:
-                gpt_answer = gpt_answers[uid][0][0]
-            elif len(gpt_answers[uid]) > 0:
                 gpt_answer = gpt_answers[uid][0]
+            elif len(gpt_answers[uid]) > 0:
+                gpt_answer = gpt_answers[uid]
             else :
                 continue
             feature2labelcount[uid2data[uid].type()][gpt_answer] += 1
-            if label[0] == gpt_answer:
+            if label == gpt_answer:
                 tp[gpt_answer] += 1
                 confusion[uid2data[uid].type()]['correct'] += 1
             else:
-                fp[label[0]] += 1
+                if label == 'non_strict' and gpt_answer == 'not_entails':
+                    #print(uid2data[uid].sentence_1(), '........', label, gpt_answer, uid2data[uid].sentence_2(), uid2data[uid].type())
+                    print(uid2data[uid].type())
+                    print()
+                fp[label] += 1
                 fn[gpt_answer] += 1
                 confusion[uid2data[uid].type()]['wrong'] += 1
-        for key in ['e', 's', 'n', 'c']:
+        for key in ['non_strict', 'strict', 'not_entails']:
             f1 = 0
             precision = 0
             recall = 0
@@ -424,9 +420,9 @@ class GPTAnalyse():
         for key1 in confusion:
             if confusion[key1]['correct'] + confusion[key1]['wrong'] > 1:
                 items[key1] = confusion[key1]['correct']/(confusion[key1]['correct'] + confusion[key1]['wrong'])
-        #items = sorted(items, key=lambda x: x[1])
-        for item in feature2labelcount:
-            print(item, feature2labelcount[item])
+        items = sorted(items.items(), key=lambda x: x[1])
+        for itemi, item in enumerate(items):
+            print(itemi, item, feature2labelcount[item[0]])
         return np.mean(f1s), items
 
 if __name__ == '__main__':

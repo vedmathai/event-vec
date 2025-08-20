@@ -10,8 +10,7 @@ X = ['4', '8', '16', '32' ]
 
 all_diff = [0.838, .80, .77, .64]
 
-gpt = [.569, .447, .418, .365]
-llama_405B = [.417, .42, .405, 0.335]
+
 
 
 
@@ -22,8 +21,7 @@ matplotlib.rcParams.update({'font.size': 14})
 
 #plt.plot(X_axis,  plain_llama, 'r*', label = 'plain_llama', linestyle='-')
 plt.plot(X_axis, all_diff,  color='red', marker='o', markersize=markersize, label = 'RoBERTa_strict', linestyle='--')
-plt.plot(X_axis, gpt, color='blue', marker='X',  label = 'gpt-4o', linestyle='--', markersize=markersize)
-plt.plot(X_axis, llama_405B, color='green', marker='p', markersize=markersize,  label = 'llama-405B', linestyle='--')
+
 ax = plt.gca()
 ax.set_ylim([0.1, 1.0])
 #ax.set_xlim([0.2, 0.5])

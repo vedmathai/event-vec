@@ -29,7 +29,7 @@ markersize=12
 matplotlib.rcParams.update({'font.size': 14})
 
 #plt.plot(X_axis,  plain_llama, 'r*', label = 'plain_llama', linestyle='-')
-plt.plot(X_axis, all_diff,  color='C0', marker='.',  label = 'RoBERTa_strict', linestyle='--', markersize=markersize)
+plt.plot(X_axis, all_diff,  color='blue', marker='X',  label = 'RoBERTa_strict', linestyle='-', markersize=markersize)
 #plt.plot(X_axis, same_english, color='C1', marker='o', label = 'roberta_same_templates', linestyle='--', markersize=markersize)
 #plt.plot(X_axis, same_names, color='C2', marker='v', label = 'roberta_same_names', linestyle='--', markersize=markersize)
 #plt.plot(X_axis, same_structures, color='C3', marker='^', label = 'roberta_same_timelines', linestyle='--', markersize=markersize)
@@ -39,13 +39,13 @@ plt.plot(X_axis, all_diff,  color='C0', marker='.',  label = 'RoBERTa_strict', l
 #plt.plot(X_axis, only_before_sim, color='C6', marker='1', label = 'roberta_only_before_sim', linestyle='--', markersize=markersize)
 #plt.plot(X_axis, only_before_after, color='C7', marker='2', label = 'roberta_before_after', linestyle='--', markersize=markersize)
 #plt.plot(X_axis, only_before_sorted, color='C8', marker='3', markersize=markersize,  label = 'roberta_only_before_sorted', linestyle='--')
-plt.plot(X_axis, logical, color='C9', marker='P', markersize=markersize,  label = 'logical', linestyle='--')
-plt.plot(X_axis, spatial, color='C10', marker='H', markersize=markersize,  label = 'spatial', linestyle='--')
+plt.plot(X_axis, logical, color='C9', marker='P', markersize=markersize,  label = 'RoBERTa logical', linestyle='--')
+plt.plot(X_axis, spatial, color='C10', marker='H', markersize=markersize,  label = 'RoBERTa spatial', linestyle='-.')
 
-plt.plot(X_axis, gpt, color='C11', marker='X',  label = 'gpt-4o', linestyle='--', markersize=markersize)
-plt.plot(X_axis, llama_405B, color='C12', marker='p', markersize=markersize,  label = 'llama-405B', linestyle='--')
+plt.plot(X_axis, gpt, color='C11', marker='.',  label = 'gpt-4o (temporal)', linestyle='--', markersize=markersize)
+plt.plot(X_axis, llama_405B, color='C12', marker='p', markersize=markersize,  label = 'llama-405B (temporal)', linestyle='-')
 ax = plt.gca()
-ax.set_ylim([0, 1.0])
+ax.set_ylim([0.3, 0.9])
 #ax.set_xlim([0.2, 0.5])
 
 
@@ -54,6 +54,5 @@ plt.xticks(X_axis, X, rotation=45)
 plt.xlabel("Relationships to events ratio\nin the premise") 
 plt.ylabel("Model Macro-F1 scores") 
 #plt.title("Macro-F1 scores of the models grouped\nby Human Judgement Entropy Buckets")
-plt.legend( loc='lower left', ncols=2) 
-
+plt.legend( loc='upper center', ncols=2, bbox_to_anchor=(0.5,-0.25)) 
 plt.savefig('/home/lalady6977/Downloads/event_rel_ablation.png', bbox_inches='tight')

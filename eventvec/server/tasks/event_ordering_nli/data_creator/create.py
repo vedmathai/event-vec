@@ -447,7 +447,7 @@ class Creator:
     def does_overlap_forwards(self, event1, event2):
         e1_s1 = self.find_event_point_1_before_event_point_2(event1.end_point(), event1.start_point())
         e2_s2 = self.find_event_point_1_before_event_point_2(event2.end_point(), event2.start_point())
-        s2_s1 = self.find_event_point_1_before_event_point_2(event2.start_point(), event1.end_point())
+        s2_s1 = self.find_event_point_1_before_event_point_2(event2.start_point(), event1.start_point())
         s1_s2 = self.find_event_point_1_before_event_point_2(event1.start_point(), event2.start_point())
         s2_e1 = self.find_event_point_1_before_event_point_2(event2.start_point(), event1.end_point())
         check = (not e1_s1) and (not e2_s2) and (not s2_s1 or s1_s2) and s2_e1

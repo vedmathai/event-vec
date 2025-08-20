@@ -135,7 +135,7 @@ class NLIConnectorClassificationTrain:
             self._all_losses += [loss.item()]
             self._iteration += 1
 
-            if self._loss is not None and self._iteration % 10 == 0:
+            if self._loss is not None and self._iteration % 4 == 0:
                 self._loss.backward()
                 self.optimizer_step()
                 self.zero_grad()

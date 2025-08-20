@@ -26,6 +26,8 @@ label_map = {
     'contradiction': 'contradiction',
     'non-strict': 'entailment',
     'strict': 'entailment',
+    'neutral': 'neutral',
+    'entailment': 'entailment',
 }
 
 
@@ -47,27 +49,45 @@ class NLIDataHandler():
         }
 
     def load(self, run_config):
-        data_reader = self._data_readers[run_config.dataset()]
+        train_size = 10000
+        data_reader = self._data_readers['mnli']
         #chaos_data_reader = self._chaos_data_readers[run_config.dataset()]
         data = data_reader.read_file('train').data()
         random.seed(42)
         random.shuffle(data)
-        train_size = 10000
-        train_data = []
-        #connectors = ['and', 'though', 'but', 'because', 'so', 'therefore']
-        #self._train_data = data#[:train_size]
-        #for datum in self._train_data:
-        #   if (any(i in datum.sentence_1().split() for i in connectors) or any(i in datum.sentence_2().split() for i in connectors)):
-        #        train_data.append(datum)
-        #train_data.extend(random.sample(self._train_data, 5000))
-        train_data = data[:int(.8*len(data))]
-        test_data = data[int(.8*len(data)):]
-        self._train_data = train_data[:10000]
-        #random.shuffle(self._train_data)
-        data_reader = self._data_readers[run_config.test_dataset()]
-        test_data = data_reader.read_file('test').data()
+        mnli_data = []
+        cnli_data = []
+        self._train_data = []
+        self._test_data = []
+        connectors = ['and', 'though', 'but', 'because', 'so', 'therefore']
+        for datum in data:
+            if (any(i in datum.sentence_1().split() for i in connectors) or any(i in datum.sentence_2().split() for i in connectors)):
+                mnli_data.append(datum)
+        mnli_data.extend(random.sample(data, 5000))
+        random.shuffle(mnli_data)
+        data_reader = self._data_readers['cnli']
+        cnli_data = data_reader.read_file('train').data()
+        random.seed(42)
+        random.shuffle(cnli_data)
+        if 'mnli' in run_config.dataset():
+            mnli_data_train = mnli_data[:int(0.8 * len(mnli_data))][:10000]
+            self._train_data.extend(mnli_data_train)
+        if 'mnli' in run_config.test_dataset():
+            self._test_data.extend(mnli_data[int(0.8 * len(mnli_data)):][:2000])
+        if 'cnli' in run_config.dataset():
+            self._train_data.extend(cnli_data[:int(0.8 * len(cnli_data))])
+        if 'cnli' in run_config.test_dataset():
+            self._test_data.extend(cnli_data[int(0.8 * len(cnli_data)):])
+        
+        del(mnli_data_train)
+        del(mnli_data)
+
+        random.shuffle(self._train_data)
+        random.shuffle(self._test_data)
+        print(len(self._train_data))
+        print(len(self._test_data))
+
         #data = chaos_data_reader.read_file('test').data()
-        self._test_data = test_data
         for datum in self._train_data:
             datum.set_label(label_map[datum.label()])
         for datum in self._test_data:
