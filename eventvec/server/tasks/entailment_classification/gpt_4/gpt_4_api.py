@@ -1,13 +1,13 @@
 import os
 from openai import OpenAI
 
-os.environ["OPENAI_API_KEY"] = 
+os.environ["OPENAI_API_KEY"] = ""
 client = OpenAI()
 
 
-def gpt_4(system, user):
+def gpt_4(model, system, user):
     completion = client.chat.completions.create(
-        model="gpt-4o",
+        model="gpt-5",
         messages=[
             {"role": "system", "content": system},
             {"role": "user", "content": user}

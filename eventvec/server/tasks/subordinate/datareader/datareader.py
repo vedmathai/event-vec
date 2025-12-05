@@ -13,6 +13,9 @@ files = {
     'temporal_subordinate_stated': 'temporal_subordinate_stated.tsv',
     'temporal_subordinate_suggested': 'temporal_subordinate_suggested.tsv',
     'temporal_subordinate_insinuated': 'temporal_subordinate_insinuated.tsv',
+    'temporal_subordinate_retiring': 'temporal_subordinate_retiring.tsv',
+    'temporal_subordinate_jogging_unembedded': 'temporal_subordinate_jogging_unembedded.tsv',
+    'temporal_subordinate_dying': 'temporal_subordinate_dying.tsv',
 }
 
 class SubordinateTemporalDatareader(AbstractDatareader):

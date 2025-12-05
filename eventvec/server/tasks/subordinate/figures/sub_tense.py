@@ -4,22 +4,21 @@ import numpy as np
 import matplotlib.pyplot as plt  
 import matplotlib
   
-X = ['DCT-sub', 'DCT-matrix', 'matrix-sub']
-
+X = ['past', 'present', 'future']
 
 # sub_tense
 
-gpt_past = [.63, .712, .722]
-gpt_present= [.612, .719, .625]
-gpt_future = [.56, .753, .62]
+gpt_open_yes = [.66, .58, .53]
+gpt_open_no= [.77, .67, .67]
 
-llama_past = [.63, .674, .786]
-llama_present= [.617, .689, .714]
-llama_future = [.599, .708, .689]
+gpt_5_yes = [.75, .646, .645]
+gpt_5_no = [.686, .76, .642]
 
-roberta_past = [.723, .818, .786]
-roberta_present= [.703, .833, .747]
-roberta_future = [.807, .856, .735]
+llama_70_yes = [.7, .651, .499]
+llama_70_no = [.747, .706, .660]
+
+llama_8_yes = [.463, 0.469, 0.376]
+llama_8_no = [0.436, 0.517, 0.436]
 
 X_axis = np.arange(len(X)) 
 
@@ -31,28 +30,27 @@ middle = 0.0
 width = 0.05
 #plt.plot(X_axis,  plain_llama, 'r*', label = 'plain_llama', linestyle='-')
 
-ax.bar(X_axis - (5 * width) + middle, gpt_past, width=width, color='C0', align='center', hatch='//', label = 'gpt_past')
-ax.bar(X_axis - (4 * width) + middle, gpt_present, width=width, color='C1', align='center', hatch='//', label = 'gpt_present')
-ax.bar(X_axis - (3 * width) + middle, gpt_future, width=width, color='C2', align='center', hatch='//', label = 'gpt_future')
+ax.plot(X_axis, gpt_open_yes, color='C0', linestyle='dashed', label = 'gpt_open_yes', alpha=1)
+ax.plot(X_axis, gpt_open_no, color='C0', linestyle='solid', label = 'gpt_open_no', alpha=0.7)
 
-ax.bar(X_axis - (1 * width), llama_past, width=width, color='C0', align='center', label = 'llama_past')
-ax.bar(X_axis - (0 * width), llama_present, width=width, color='C1', align='center', label = 'llama_present')
-ax.bar(X_axis + (1 * width), llama_future, width=width, color='C2', align='center', label = 'llama_future')
+ax.plot(X_axis, gpt_5_yes, color='C1', linestyle='dashed', label = 'gpt_5_yes', alpha=1)
+ax.plot(X_axis, gpt_5_no, color='C1', linestyle='solid', label = 'gpt_5_no', alpha=0.7)
 
-ax.bar(X_axis + (3 * width) - middle, roberta_past, width=width, color='C0', align='center', hatch='\\', label = 'roberta_past')
-ax.bar(X_axis + (4 * width) - middle, roberta_present, width=width, color='C1', align='center', hatch='\\', label = 'roberta_present')
-ax.bar(X_axis + (5 * width) - middle, roberta_future, width=width, color='C2', align='center', hatch='\\', label = 'roberta_future')
+ax.plot(X_axis, llama_70_yes, color='C2', linestyle='dashed', label = 'llama_70_yes', alpha=1)
+ax.plot(X_axis, llama_70_no, color='C2', linestyle='solid', label = 'llama_70_no', alpha=0.7)
 
+ax.plot(X_axis, llama_8_yes, color='C3', linestyle='dashed', label = 'llama_8_yes', alpha=1)
+ax.plot(X_axis, llama_8_no, color='C3', linestyle='solid', label = 'llama_8_no', alpha=0.7)
 
 ax = plt.gca()
-ax.set_ylim([0.5, 1])
+ax.set_ylim([0.4, 0.85])
 #ax.set_xlim([0.2, 0.5])
 
 plt.xticks(X_axis, X, rotation=0) 
 plt.xlabel("Relationship") 
 plt.ylabel("Model Macro-F1 scores") 
 #plt.title("Macro-F1 scores of the models grouped\nby Human Judgement Entropy Buckets")
-plt.legend( loc='upper center', bbox_to_anchor=(0.5,-0.15), ncols=2) 
+plt.legend( loc='upper center', bbox_to_anchor=(0.5,-0.15)) 
 
 
 plt.savefig('/home/lalady6977/Downloads/sub_tense.png', bbox_inches='tight')

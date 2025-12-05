@@ -4,11 +4,12 @@ from eventvec.server.tasks.event_ordering_nli.datamodel.event_point import Event
 
 
 class Event():
-    def __init__(self):
+    def __init__(self, parameter):
         self._id = 'event_' + str(uuid.uuid4())
         self._event_name = None
         self._start_point = None
         self._end_point = None
+        self._parameter_name = parameter
 
     def id(self):
         return self._id
@@ -24,14 +25,14 @@ class Event():
     
     def start_point(self):
         if self._start_point is None:
-            self._start_point = EventPoint()
+            self._start_point = EventPoint(self._parameter_name)
             self._start_point.set_is_start(True)
             self._start_point.set_event(self)
         return self._start_point
     
     def end_point(self):
         if self._end_point is None:
-            self._end_point = EventPoint()
+            self._end_point = EventPoint(self._parameter_name)
             self._end_point.set_is_start(False)
             self._end_point.set_event(self)
         return self._end_point

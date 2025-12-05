@@ -1,11 +1,29 @@
 import uuid
 
+from eventvec.server.tasks.event_ordering_nli.data_creator.parameters import parameters
+
+domain2template = {
+    'temporal': {
+        'start': 'start of {}',
+        'end': 'end of {}',
+    },
+    'spatial': {
+        'start': 'eastern edge of {}',
+        'end': 'western edge of {}',
+    },
+    'logical': {
+        'start': '{}1',
+        'end': '{}2',
+    }
+}
+
 class EventPoint():
-    def __init__(self):
+    def __init__(self, parameter):
         self._id = 'event_point_' + str(uuid.uuid4())
         self._event = None
         self._relationships = []
         self._is_start = True
+        self._parameter_name = parameter
 
     def event(self):
         return self._event
@@ -44,11 +62,8 @@ class EventPoint():
         return hash(self._id)
 
     def __repr__(self):
+        domain = parameters[self._parameter_name]['domain']
         if self.is_start():
-            s1 = '1'#'start'
+            return domain2template[domain]['start'].format(self.event().event_name())
         else:
-            s1 = '2'#'end'
-        
-        #return f'{s1} of {self.event().event_name()}'
-        return f'{self.event().event_name()}{s1}'
-            
+            return domain2template[domain]['end'].format(self.event().event_name())

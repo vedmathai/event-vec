@@ -1,0 +1,117 @@
+import json
+from collections import defaultdict
+
+
+from eventvec.server.featurizers.lingusitic_featurizer import LinguisticFeaturizer  # noqa
+from eventvec.server.data.book_corpus.book_corpus_datahandlers.book_corpus_llm_datahandler import BookCorpusDatahandler  # noqa
+from eventvec.server.data.wikipedia.datahandlers.wiki_datahandler import WikiDatahandler
+from eventvec.server.data.nyt.nyt_datahandlers.nyt_datahandler import NYTDatahandler
+from eventvec.server.data.hansard.hansard_datahandlers.hansard_datahandler import HansardDatahandler
+from eventvec.server.data.maec.maec_datahandlers.maec_datahandler import MAECDatahandler
+from eventvec.server.data.politosphere.politosphere_datahandlers.politosphere_datahandler import PolitosphereDatahandler
+from eventvec.server.data.timebank.timebank_reader.timebank_reader import TimeMLDataReader 
+from eventvec.server.data.mnli.mnli_datahandlers.mnli_data_reader import MNLIDataReader
+from eventvec.server.data.torque.readers.torque_datareader import TorqueDataReader
+from eventvec.server.data.timebank.timebank_reader.te3_silver_reader import TE3SilverDatareader
+from eventvec.server.data.timebank.timebank_reader.te3_gold_reader import TE3GoldDatareader
+from eventvec.server.common.lists.said_verbs import said_verbs, future_said_verbs
+from eventvec.server.utils.general import token2parent, token2tense
+from eventvec.server.featurizers.factuality_categorizer.factuality_categorizer import FactualityCategorizer
+
+saying_verbs = said_verbs | future_said_verbs
+
+
+class TenseCounter():
+    def __init__(self):
+        self._book_corpus_data_handler = BookCorpusDatahandler()
+        self._wiki_data_handler = WikiDatahandler()
+        self._linguistic_featurizer = LinguisticFeaturizer()
+        self._nyt_corpus_handler = NYTDatahandler()
+        self._hansard_handler = HansardDatahandler()
+        self._maec_handler = MAECDatahandler()
+        self._politosphere_handler = PolitosphereDatahandler()
+        self._mnli_handler = MNLIDataReader()
+        self._time_ml_handler = TimeMLDataReader()
+        self._torque_handler = TorqueDataReader()
+        self._te3_silver_handler = TE3SilverDatareader()
+        self._te3_gold_handler = TE3GoldDatareader()
+        self._corpus = 'hansard'
+        self._factuality_categorizer = FactualityCategorizer()
+
+
+    def filenames(self):
+        filename2list = {
+            'wikidata': self._wiki_data_handler.wiki_file_list,
+            'bookcorpus': self._book_corpus_data_handler.book_corpus_file_list,
+            'nytcorpus': self._nyt_corpus_handler.nyt_file_list,
+            'hansard': self._hansard_handler.hansard_file_list,
+            'mnli': self._mnli_handler.mnli_file_list,
+            'timebank': self._time_ml_handler.list_extra,
+            'torque': self._torque_handler.file_list,
+            'te3_silver': self._te3_silver_handler.list_folder,
+            'te3_gold': self._te3_gold_handler.list_folder,
+            'maec': self._maec_handler.maec_file_list,
+            'politosphere': self._politosphere_handler.politosphere_file_list,
+        }
+        return filename2list[self._corpus]()
+    
+    def read_file(self, filename):
+        filename2file = {
+            'wikidata': self._wiki_data_handler.read_file,
+            'bookcorpus': self._book_corpus_data_handler.read_file,
+            'nytcorpus': self._nyt_corpus_handler.read_file,
+            'hansard': self._hansard_handler.read_file,
+            'mnli': self._mnli_handler.read_file,
+            'timebank': self._time_ml_handler.read_file_text,
+            'torque': self._torque_handler.torque_sentences,
+            'te3_silver': self._te3_silver_handler.timebank_documents_contents,
+            'te3_gold': self._te3_gold_handler.timebank_documents_contents,
+            'maec': self._maec_handler.read_file,
+            'politosphere': self._politosphere_handler.read_file
+        }
+        fn = filename2file[self._corpus]
+        return fn(filename)
+    
+    def load(self):
+        filenames = self.filenames()
+        end = 20000
+        sentence_counter = 0
+        stop = 10000000
+        counter = defaultdict(lambda: defaultdict(int))
+        counter = defaultdict(int)
+
+
+        for filenamei, filename in enumerate(filenames[:end]):
+            print(sentence_counter)
+            file_contents_list = self.read_file(filename)  # noqa
+            if sentence_counter > stop: #100000
+                break
+            for file_contentsi, file_contents in enumerate(file_contents_list):
+                file_contents = file_contents[:1000000-1]
+                fdoc = self._linguistic_featurizer.featurize_document(file_contents)
+                for fsent in fdoc.sentences():
+                    sentence_counter += 1
+                    if sentence_counter > stop: #100000
+                        break
+                    if sentence_counter % 1000 == 0:
+                        print(sentence_counter)
+                        print(counter)
+                    for tokeni, token in enumerate(fsent.tokens()):
+                        parent, is_quote = token2parent(token)
+                        if False and parent is None:
+                            if token.pos() == 'VERB' and (tokeni == len(fsent.tokens()) -1  or fsent.tokens()[tokeni + 1] != 'VERB'):
+                                token_tense = token2tense(fsent.text(), token)
+                                parent_tense = token2tense(fsent.text(), parent)
+                                #print(parent.text(), token.text(), token2tense(fsent.text(), parent), token2tense(fsent.text(), token))
+                                counter[token_tense] += 1
+                        if parent is not None:
+                            if token.pos() == 'VERB' and (tokeni == len(fsent.tokens()) -1  or fsent.tokens()[tokeni + 1] != 'VERB'):
+                                token_tense = token2tense(fsent.text(), token)
+                                parent_tense = token2tense(fsent.text(), parent)
+                                metric = (parent_tense[0], parent_tense[1], token_tense[0], token_tense[1], token_tense[2], is_quote)
+                                #print(parent.text(), token.text(), token2tense(fsent.text(), parent), token2tense(fsent.text(), token))
+                                counter[metric] += 1
+
+if __name__ == "__main__":
+    emc = TenseCounter()
+    emc.load()

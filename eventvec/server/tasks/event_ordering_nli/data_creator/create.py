@@ -1,320 +1,31 @@
 import random
 from collections import defaultdict
 
-from eventvec.server.tasks.event_ordering_nli.datamodel.relationship import EventRelationship, parameters, parameter_name
+from eventvec.server.tasks.event_ordering_nli.datamodel.relationship import EventRelationship
+from eventvec.server.tasks.event_ordering_nli.data_creator.parameters import parameters
 from eventvec.server.tasks.event_ordering_nli.datamodel.event import Event
-
+from eventvec.server.tasks.event_ordering_nli.datamodel.event_names import event_names_dict
 
 
 relationship_types = ['before', 'after', 'simultaneous']
-test_event_place_names = [
-    'Silver Crest',
-    'Ironhold Pass',
-    'Shadow Ridge',
-    'Thunder Valley',
-    'Ember Plains',
-    'Raven Watch',
-    'Frostgate',
-    'Golden Field',
-    'Misty Heights',
-    'Stormforge',
-    'Crimson Shore',
-    'Darkwater Keep',
-    'Sunfire Canyon',
-    'Blackstone Crag',
-    'Vipers Hollow',
-    'Emberfall',
-    'Wolfs Den',
-    'Dragonspire Peak',
-    'Silent Meadows',
-    'Ironclad Bastion',
-    'Windscar Ridge',
-    'Serpent Pass',
-    'Steelshade Valley',
-    'Ashen Grove',
-    'Dreadmoor',
-    'Bloodthorn Keep',
-    'Ravens Perch',
-    'Hollowcrest',
-    'Stonegate',
-    'Ironhelm Hill',
-    'Frostmere',
-    'Shadowfen',
-    'Grimwatch Tower',
-    'Thundercliff',
-    'Crimson Vale',
-    'Sunken Reach',
-    'Stormcliff',
-    'Nightshade Ridge',
-    'Shadowspire',
-    'Dreadhold',
-    'Blazing Hearth',
-    'Wraithwood',
-    'Frostveil',
-    'Blackrock Gorge',
-    'Bloodmoon Keep',
-    'Silverpine',
-    'Ironpeak',
-    'Ravenloft',
-    'Emberwatch',
-    'Twilight Glade',
-    'Wolfbane Tower',
-    'Frostfang Pass',
-    'Whispering Pines',
-    'Shattered Plains',
-    'Ironveil',
-    'Firestone Ridge',
-    'Thornwood Keep',
-    'Dawnforge',
-    'Stormhold',
-    'Vulture Reach',
-]
 
-train_event_place_names = [
-    "Obsidian Hollow",
-    "Stormvale",
-    "Ravenspire",
-    "Ironwood Keep",
-    "Shadowbrook",
-    "Duskwatch Tower",
-    "Blightmoor",
-    "Thundershade Pass",
-    "Emberglow Valley",
-    "Frostwind Crag",
-    "Nightfall Ridge",
-    "Drake's Hollow",
-    "Ashenvale",
-    "Darkreach",
-    "Bloodspire Keep",
-    "Blackthorn Vale",
-    "Whispering Hollow",
-    "Silent Ridge",
-    "Cinderfall",
-    "Grimshade Bastion",
-    "Shadowgate",
-    "Dragonfang Pass",
-    "Silverbrook",
-    "Stormglen",
-    "Daggerfall Heights",
-    "Hollowshade",
-    "Moonlit Crag",
-    "Onyx Hollow",
-    "Blazing Peak",
-    "Wraithspire",
-    "Thornvale",
-    "Ironwatch Keep",
-    "Sunscorch Canyon",
-    "Frostshade Valley",
-    "Stormbreaker Cliffs",
-    "Duskwood",
-    "Ebonridge",
-    "Crimson Hollow",
-    "Blacksteel Keep",
-    "Ravenshadow",
-    "Emberreach",
-    "Ironthorn Pass",
-    "Daggercliff",
-    "Silent Hollow",
-    "Thunderpeak",
-    "Frostburn Vale",
-    "Shadewatch",
-    "Silverthorn",
-    "Wolfsbane Hollow",
-    "Duskridge"
-  ]
-
-test_event_names = [
-    'Battle of Silver Crest',
-    'Siege of Ironhold Pass',
-    'Clash at Shadow Ridge',
-    'Engagement of Thunder Valley',
-    'Battle of Ember Plains',
-    'Conflict at Raven Watch',
-    'Assault on Frostgate',
-    'Skirmish of the Golden Field',
-    'Encounter at Misty Heights',
-    'Struggle of the Stormforge',
-    'Battle of Crimson Shore',
-    'Siege of Darkwater Keep',
-    'Ambush at Sunfire Canyon',
-    'Engagement of Blackstone Crag',
-    'Conflict at Vipers Hollow',
-    'Assault on Emberfall',
-    'Clash at Wolfs Den',
-    'Battle of Dragonspire Peak',
-    'Skirmish of Silent Meadows',
-    'Raid on Ironclad Bastion',
-    'Struggle at Windscar Ridge',
-    'Engagement of Serpent Pass',
-    'Conflict at Steelshade Valley',
-    'Battle of Ashen Grove',
-    'Ambush at Dreadmoor',
-    'Siege of Bloodthorn Keep',
-    'Skirmish at Ravens Perch',
-    'Encounter at Hollowcrest',
-    'Assault on Stonegate',
-    'Clash at Ironhelm Hill',
-    'Battle of Frostmere',
-    'Engagement at Shadowfen',
-    'Conflict at Grimwatch Tower',
-    'Raid on Thundercliff',
-    'Struggle at Crimson Vale',
-    'Skirmish at Sunken Reach',
-    'Siege of Stormcliff',
-    'Assault on Nightshade Ridge',
-    'Battle of Shadowspire',
-    'Engagement of Dreadhold',
-    'Clash at Blazing Hearth',
-    'Conflict at Wraithwood',
-    'Encounter at Frostveil',
-    'Skirmish at Blackrock Gorge',
-    'Battle of Bloodmoon Keep',
-    'Engagement at Silverpine',
-    'Siege of Ironpeak',
-    'Raid on Ravenloft',
-    'Struggle at Emberwatch',
-    'Skirmish at Twilight Glade',
-    'Assault on Wolfbane Tower',
-    'Battle of Frostfang Pass',
-    'Clash at Whispering Pines',
-    'Engagement of Shattered Plains',
-    'Conflict at Ironveil',
-    'Raid on Firestone Ridge',
-    'Siege of Thornwood Keep',
-    'Encounter at Dawnforge',
-    'Struggle of Stormhold',
-    'Skirmish at Vulture Reach',
-]
-
-train_event_names = [
-    "Battle of Crimson Hollow",
-    "Siege of Stormveil Keep",
-    "Clash at Dragon’s Roost",
-    "Engagement of Shattered Hills",
-    "Conflict at Blackbriar Wood",
-    "Assault on Frostfire Pass",
-    "Skirmish of the Starfall Plains",
-    "Encounter at Ghostwood Ridge",
-    "Struggle of Emberhold",
-    "Battle of Blightwood",
-    "Siege of Moonstone Citadel",
-    "Ambush at Coldreach",
-    "Raid on Granite Spire",
-    "Engagement at Bloodstone Crossing",
-    "Conflict at Frostveil Crag",
-    "Clash at the Thunderclap Bridge",
-    "Battle of Thornspire",
-    "Skirmish at Ravenshade",
-    "Assault on the Diremarch",
-    "Struggle at Sunwatch Valley",
-    "Encounter at Stormwatch Keep",
-    "Battle of Grimstone Hollow",
-    "Siege of Ironvale Bastion",
-    "Clash at the Twilight Ruins",
-    "Engagement of Thornclaw Pass",
-    "Conflict at the Everpeak",
-    "Skirmish at Wraithfall",
-    "Battle of Shatterstone Plateau",
-    "Ambush at Sunspire Bluff",
-    "Assault on Hollowspire",
-    "Raid on Frostpeak Summit",
-    "Struggle at Ironclaw Ridge",
-    "Encounter at Whisperwind Vale",
-    "Battle of the Starforge",
-    "Siege of Wolfhaven",
-    "Engagement at Grimwatch Keep",
-    "Clash at Shadowfen Marsh",
-    "Conflict at Frostspire",
-    "Skirmish at Thunderhill",
-    "Assault on Coldspire Hold",
-    "Struggle of Ironshade Ridge",
-    "Raid on Ravencrest Keep",
-    "Encounter at Frostbloom Fields",
-    "Battle of Dreadhelm",
-    "Siege of Everwinter Fortress",
-    "Clash at Stormspire Peak",
-    "Engagement of Duskwatch Hill",
-    "Conflict at Embercliff Ridge",
-    "Skirmish at Stormfire Caverns",
-    "Assault on Blackthorn Fortress",
-    "Struggle at Frostglade Pass",
-    "Encounter at Moonshadow Keep",
-    "Battle of Brimstone Hollow",
-    "Siege of Iceclaw Citadel",
-    "Ambush at Silverpine Pass",
-    "Raid on Thunderfrost Ridge",
-    "Engagement at Stormpeak Spire",
-    "Clash at Bloodthorn Plains",
-    "Conflict at Shadewood Crag",
-    "Skirmish at Winterfell Keep",
-    "Assault on Greycliff Bastion",
-    "Struggle at Dawnfire Pass",
-    "Encounter at Sunshadow Ridge",
-    "Battle of Direfall",
-    "Siege of Frostglen Keep",
-    "Clash at Grimwatch Plateau",
-    "Engagement of Bloodfrost Ridge",
-    "Conflict at Nightfall Vale",
-    "Skirmish at Ashenridge",
-    "Assault on Blackspire Hold",
-    "Struggle at Frostmourne Keep",
-    "Raid on Emberstone Fortress",
-    "Encounter at Thunderforge",
-    "Battle of Ironclaw Bastion",
-    "Siege of Frostwolf Citadel",
-    "Clash at the Obsidian Ridge",
-    "Engagement of Bloodspire Keep",
-    "Conflict at Windscar Summit",
-    "Skirmish at the Starspire",
-    "Assault on Silvercrest Tower",
-    "Struggle at Frostthorn Ridge",
-    "Encounter at Dreadclaw Keep",
-    "Battle of the Direforge",
-    "Siege of Stonefrost Bastion",
-    "Clash at Blackwatch Hill",
-    "Engagement of Ravenscar Ridge",
-    "Conflict at Ironwind Pass",
-    "Skirmish at the Frostfire Citadel",
-    "Assault on Moonspire Peak",
-    "Struggle at Emberfall Tower",
-    "Raid on Shadowspire Bastion",
-    "Encounter at Windfall Pass",
-    "Battle of Frostreach Keep",
-    "Siege of Coldthorn Citadel",
-    "Clash at Ironclad Hill",
-    "Engagement of Silverwatch Ridge",
-    "Conflict at Sunfire Summit",
-    "Skirmish at Blackthorn Ridge",
-    "Assault on Thunderclaw Hold"
-]
-
-
-simple_events_train_names = [
-    'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'apple', 'sea', 'frog', 'item', 'car', 'boy', 'girl', 'hat', 'imp', 'joker', 'kite', 'lion', 'man', 'nectar', 'orange', 'pillow', 'queen', 'ram', 'sow', 'time', 'under', 'van', 'water', 'winter', 'yellow', 'town'
-]
-
-simple_events_test_names = [
-    'round', 'plod', 'fresh', 'shirt', 'brook', 'odd', 'tail', 'harm', 'same', 'dry', 'fine', 'drop', 'card', 'class', 'drink', 'hill', 'deal', 'home', 'ask', 'apart', 'smell', 'read', 'must', 'test', 'vest', 'clad', 'add', 'belt', 'thank', 'acid', 'band', 'chalk', 'debt', 'egg', 'fear', 'goat', 'head', 'iron', 'judge', 'knife', 'linen', 'milk', 'neck', 'other', 'pipe', 'rain'
-]
-
-if parameters[parameter_name]['random_seed']:
-    random.seed(0)
 
 class Creator:
-    def __init__(self):
+    def __init__(self, parameter_name):
         self._events = []
         self._relationships = []
+        self._parameter_name = parameter_name
 
     def create_random_relationship(self):
         event_1 = random.choice(self._events)
         point_1 = random.choice(event_1.points())
         event_2 = random.choice(list(set(self._events) - {event_1}))
         point_2 = random.choice(event_2.points())
-        relationship_type = random.choice(parameters[parameter_name]['relationship_types'])
+        relationship_type = random.choice(parameters[self._parameter_name]['relationship_types'])
         self.create_relationship(point_1, point_2, relationship_type)
 
     def create_relationship(self, event_point1, event_point2, relationship_type):
-        relationship = EventRelationship()
+        relationship = EventRelationship(self._parameter_name)
         relationship.set_relationship_type(relationship_type)
         relationship.set_event_point_1(event_point1)
         relationship.set_event_point_2(event_point2)
@@ -325,11 +36,9 @@ class Creator:
 
     def create_event(self, event_name=None):
         all_used_event_names = [e.event_name() for e in self._events]
-        event = Event()
-        if parameters[parameter_name]['names'] == 'train_event_names':
-            remaining_names = list(set(simple_events_train_names) - set(all_used_event_names))
-        else:
-            remaining_names = list(set(simple_events_test_names) - set(all_used_event_names))
+        event = Event(self._parameter_name)
+        event_names = event_names_dict[parameters[self._parameter_name]['names']]
+        remaining_names = list(set(event_names) - set(all_used_event_names))
         remaining_names = sorted(remaining_names)
         self.create_relationship(event.start_point(), event.end_point(), 'before')
         if event_name is None:

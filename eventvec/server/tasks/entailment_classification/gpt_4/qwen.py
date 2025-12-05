@@ -2,7 +2,7 @@
 import os
 from openai import OpenAI
 
-os.environ["DASHSCOPE_API_KEY"] = "sk-66be962197d746b885e4f73f0d6480df"
+os.environ["DASHSCOPE_API_KEY"] = ""
 
 
 client = OpenAI(
